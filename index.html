@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" data-pass="beauty">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Amidyala Sai Sumanth — 3D Environment Artist &amp; Visual Designer</title>
+<meta name="description" content="3D environment artist and visual designer in Hyderabad. Shrines, ponds and pagodas lit at the one hour they make sense — plus campaign work for Midea Canada, Home Depot Canada, GC Burger and more.">
+<link rel="canonical" href="https://www.thesumanth.com/">
+<meta name="theme-color" content="#0B0B0D">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.thesumanth.com/">
+<meta property="og:title" content="Amidyala Sai Sumanth — 3D Environment Artist">
+<meta property="og:description" content="Worlds built in Maya, lit in Arnold, finished on deadline.">
+<meta property="og:image" content="https://www.thesumanth.com/assets/images/japa-render-1.webp">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="image" href="assets/images/japa-render-1.webp" fetchpriority="high">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,200;0,6..72,300;0,6..72,400;1,6..72,300&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Person","name":"Amidyala Sai Sumanth","url":"https://www.thesumanth.com/","jobTitle":"3D Environment Artist","address":{"@type":"PostalAddress","addressLocality":"Hyderabad","addressCountry":"IN"},"email":"sumanth.richie25@icloud.com","sameAs":["https://behance.net/sumanthrichie","https://instagram.com/sumofDanth"]}
+</script>
+</head>
+
+<body class="is-booting">
+
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="wipe" id="wipe" aria-hidden="true"></div>
+
+<!-- ══════════════  BOOT  ══════════════ -->
+<div class="boot" id="boot">
+  <div class="boot__inner">
+    <div class="boot__grid" id="bootGrid" aria-hidden="true"></div>
+    <div class="boot__side">
+      <p class="boot__name">AMIDYALA<br>SAI SUMANTH</p>
+      <p class="boot__task" id="bootTask">allocating buckets</p>
+    </div>
+  </div>
+  <div class="boot__pct"><span id="bootPct">000</span><i>%</i></div>
+  <div class="boot__rule"><i id="bootRule"></i></div>
+</div>
+
+<!-- ══════════════  CHROME  ══════════════ -->
+<header class="topbar" data-wire="header">
+  <a class="topbar__mark" href="#top" data-magnet>
+    <span class="topbar__sig">SUMANTH</span>
+    <span class="topbar__role">3D ENV · VISUAL DESIGN</span>
+  </a>
+  <div class="topbar__mid">
+    <span class="topbar__live"><i></i>OPEN FOR COMMISSIONS</span>
+  </div>
+  <button class="topbar__menu" id="menuBtn" data-magnet aria-expanded="false" aria-controls="indexPanel">
+    <span data-scramble>INDEX</span>
+    <i class="topbar__burger"><b></b><b></b></i>
+  </button>
+</header>
+
+<nav class="index" id="indexPanel" aria-label="Site index" hidden>
+  <div class="index__list">
+    <a href="#worlds" data-idx="01" data-peek="assets/images/japa-render-3.webp"><span>Worlds</span></a>
+    <a href="#method" data-idx="02" data-peek="assets/images/19.webp"><span>Method</span></a>
+    <a href="#clients" data-idx="03" data-peek="assets/images/gcburger-campaign-4.webp"><span>Clients</span></a>
+    <a href="#studies" data-idx="04" data-peek="assets/images/10.webp"><span>Studies</span></a>
+    <a href="#commissions" data-idx="05" data-peek="assets/images/koipond-render-5.webp"><span>Commissions</span></a>
+    <a href="#contact" data-idx="06" data-peek="assets/images/fudomyo-render-mobile-1.webp"><span>Contact</span></a>
+  </div>
+  <div class="index__peek"><img id="peekImg" alt="" aria-hidden="true"></div>
+  <div class="index__foot">
+    <span>HYDERABAD · 17.38°N 78.48°E</span>
+    <span id="indexClock">--:--:-- IST</span>
+  </div>
+</nav>
+
+<div class="passbar" id="passbar" role="group" aria-label="Render pass">
+  <span class="passbar__label">PASS</span>
+  <button data-pass-btn="beauty" class="is-on" aria-pressed="true">Beauty</button>
+  <button data-pass-btn="clay" aria-pressed="false">Clay</button>
+  <button data-pass-btn="wire" aria-pressed="false">Wire</button>
+  <button data-pass-btn="depth" aria-pressed="false">Depth</button>
+  <span class="passbar__hint">1–4</span>
+</div>
+
+<main id="top">
+
+<!-- ══════════════  HERO  ══════════════ -->
+<section class="hero" id="hero" data-wire="section#hero">
+  <div class="hero__plate" data-gl="assets/images/japa-render-1.webp">
+    <img src="assets/images/japa-render-1.webp" alt="Rōman no Yoake — a pagoda above the treeline at first light" fetchpriority="high">
+  </div>
+  <div class="hero__scrim"></div>
+
+  <div class="hero__type">
+    <p class="hero__eyebrow">
+      <span data-scramble>3D ENVIRONMENT ARTIST</span>
+      <span data-scramble>VISUAL DESIGNER</span>
+      <span data-scramble>HYDERABAD</span>
+    </p>
+    <h1 class="hero__name">
+      <span class="hero__given">Amidyala Sai</span>
+      <span class="hero__family" id="heroFamily">SUMANTH</span>
+    </h1>
+    <p class="hero__line">I build places that don't exist, then decide how the light behaves once it gets there.</p>
+  </div>
+
+  <div class="hero__hud" data-wire="hud">
+    <div class="hud__row"><b>RENDERING</b><span id="hudName">roman-no-yoake</span></div>
+    <div class="hud__row"><span>MAYA · ARNOLD</span><span id="hudSpp">512 spp</span></div>
+    <div class="hud__row"><span id="hudRes">3840 × 2160</span><span id="hudTime">00:00:00</span></div>
+    <div class="hud__bar"><i id="hudFill"></i></div>
+  </div>
+
+  <a class="hero__scroll" href="#manifesto" data-magnet><span>SCROLL</span><i></i></a>
+
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__row" id="tickerRow"></div>
+  </div>
+</section>
+
+<!-- ══════════════  MANIFESTO  ══════════════ -->
+<section class="manifesto" id="manifesto" data-wire="section#manifesto">
+  <p class="eyebrow"><span class="eyebrow__n">00</span> <span data-scramble>THE PASS BEFORE THE BEAUTY PASS</span></p>
+  <h2 class="manifesto__head" data-split>Every frame here began as grey boxes and one light that had to justify itself.</h2>
+
+  <div class="manifesto__cols">
+    <div class="manifesto__body">
+      <p class="lede">I'm Sumanth. Half of my work is quiet — shrines, ponds, pagodas, held at the one hour they actually make sense.</p>
+      <p>The other half ships on a Friday for agencies in Toronto and San Juan: air conditioners, burgers, jewellery, bank ads. Both halves want the same thing from me. A place that looks kept. Light with somewhere to be.</p>
+      <p>Trained through the agency pipeline, raised on anime frames I paused for too long. The two don't argue. They argue with the work, and the work answers.</p>
+    </div>
+    <figure class="manifesto__clay" data-wire="figure.grey-ball">
+      <div class="frame frame--4x3" data-gl="assets/images/19.webp">
+        <img data-src="assets/images/19.webp" alt="Grey primitive lighting study — sphere, cylinder and cube on a neutral backdrop">
+      </div>
+      <figcaption>18% grey, three primitives, one key. Where every scene starts — and what this whole site is painted in.</figcaption>
+    </figure>
+  </div>
+
+  <dl class="specs">
+    <div><dt>Based</dt><dd>Hyderabad, India · remote or on-site</dd></div>
+    <div><dt>Core</dt><dd>Maya · ZBrush · Substance · Arnold</dd></div>
+    <div><dt>Also</dt><dd>Unreal · After Effects · Photoshop · Illustrator</dd></div>
+    <div><dt>Works in</dt><dd>Environments · Product viz · Campaign design</dd></div>
+    <div><dt>Status</dt><dd class="is-live">Open — commission, full-time, collaboration</dd></div>
+  </dl>
+</section>
+
+<!-- ══════════════  WORLDS  ══════════════ -->
+<section class="worlds" id="worlds" data-wire="section#worlds">
+  <div class="section-head">
+    <p class="eyebrow"><span class="eyebrow__n">01</span> <span data-scramble>SELECTED WORLDS</span></p>
+    <h2 class="section-head__h" data-split>Three places, built to be stood in.</h2>
+  </div>
+  <div id="worldsMount"></div>
+</section>
+
+<!-- ══════════════  METHOD  ══════════════ -->
+<section class="method" id="method" data-wire="section#method">
+  <div class="method__sticky">
+    <div class="method__head">
+      <p class="eyebrow"><span class="eyebrow__n">02</span> <span data-scramble>METHOD</span></p>
+      <h2 class="method__h">Seven moves,<br>every single time.</h2>
+      <p class="method__sub">In order. Skipping one shows up in the render three weeks later.</p>
+      <div class="method__prog"><i id="methodProg"></i></div>
+    </div>
+    <ol class="method__track" id="methodTrack"></ol>
+  </div>
+</section>
+
+<!-- ══════════════  CLIENTS  ══════════════ -->
+<section class="clients" id="clients" data-wire="section#clients">
+  <div class="section-head">
+    <p class="eyebrow"><span class="eyebrow__n">03</span> <span data-scramble>COMMERCIAL</span></p>
+    <h2 class="section-head__h" data-split>Sixteen clients who needed it Tuesday.</h2>
+    <p class="section-head__sub">Through The Classic Partnership (Toronto) and VS Design Studio, plus direct freelance. Solo a client and everything else drops to clay.</p>
+  </div>
+
+  <div class="solo">
+    <div class="solo__list" id="soloList" aria-label="Clients"></div>
+    <div class="solo__wall">
+      <div class="solo__bar">
+        <span id="soloName">ALL CLIENTS</span>
+        <span id="soloRole">2023 — 2025 · agency, studio &amp; freelance</span>
+        <button id="soloClear" class="solo__clear" hidden>UNSOLO ✕</button>
+      </div>
+      <div class="wall" id="clientWall"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════  STUDIES  ══════════════ -->
+<section class="studies" id="studies" data-wire="section#studies">
+  <div class="section-head">
+    <p class="eyebrow"><span class="eyebrow__n">04</span> <span data-scramble>STUDIES &amp; GRAPHICS</span></p>
+    <h2 class="section-head__h" data-split>The other half of the desk.</h2>
+    <p class="section-head__sub">Packaging, posters, automotive viz, hard-surface practice, and the occasional Sunday illustration.</p>
+  </div>
+  <div class="bento" id="studyGrid"></div>
+</section>
+
+<!-- ══════════════  COMMISSIONS  ══════════════ -->
+<section class="commissions" id="commissions" data-wire="section#commissions">
+  <div class="section-head">
+    <p class="eyebrow"><span class="eyebrow__n">05</span> <span data-scramble>COMMISSIONS</span></p>
+    <h2 class="section-head__h" data-split>Buy the scope, not the hours.</h2>
+    <p class="section-head__sub">Every commission runs concept → blockout → look-dev → final. What changes is how much world you get.</p>
+  </div>
+
+  <div class="stack" id="stack">
+    <article class="tier" data-wire="tier.one-frame">
+      <div class="tier__in">
+        <p class="tier__n">01</p>
+        <h3 class="tier__name">One&nbsp;Frame</h3>
+        <p class="tier__for">Album art, key frames, cover stills.</p>
+        <ul><li>1 hero render</li><li>2 alternate angles</li><li>2 light revisions</li><li>10–14 days</li></ul>
+      </div>
+    </article>
+    <article class="tier tier--flag" data-wire="tier.the-world">
+      <div class="tier__in">
+        <p class="tier__n">02</p>
+        <h3 class="tier__name">The&nbsp;World</h3>
+        <p class="tier__for">Editorial, brand campaigns, visual development.</p>
+        <ul><li>4–6 hero renders</li><li>Props, set dressing, full atmosphere</li><li>Turntable or parallax pass</li><li>Light revisions included</li><li>3–5 weeks</li></ul>
+        <span class="tier__flag">MOST COMMISSIONED</span>
+      </div>
+    </article>
+    <article class="tier" data-wire="tier.the-pipeline">
+      <div class="tier__in">
+        <p class="tier__n">03</p>
+        <h3 class="tier__name">The&nbsp;Pipeline</h3>
+        <p class="tier__for">Studios, agencies, films, product launches.</p>
+        <ul><li>Full visual development</li><li>Animated turntables · pre-viz</li><li>Farm-ready hand-off, named and tidy</li><li>On call two months after delivery</li><li>6–10 weeks</li></ul>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ══════════════  CONTACT  ══════════════ -->
+<section class="contact" id="contact" data-wire="section#contact">
+  <div class="contact__grid">
+    <div class="contact__left">
+      <p class="eyebrow"><span class="eyebrow__n">06</span> <span data-scramble>CONTACT</span></p>
+      <h2 class="contact__h">SAY<br>HELLO</h2>
+      <a class="contact__mail" href="mailto:sumanth.richie25@icloud.com" data-magnet>sumanth.richie25@icloud.com</a>
+      <div class="contact__links">
+        <a href="https://behance.net/sumanthrichie" target="_blank" rel="noopener" data-magnet><span data-scramble>BEHANCE</span> <i>↗</i></a>
+        <a href="https://instagram.com/sumofDanth" target="_blank" rel="noopener" data-magnet><span data-scramble>INSTAGRAM</span> <i>↗</i></a>
+        <a href="https://su3doesign.github.io/Resume/" target="_blank" rel="noopener" data-magnet><span data-scramble>RÉSUMÉ</span> <i>↗</i></a>
+      </div>
+    </div>
+    <div class="contact__prop" data-gl-prop>
+      <button class="prop__hint" id="propHint" data-magnet>KNOCK THE HAT OFF</button>
+    </div>
+  </div>
+
+  <figure class="desk">
+    <div id="deskMount"></div>
+    <figcaption>The desk it all leaves from — Hyderabad, most nights.</figcaption>
+  </figure>
+
+  <footer class="foot">
+    <span>© 2026 Amidyala Sai Sumanth</span>
+    <span>Rendered in the browser · Three.js, GSAP, Lenis</span>
+    <a href="#top" data-magnet>BACK TO TOP ↑</a>
+  </footer>
+</section>
+
+<noscript>
+  <p style="padding:2rem;font-family:monospace;color:#A9A6A0">
+    This portfolio builds its galleries with JavaScript. Enable it, or write to
+    sumanth.richie25@icloud.com and the work will come to you as a PDF.
+  </p>
+</noscript>
+
+</main>
+
+<!-- ══════════════  CASE STUDY LAYER  ══════════════ -->
+<div class="case" id="case" role="dialog" aria-modal="true" aria-label="Case study" hidden>
+  <div class="case__scroll" id="caseScroll">
+    <header class="case__head">
+      <div>
+        <span class="case__jp" id="caseJp"></span>
+        <h2 class="case__title" id="caseTitle"></h2>
+        <p class="case__sub" id="caseSub"></p>
+      </div>
+      <button class="case__close" id="caseClose" data-magnet>CLOSE ✕</button>
+    </header>
+    <p class="case__note" id="caseNote"></p>
+    <div class="case__tags" id="caseTags"></div>
+    <div class="case__shots" id="caseShots"></div>
+  </div>
+</div>
+
+<!-- ══════════════  LIGHTBOX  ══════════════ -->
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Media viewer" hidden>
+  <div class="lb__bar">
+    <span id="lbTitle">—</span><span id="lbCount">1 / 1</span>
+    <button id="lbClose" data-magnet>CLOSE ✕</button>
+  </div>
+  <button class="lb__nav lb__nav--prev" id="lbPrev" aria-label="Previous">←</button>
+  <div class="lb__stage" id="lbStage"></div>
+  <button class="lb__nav lb__nav--next" id="lbNext" aria-label="Next">→</button>
+  <p class="lb__hint">← → browse · ESC close</p>
+</div>
+
+<div class="cursor" id="cursor" aria-hidden="true"><span id="cursorLabel"></span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/Pass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/MaskPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="gl.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
