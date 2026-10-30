@@ -9,29 +9,52 @@ is talking about.
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173
-npm run build      # type-check + production build into dist/
+npm run dev        # fetches the fonts, then http://localhost:5173
+npm run build      # fetches the fonts, type-checks, builds into dist/
 npm run preview    # serve dist/
 ```
 
-Needs Node 20.19 or newer (22 in CI).
+Needs Node 20.19 or newer (22 in CI). Behind an HTTPS proxy, run with `NODE_USE_ENV_PROXY=1` so the font fetch
+uses it.
+
+## Type
+
+| Role | Face | Source |
+|------|------|--------|
+| Display: the giant kinetic words, headings, numbers | **Clash Display** (variable, 200–700) | Fontshare |
+| Text and UI | **Satoshi** (variable, 300–900) | Fontshare |
+| Small labels | **Geist Mono** | npm (`@fontsource-variable/geist-mono`) |
+
+Clash Display's weight axis drives the kinetic type. The giant **SUMANTH** in the footer thins to a hairline
+wherever the cursor passes. Hollow headings use Clash Display's static 600 cut, because the variable font's
+overlapping contours would show through a text stroke.
+
+**Licensing.** Clash Display and Satoshi are under the ITF Free Font License, which allows self-hosting on your
+own site but not redistributing the font files. So `tools/fonts.mjs` fetches them from Fontshare into
+`public/fonts/` before every dev run and build, `.gitignore` keeps them out of the repository, and the deployed
+site serves its own copies. No runtime CDN is involved. CI fails the build if the fetch fails, so a deploy never ships
+without its fonts.
 
 ## What is on the page
 
 | Section | What it does | Built with |
 |---------|--------------|------------|
-| Loader | Counts to 100 against the fonts and the first door image, then lifts like a shutter | GSAP |
-| Hero | Fullscreen. Three layers (the word “Doors”, the 3D door, the headline) drift at different speeds | GSAP ScrollTrigger, three.js |
-| The idea | The paragraph lights up word by word as you scroll; counters | ScrollTrigger scrub |
+| Menu | Full-screen: sections in giant type, all 13 sites with their picture opening on hover | GSAP |
+| Loader | A giant counter to 100 against real loading while an arch draws itself; then the screen splits down the middle and opens like a pair of doors | GSAP, ScrambleText |
+| Hero | **FRONT** and **DOORS** fill the screen with the 3D door standing *between* the words (they sit under the canvas). Scrolling slides the words apart like doors while the door comes forward | GSAP ScrollTrigger, SplitText, three.js |
+| Tapes | Two marquee tapes cross the page; they speed up with the scroll and reverse with it | GSAP ticker |
+| The idea | One big sentence with a window onto each world set into the line; it lights up word by word | ScrollTrigger scrub |
 | Method | **The door pins** on the left while five rules scroll on the right. Each rule swaps the world in the door and tints its light | ScrollTrigger `pin` |
 | Worlds | Four flagship sites. **Each image opens** from a small card to full-bleed, and the title lines slide apart | ScrollTrigger scrub, `clip-path` |
-| Shelf | All 13 sites on an **infinite horizontal rail** with filters and parallax inside each card | CSS scroll-snap |
+| Shelf | All 13 sites on an **infinite horizontal rail** with filters and parallax inside each card, or as an **index** of big rows that fill with the project's colour while its picture follows the cursor | CSS scroll-snap, GSAP `quickTo` |
 | Ask | A minimal chat panel that answers from the case studies | React |
-| Contact | The door comes back, lit at dawn | three.js |
+| Contact | The door comes back, lit at dawn, above a giant **SUMANTH** that reacts to the cursor | three.js, Clash Display's weight axis |
 | Case studies | `#/work/<slug>`: premise, idea, what was built, the hard part, the outcome, a gallery, next door | React, ScrollTrigger |
 
-Lenis smooths the scroll. A custom cursor (a dot with a slow ring) labels what you’re over: *Drag*, *Open*,
-*Read*, *Visit*.
+Lenis smooths the scroll. Throughout: link text **rolls** to a fresh copy on hover, buttons are **magnetic**,
+headings rise **letter by letter** (GSAP SplitText, with the original text kept for screen readers), images and
+titles **lean with scroll speed**, and a custom cursor (a dot with a slow ring) labels what you’re over: *Drag*,
+*Open*, *Read*, *Visit*. The interaction pieces live in `src/components/kit/`.
 
 ### The door
 
@@ -63,7 +86,8 @@ src/
     useHashRoute.ts       #/work/<slug> routing for GitHub Pages
     ask.ts                local answers, optional model endpoint
   components/
-    Loader, Cursor, Nav, Hero, Manifesto, Process, Worlds, Shelf, CaseStudy, Ask, Contact
+    Loader, Cursor, Nav, Menu, Hero, Bands, Manifesto, Process, Worlds, Shelf, CaseStudy, Ask, Contact
+    kit/                  Roll (hover text), Magnetic, Marquee, ProximityWord
     portal/               PortalScene (three.js), PortalCanvas, PortalAnchor, bus
 public/
   work/<slug>/*.webp      covers and gallery images
@@ -74,6 +98,7 @@ docs/
   UX-AUDIT.md             top five UX issues across the live sites, with quick fixes
   CHAT-UI.md              the chat panel’s design and its endpoint contract
 tools/
+  fonts.mjs               fetch Clash Display + Satoshi from Fontshare into public/fonts/ (git-ignored)
   capture.mjs             screenshot a site into public/work/<slug>/
   v1/                     the first version’s page and image scripts
 ```

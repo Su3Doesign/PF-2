@@ -1,11 +1,13 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
+import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import Lenis from 'lenis';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin);
 gsap.defaults({ ease: 'expo.out', duration: 1.4 });
 
-export { gsap, ScrollTrigger };
+export { gsap, ScrollTrigger, SplitText };
 
 export const reducedMotion =
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -50,9 +52,11 @@ export function startSmoothScroll() {
   const tick = (time: number) => lenis?.raf(time * 1000);
   gsap.ticker.add(tick);
   gsap.ticker.lagSmoothing(0);
+  gsap.ticker.add(skewTick);
 
   return () => {
     gsap.ticker.remove(tick);
+    gsap.ticker.remove(skewTick);
     lenis?.destroy();
     lenis = null;
   };
@@ -97,6 +101,18 @@ export function accentAt(p: number): [number, number, number] {
   return STOPS[STOPS.length - 1][1];
 }
 
+// Fast scrolling leans [data-skew] elements a few degrees; resting eases them back upright.
+let skew = 0;
+function skewTick() {
+  // Lenis stops emitting when the page rests, so let the last velocity die away here.
+  scrollState.velocity *= 0.92;
+  const target = Math.max(-5, Math.min(5, scrollState.velocity * -0.16));
+  const next = skew + (target - skew) * 0.12;
+  if (Math.abs(next - skew) < 0.005 && Math.abs(target) < 0.005) return;
+  skew = next;
+  document.documentElement.style.setProperty('--skew', skew.toFixed(3));
+}
+
 let lastAccent = '';
 function updateProgress(y: number, velocity: number) {
   const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -108,4 +124,33 @@ function updateProgress(y: number, velocity: number) {
     document.documentElement.style.setProperty('--accent', next);
     lastAccent = next;
   }
+}
+
+/**
+ * Splits text into masked lines and characters and lets the characters rise into place.
+ * Re-splits when fonts load or the line breaks change, and keeps the original text for
+ * screen readers.
+ */
+export function riseChars(target: Element | Element[], vars: gsap.TweenVars = {}) {
+  if (reducedMotion) return null;
+  return SplitText.create(target, {
+    // Words keep their letters together when a line wraps.
+    type: 'lines,words,chars',
+    mask: 'lines',
+    aria: 'auto',
+    autoSplit: true,
+    onSplit: (self) => gsap.from(self.chars, { yPercent: 115, rotate: 6, duration: 1.6, stagger: 0.025, ease: 'expo.out', ...vars }),
+  });
+}
+
+/** The same, line by line, for paragraphs. */
+export function riseLines(target: Element | Element[], vars: gsap.TweenVars = {}) {
+  if (reducedMotion) return null;
+  return SplitText.create(target, {
+    type: 'lines',
+    mask: 'lines',
+    aria: 'auto',
+    autoSplit: true,
+    onSplit: (self) => gsap.from(self.lines, { yPercent: 110, duration: 1.5, stagger: 0.08, ease: 'expo.out', ...vars }),
+  });
 }

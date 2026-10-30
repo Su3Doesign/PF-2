@@ -67,6 +67,14 @@ door into it. When no anchor is visible the canvas fades out and stops drawing.
 This makes pinning free. When ScrollTrigger pins the method stage, the anchor stops moving, so the door stops
 moving. Layout stays in CSS, where it belongs.
 
+## Type that moves
+
+The type system is Clash Display for anything big and Satoshi for reading, both from Fontshare, plus Geist Mono
+for the small labels. The display face has a weight axis from 200 to 700, and the site plays on it. The two hero
+words fill the screen with the door standing between them, and the giant name in the footer thins to a hairline
+wherever the cursor passes, then fills back in behind it. Headings rise letter by letter, link text rolls to a
+fresh copy on hover, and titles lean with the scroll speed.
+
 ## Keeping it quiet
 
 The brief asked for slow, premium motion, and slow is easy to get wrong. Every duration is long and every ease
@@ -84,7 +92,7 @@ Every effect also has an exit:
 
 - **13 finished sites**, each with a story-shaped case study: premise → idea → what was built → the hard part
   → where it landed.
-- **About 140 KB of gzipped JavaScript** before first paint. three.js (144 KB gzipped) arrives afterwards, so
+- **About 150 KB of gzipped JavaScript** before first paint, plus about 90 KB of fonts. three.js (144 KB gzipped) arrives afterwards, so
   the headline never waits for it.
 - **2.8 MB of WebP** for every cover and gallery image, all lazy except the first door.
 - **A chat panel** that answers questions about the work from the same data that drives the page, and can be

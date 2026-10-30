@@ -1,8 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { useGSAP } from '@gsap/react';
-import { gsap, reducedMotion } from '../lib/motion';
+import { gsap, reducedMotion, riseChars } from '../lib/motion';
 import { projects, type Project } from '../data/projects';
 import { closeWork, workHref } from '../lib/useHashRoute';
+import Roll from './kit/Roll';
+import Magnetic from './kit/Magnetic';
+
+/** Clash Display's caps run about 0.68 em per letter: a size that keeps the longest line inside `vw`. */
+const fit = (lines: string[], vw: number, max: string) =>
+  `min(${(vw / (Math.max(...lines.map((l) => l.length)) * 0.68)).toFixed(2)}vw, ${max})`;
 
 const CHAPTERS = [
   ['The premise', 'premise'],
@@ -54,7 +60,7 @@ export default function CaseStudy({ project: p }: { project: Project }) {
       if (reducedMotion) return;
       gsap.fromTo(root.current, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.3, ease: 'expo.inOut' });
       gsap.fromTo(q('[data-cover]'), { scale: 1.25 }, { scale: 1, duration: 2.4, ease: 'expo.out', delay: 0.3 });
-      gsap.fromTo(q('.rise > span'), { yPercent: 105 }, { yPercent: 0, duration: 1.6, stagger: 0.1, delay: 0.6 });
+      riseChars(q('#cs-title')[0], { delay: 0.55, stagger: 0.02 });
 
       const sc = scroller.current!;
       gsap.to(q('[data-cover]'), { yPercent: 18, ease: 'none', scrollTrigger: { scroller: sc, trigger: q('[data-hero]')[0], start: 'top top', end: 'bottom top', scrub: true } });
@@ -73,6 +79,7 @@ export default function CaseStudy({ project: p }: { project: Project }) {
   );
 
   const titleLines = p.title.split(/:\s/);
+  const nextLines = next.title.split(/:\s/);
 
   return (
     <div
@@ -88,9 +95,9 @@ export default function CaseStudy({ project: p }: { project: Project }) {
           ref={closeBtn}
           type="button"
           onClick={closeWork}
-          className="label fixed top-4 right-4 z-10 rounded-full bg-bone px-5 py-3.5 text-ink md:top-6 md:right-8"
+          className="label fixed top-4 right-4 z-10 flex h-12 items-center gap-2 rounded-full bg-bone px-5 text-ink md:top-6 md:right-8"
         >
-          Close <span className="text-ink/70">Esc</span>
+          <Roll text="Close" /> <span className="text-ink/70">Esc</span>
         </button>
 
         <div data-hero className="relative h-[100svh] overflow-clip">
@@ -108,14 +115,14 @@ export default function CaseStudy({ project: p }: { project: Project }) {
             <p className="label mb-6 text-bone/80">
               <span style={{ color: p.tone }}>●</span> {p.kind === 'Self' ? 'Self-initiated' : p.kind} · {p.year} · {p.role}
             </p>
-            <h2 id="cs-title" className="display text-[clamp(3rem,9vw,9rem)]">
+            <h2 id="cs-title" className="display" style={{ fontSize: fit(titleLines, 90, '11rem') }}>
               {titleLines.map((l, i) => (
-                <span key={i} className="rise">
-                  <span className={i ? 'italic' : ''}>{l}</span>
+                <span key={i} className="block" style={i ? { color: p.tone } : undefined}>
+                  {l}
                 </span>
               ))}
             </h2>
-            <p className="mt-6 max-w-[36rem] text-lg leading-relaxed text-bone/85">{p.line}</p>
+            <p className="title mt-7 max-w-[36rem] text-[clamp(1.15rem,1.6vw,1.5rem)] leading-snug">{p.line}</p>
           </div>
         </div>
 
@@ -124,7 +131,7 @@ export default function CaseStudy({ project: p }: { project: Project }) {
             {p.facts.map(([k, v]) => (
               <div key={k} className="flex flex-col-reverse gap-2">
                 <dt className="label text-mute">{k}</dt>
-                <dd className="display text-[clamp(1.8rem,3.4vw,3rem)] leading-none">{v}</dd>
+                <dd className={v.length <= 7 ? 'display text-[clamp(2.6rem,4.8vw,4.4rem)]' : 'title text-[clamp(1.25rem,1.9vw,1.7rem)] leading-tight'}>{v}</dd>
               </div>
             ))}
           </dl>
@@ -146,7 +153,7 @@ export default function CaseStudy({ project: p }: { project: Project }) {
                     ))}
                   </ul>
                 ) : (
-                  <p className={`max-w-[44rem] leading-[1.35] ${i === 1 ? 'display text-[clamp(1.8rem,3.2vw,2.8rem)]' : 'text-xl text-bone/85'}`}>
+                  <p className={`max-w-[46rem] ${i === 1 ? 'title text-[clamp(1.8rem,3.2vw,2.9rem)] leading-[1.06]' : 'text-xl leading-[1.55] text-bone/85'}`}>
                     {body}
                   </p>
                 )}
@@ -170,23 +177,29 @@ export default function CaseStudy({ project: p }: { project: Project }) {
           <section data-reveal className="flex flex-col gap-10 border-t border-line py-16 md:flex-row md:items-end md:justify-between">
             <div>
               <h3 className="label mb-4 text-mute">Built with</h3>
-              <p className="display text-[clamp(1.6rem,3vw,2.6rem)]">{p.stack.join(' · ')}</p>
+              <p className="title text-[clamp(1.5rem,2.8vw,2.6rem)]">{p.stack.join(' · ')}</p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <a
-                href={p.live}
-                target="_blank"
-                rel="noopener"
-                data-cursor="Visit"
-                className="label rounded-full px-7 py-4 text-ink"
-                style={{ background: p.tone }}
-              >
-                Open the site ↗<span className="sr-only"> (opens in a new tab)</span>
-              </a>
-              {p.repo && (
-                <a href={p.repo} target="_blank" rel="noopener" className="label rounded-full border border-bone/30 px-7 py-4 text-bone hover:border-bone">
-                  Source ↗<span className="sr-only"> (opens in a new tab)</span>
+              <Magnetic>
+                <a
+                  href={p.live}
+                  target="_blank"
+                  rel="noopener"
+                  data-cursor="Visit"
+                  className="label flex h-14 items-center rounded-full px-7 text-ink"
+                  style={{ background: p.tone }}
+                >
+                  <Roll text="Open the site ↗" />
+                  <span className="sr-only"> (opens in a new tab)</span>
                 </a>
+              </Magnetic>
+              {p.repo && (
+                <Magnetic>
+                  <a href={p.repo} target="_blank" rel="noopener" className="label flex h-14 items-center rounded-full border border-bone/30 px-7 text-bone hover:border-bone">
+                    <Roll text="Source ↗" />
+                    <span className="sr-only"> (opens in a new tab)</span>
+                  </a>
+                </Magnetic>
               )}
             </div>
           </section>
@@ -201,8 +214,14 @@ export default function CaseStudy({ project: p }: { project: Project }) {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-ink to-transparent" />
           <div className="absolute inset-x-5 bottom-10 md:inset-x-10">
-            <p className="label mb-4 text-mute">Next door</p>
-            <p className="display text-[clamp(2.6rem,8vw,7.5rem)]">{next.title}</p>
+            <p className="label mb-4 text-mute">Next door →</p>
+            <p className="display transition-colors duration-700 group-hover:text-[var(--tone)]" style={{ fontSize: fit(nextLines, 90, '10rem') }}>
+              {nextLines.map((l) => (
+                <span key={l} className="block">
+                  {l}
+                </span>
+              ))}
+            </p>
           </div>
         </a>
       </div>

@@ -87,7 +87,7 @@ export default function Ask({ open, onClose }: Props) {
       <header data-in className="flex items-center justify-between border-b border-line px-6 py-5">
         <h2 id="ask-title" className="flex items-center gap-3">
           <span className="h-2 w-2 rounded-full bg-[var(--accent)] shadow-[0_0_14px_var(--accent)]" aria-hidden="true" />
-          <span className="display text-2xl italic">Ask the archive</span>
+          <span className="title text-2xl">Ask the archive</span>
         </h2>
         <button type="button" onClick={onClose} className="label -mr-2 min-h-11 px-3 text-mute hover:text-bone">
           Close
@@ -97,7 +97,7 @@ export default function Ask({ open, onClose }: Props) {
       <div ref={log} className="flex-1 overflow-y-auto overscroll-contain px-6 py-8" aria-live="polite">
         {turns.length === 0 && (
           <div data-in>
-            <p className="display text-[2rem] leading-tight">What would you like to know about the work?</p>
+            <p className="title text-[2rem] leading-[1.05]">What would you like to know about the work?</p>
             <ul className="mt-8 space-y-2">
               {SUGGESTIONS.map((s) => (
                 <li key={s}>

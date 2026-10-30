@@ -110,11 +110,14 @@ const haloFrag = /* glsl */ `
 const dustVert = /* glsl */ `
   uniform float uTime;
   uniform float uPixel;
+  uniform float uWarp;
   attribute float aSeed;
   varying float vA;
   void main() {
     vec3 p = position;
     p.y = mod(p.y + uTime * (0.08 + aSeed * 0.12) + 2.4, 6.0) - 2.4;
+    // Fast scrolling pulls the dust out through the door, toward the viewer.
+    p.z = mod(p.z + uWarp * (0.6 + aSeed) + 3.0, 6.0) - 3.0;
     p.x += sin(uTime * 0.3 + aSeed * 12.0) * 0.18;
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
@@ -151,6 +154,7 @@ export class PortalScene implements PortalApi {
   private timer = new THREE.Timer();
   private raf = 0;
   private time = 0;
+  private warp = 0;
   private alive = true;
 
   private opacity = 0;
@@ -379,6 +383,7 @@ export class PortalScene implements PortalApi {
       uniforms: {
         uTime: { value: 0 },
         uPixel: { value: 1 },
+        uWarp: { value: 0 },
         uColor: { value: new THREE.Color() },
         uOpacity: { value: 1 },
       },
@@ -612,6 +617,8 @@ export class PortalScene implements PortalApi {
     });
     this.dust.uniforms.uColor.value.copy(this.light.color);
     this.dust.uniforms.uTime.value = reducedMotion ? 0 : this.time;
+    if (!reducedMotion) this.warp += speed * speed * dt * 2.2;
+    this.dust.uniforms.uWarp.value = this.warp;
 
     this.renderer.render(this.scene, this.camera);
   };

@@ -1,11 +1,12 @@
 import { useEffect, useRef, type MouseEvent } from 'react';
 import { scrollToTarget } from '../lib/motion';
+import Roll from './kit/Roll';
+import Magnetic from './kit/Magnetic';
 
 const LINKS = [
   ['Worlds', '#worlds'],
   ['Shelf', '#shelf'],
   ['Ask', '#ask'],
-  ['Contact', '#contact'],
 ] as const;
 
 const clock = new Intl.DateTimeFormat('en-GB', {
@@ -16,7 +17,13 @@ const clock = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Asia/Kolkata',
 });
 
-export default function Nav({ onAsk }: { onAsk: () => void }) {
+interface Props {
+  onAsk: () => void;
+  menuOpen: boolean;
+  onMenu: () => void;
+}
+
+export default function Nav({ onAsk, menuOpen, onMenu }: Props) {
   const time = useRef<HTMLSpanElement>(null);
   const bar = useRef<HTMLDivElement>(null);
 
@@ -45,32 +52,42 @@ export default function Nav({ onAsk }: { onAsk: () => void }) {
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-[70] mix-blend-difference">
-      <div className="flex items-center justify-between gap-6 px-5 py-4 md:px-10 md:py-6">
-        <a href="#top" onClick={(e) => go(e, '#top')} className="flex items-baseline gap-3">
-          <span className="display text-2xl italic">Sumanth</span>
-          <span className="label hidden text-mute sm:inline">Front doors · 13 sites</span>
+    <header className="fixed inset-x-0 top-0 z-[72]">
+      <div className="flex items-center justify-between gap-6 px-5 py-4 md:px-10 md:py-5">
+        <a href="#top" onClick={(e) => go(e, '#top')} className="flex items-center gap-4 mix-blend-difference">
+          <span className="display text-[1.35rem] tracking-[-0.03em]">Sumanth®</span>
+          <span className="label hidden text-bone/60 lg:inline">Worlds &amp; websites</span>
         </a>
-        <nav aria-label="Sections" className="flex items-center gap-1 md:gap-2">
+
+        <p className="label hidden items-center gap-2 text-bone/70 mix-blend-difference lg:flex" aria-label="Time in Hyderabad">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--accent)] motion-reduce:animate-none" aria-hidden="true" />
+          Open for commissions · HYD <span ref={time} className="text-bone tabular-nums" />
+        </p>
+
+        <nav aria-label="Sections" className="flex items-center gap-2">
           {LINKS.map(([name, href]) => (
-            <a
-              key={href}
-              href={href}
-              onClick={(e) => go(e, href)}
-              className="label link-sweep hidden px-2 py-3 text-bone sm:inline-block"
-            >
-              {name}
+            <a key={href} href={href} onClick={(e) => go(e, href)} className="label hidden px-3 py-3 text-bone mix-blend-difference md:inline-block">
+              <Roll text={name} />
             </a>
           ))}
-          <a href="#contact" onClick={(e) => go(e, '#contact')} className="label px-2 py-3 text-bone sm:hidden">
-            Contact
-          </a>
-          <span className="label hidden pl-4 text-mute lg:inline" aria-label="Time in Hyderabad">
-            HYD <span ref={time} className="text-bone tabular-nums" />
-          </span>
+          <Magnetic strength={0.25}>
+            <button
+              type="button"
+              onClick={onMenu}
+              aria-expanded={menuOpen}
+              aria-controls="menu"
+              className="label ml-2 flex h-11 items-center gap-3 rounded-full bg-bone pr-2 pl-5 text-ink"
+            >
+              <Roll text={menuOpen ? 'Close' : 'Menu'} />
+              <span className="relative h-7 w-7 rounded-full bg-ink" aria-hidden="true">
+                <span className={`absolute left-1/2 h-px w-3 -translate-x-1/2 bg-bone transition-all duration-500 ${menuOpen ? 'top-1/2 rotate-45' : 'top-[calc(50%-3px)]'}`} />
+                <span className={`absolute left-1/2 h-px w-3 -translate-x-1/2 bg-bone transition-all duration-500 ${menuOpen ? 'top-1/2 -rotate-45' : 'top-[calc(50%+3px)]'}`} />
+              </span>
+            </button>
+          </Magnetic>
         </nav>
       </div>
-      <div ref={bar} className="h-px origin-left bg-bone/60" style={{ transform: 'scaleX(0)' }} />
+      <div ref={bar} className="h-px origin-left bg-[var(--accent)]" style={{ transform: 'scaleX(0)' }} />
     </header>
   );
 }

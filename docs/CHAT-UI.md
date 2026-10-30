@@ -22,10 +22,10 @@ nav, from the “Just ask” section, or with <kbd>/</kbd> anywhere on the page.
 
 ```
 ┌──────────────────────────────── 28rem ─┐
-│ ● Ask the archive                Close │  header: accent dot, serif title
+│ ● Ask the archive                Close │  header: accent dot, Clash Display title
 ├────────────────────────────────────────┤
 │                                        │
-│  What would you like to know           │  empty state: one serif line
+│  What would you like to know           │  empty state: one display line
 │  about the work?                       │
 │  ┌──────────────────────────────────┐  │
 │  │ Which sites have a 3D world…     │  │  four suggestions
