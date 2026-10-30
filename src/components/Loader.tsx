@@ -34,7 +34,7 @@ export default function Loader({ onDone }: Props) {
         new Promise<void>((res) => {
           const img = new Image();
           img.onload = img.onerror = () => res();
-          img.src = 'work/overgrown-archive/cover.webp';
+          img.src = 'v1/assets/images/japa-render-1.webp';
         }),
       ]),
       new Promise((res) => setTimeout(res, 4500)),

@@ -1,7 +1,7 @@
 # Sumanth: Front Doors
 
 The portfolio of **Amidyala Sai Sumanth**, 3D environment artist and web designer in Hyderabad. It collects the
-**thirteen finished websites** from the Su3Doesign repositories, and each one is the front door to a world built first.
+**eleven finished websites** from the Su3Doesign repositories, and each one is the front door to a world built first.
 
 One obsidian door, rendered live with three.js, travels down the page. You can turn it all the way round by
 dragging. Its UV light starts violet and ends at dawn as you scroll, and it shows whichever world the page
@@ -37,31 +37,34 @@ without its fonts.
 
 ## What is on the page
 
-| Section | What it does | Built with |
-|---------|--------------|------------|
-| Menu | Full-screen: sections in giant type, all 13 sites with their picture opening on hover | GSAP |
-| Loader | A giant counter to 100 against real loading while an arch draws itself; then the screen splits down the middle and opens like a pair of doors | GSAP, ScrambleText |
-| Hero | **FRONT** and **DOORS** fill the screen with the 3D door standing *between* the words (they sit under the canvas). Scrolling slides the words apart like doors while the door comes forward | GSAP ScrollTrigger, SplitText, three.js |
-| Tapes | Two marquee tapes cross the page; they speed up with the scroll and reverse with it | GSAP ticker |
-| The idea | One big sentence with a window onto each world set into the line; it lights up word by word | ScrollTrigger scrub |
-| Method | **The door pins** on the left while five rules scroll on the right. Each rule swaps the world in the door and tints its light | ScrollTrigger `pin` |
-| Worlds | Four flagship sites. **Each image opens** from a small card to full-bleed, and the title lines slide apart | ScrollTrigger scrub, `clip-path` |
-| Shelf | All 13 sites on an **infinite horizontal rail** with filters and parallax inside each card, or as an **index** of big rows that fill with the project's colour while its picture follows the cursor | CSS scroll-snap, GSAP `quickTo` |
-| Ask | A minimal chat panel that answers from the case studies | React |
-| Contact | The door comes back, lit at dawn, above a giant **SUMANTH** that reacts to the cursor | three.js, Clash Display's weight axis |
-| Case studies | `#/work/<slug>`: premise, idea, what was built, the hard part, the outcome, a gallery, next door | React, ScrollTrigger |
+Each piece of work appears in one place only.
 
-Lenis smooths the scroll. Throughout: link text **rolls** to a fresh copy on hover, buttons are **magnetic**,
-headings rise **letter by letter** (GSAP SplitText, with the original text kept for screen readers), images and
-titles **lean with scroll speed**, and a custom cursor (a dot with a slow ring) labels what you’re over: *Drag*,
-*Open*, *Read*, *Visit*. The interaction pieces live in `src/components/kit/`.
+| # | Section | What it shows | How |
+|---|---------|---------------|-----|
+| — | Loader | A giant counter while an arch draws itself | The screen splits open like a pair of doors |
+| 01 | Hero | **FRONT / DOORS**, with the 3D door between the words showing the worlds; **Résumé** button | SplitText, three.js |
+| — | Tapes | Brand systems, 3D, campaigns, websites; the tools | Marquees that follow scroll speed and direction |
+| 02 | Who’s building | The line, the résumé statement, tools, the desk on loop, the path so far, numbers | Word-by-word light-up with image pills |
+| 03 | Worlds | Rōman no Yoake, Fudō Myō-ō, Koi Pond and The Castle on the Crag (from the `wizardingworld` repo), each in its own colour, hour and kanji | Card-to-full-bleed expansion, then a film strip of renders and turntables |
+| 04 | Method | The seven moves, Reference → Comp | The door pins and shows the study where each move is easiest to see |
+| 05 | Clients | 16 clients, 129 pieces including 21 films | Bento wall; tiles flip through the work on hover; full gallery in the lightbox |
+| 06 | Library | 39 studies | An endless canvas you throw in any direction |
+| 07 | Websites | 11 finished sites | Scroll-snap rail or index list; story-shaped case studies at `#/work/<slug>` |
+| 08 | Commissions | “I’d like ___ for ___.”: a single frame, a whole world, the full pipeline, a brand and a website | Tap a blank to change it; what arrives, the usual timeline and an example follow; the sentence is sent as an email |
+| 09 | Ask | A chat panel that answers from all of the above | |
+| 10 | Contact | Email, **Résumé**, links; the door again at dawn; a giant SUMANTH that thins under the cursor | |
+
+The résumé is `public/resume/Sumanth-Resume-2026.pdf`. Every Résumé button links to it: the nav, the hero, the
+about section, the menu and the footer. Behance (`profile.behance`, for the full case studies, boards and credits) sits beside it in the
+hero, the about section, the menu and the contact section, and closes the clients wall.
 
 ### The door
 
 `src/components/portal/PortalScene.ts`
 
-- **360° with no plugin.** Dragging sets a target angle, releasing throws it with inertia, and at rest it drifts
-  slowly. Arrow keys turn it too. There are no OrbitControls: it is about forty lines of pointer maths.
+- **360° with no plugin.** Dragging sets a target angle, releasing throws it with inertia, and arrow keys turn it
+  too. At rest it lingers while it faces you (either side shows the work) and swings quickly through the
+  edge-on angles. In idle mode it swaps to the next world while edge-on, so every turn reveals a new one.
 - **A point light that follows the scroll.** Its colour follows the page from UV violet to dawn amber, leans
   toward the pinned project’s tone in the method section, and brightens with scroll speed. At the top of the page it
   waits behind the door, and the first scroll brings it through the opening.
@@ -80,18 +83,23 @@ index.html
 src/
   main.tsx, App.tsx       fonts, providers, section order, routes
   index.css               Tailwind v4 theme tokens, grain, utilities
-  data/projects.ts        every site: copy, facts, story, images, links (the only file to edit for content)
+  data/projects.ts        the eleven websites, plus the profile (email, links, résumé)
+  data/work.ts            the 3D and visual-design work, with each world's colour and hour and the door's reel
+  data/pf1.json           imported from PF-1 by tools/import-pf1.mjs
   lib/
     motion.ts             GSAP + ScrollTrigger + Lenis, scroll state for WebGL, the UV-to-dawn accent
     useHashRoute.ts       #/work/<slug> routing for GitHub Pages
     ask.ts                local answers, optional model endpoint
   components/
-    Loader, Cursor, Nav, Menu, Hero, Bands, Manifesto, Process, Worlds, Shelf, CaseStudy, Ask, Contact
-    kit/                  Roll (hover text), Magnetic, Marquee, ProximityWord
+    Loader, Cursor, Nav, Menu, Hero, Bands, Manifesto (about), Worlds, Process (method), Clients, Library,
+    Shelf (websites), Commissions, CaseStudy, Lightbox, Ask, Contact
+    kit/                  Roll (hover text), Magnetic, Marquee, ProximityWord, InViewVideo
     portal/               PortalScene (three.js), PortalCanvas, PortalAnchor, bus
 public/
   work/<slug>/*.webp      covers and gallery images
-  v1/                     the first thesumanth.com, still running
+  v1/                     the first thesumanth.com, still running; v1/assets is also the media library
+                          (renders, client work, studies, films, posters, 640px thumbnails)
+  resume/                 the 2026 résumé (PDF)
 docs/
   LANDING.md              sections and a headline bank
   CASE-STUDY.md           the story of this site
@@ -99,6 +107,7 @@ docs/
   CHAT-UI.md              the chat panel’s design and its endpoint contract
 tools/
   fonts.mjs               fetch Clash Display + Satoshi from Fontshare into public/fonts/ (git-ignored)
+  import-pf1.mjs          import worlds, method, clients, studies, tiers and profile from PF-1
   capture.mjs             screenshot a site into public/work/<slug>/
   v1/                     the first version’s page and image scripts
 ```
@@ -107,15 +116,33 @@ tools/
 
 1. Put images in `public/work/<slug>/`. `cover.webp` (16:9, about 1600–1920 px wide) is required; gallery images
    are optional. `node tools/capture.mjs <slug> <url>` will take the screenshots for you.
-2. Add an entry to `projects` in `src/data/projects.ts`. Set `featured: true` to give it a full-screen chapter in
-   Worlds; set `tone` to the colour the door’s light should lean toward.
+2. Add an entry to `projects` in `src/data/projects.ts`. Set `tone` to the project's colour; `featured: true` puts
+   it first in the rail.
 
-The shelf, the counters, the chat answers and the case study all update from that one entry.
+The rail, the index, the counters, the chat answers and the case study all update from that one entry.
+
+## Adding 3D and visual-design work
+
+The worlds, method, clients, studies and the 3D commissions come from the PF-1 portfolio, so the two never drift
+apart:
+
+1. Copy any new files from PF-1's `public/assets/` (images, videos, posters, `thumbs/640`) into
+   `public/v1/assets/`.
+2. Run `node tools/import-pf1.mjs ../PF-1/src/data/content.json`. It rewrites the paths, checks that every file
+   exists, and writes `src/data/pf1.json`.
+
+Each world's colour and hour, and the study the door shows at each step of the method, are set in
+`src/data/work.ts`.
+
+The fourth world, The Castle on the Crag, is not on PF-1. Its frames are the Cycles previews from the
+`wizardingworld` repository's `Previews/`, converted to WebP in `public/worlds/castle/` (thumbnails in `thumbs/`).
+Its shot list and copy sit in `src/data/work.ts` next to the others. If final Unreal renders replace the
+previews, drop them in with the same names and change the note.
 
 ## Which repositories made the cut
 
-All 29 repositories were cloned and every website among them was rendered and read. Thirteen are finished
-and on the shelf. The rest, and the reason for each, are listed in [`docs/LANDING.md`](docs/LANDING.md#what-was-left-off-and-why).
+All 29 repositories were cloned and every website among them was rendered and read. Eleven finished sites
+are on the shelf. The rest, and the reason for each, are listed in [`docs/LANDING.md`](docs/LANDING.md#what-was-left-off-and-why).
 
 ## Accessibility and fallbacks
 

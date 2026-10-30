@@ -12,7 +12,12 @@ import Manifesto from './components/Manifesto';
 import Process from './components/Process';
 import Worlds from './components/Worlds';
 import Shelf from './components/Shelf';
+import Clients from './components/Clients';
+import Library from './components/Library';
+import Commissions from './components/Commissions';
+import Lightbox from './components/Lightbox';
 import Contact, { AskInvite } from './components/Contact';
+import { useLightbox } from './lib/lightbox';
 import PortalCanvas from './components/portal/PortalCanvas';
 
 // Only needed once someone opens them.
@@ -27,7 +32,8 @@ export default function App() {
   const slug = useWorkSlug();
   const project = slug ? bySlug(slug) : undefined;
   const done = useCallback(() => setReady(true), []);
-  const covered = Boolean(project) || menu;
+  const viewing = Boolean(useLightbox());
+  const covered = Boolean(project) || menu || viewing;
 
   useEffect(() => startSmoothScroll(), []);
 
@@ -77,15 +83,18 @@ export default function App() {
       <PortalCanvas />
       <Cursor />
       <Nav onAsk={openAsk} menuOpen={menu} onMenu={toggleMenu} />
-      <Menu open={menu} onClose={closeMenu} onAsk={openAsk} />
+      <Menu open={menu} onClose={closeMenu} />
 
       <main inert={covered}>
         <Hero ready={ready} />
         <Bands />
         <Manifesto />
-        <Process />
         <Worlds />
+        <Process />
+        <Clients />
+        <Library />
         <Shelf />
+        <Commissions />
         <AskInvite onAsk={openAsk} />
       </main>
       <div inert={covered}>
@@ -96,6 +105,7 @@ export default function App() {
         {project && <CaseStudy key={project.slug} project={project} />}
         {askMounted && <Ask open={asking} onClose={closeAsk} />}
       </Suspense>
+      <Lightbox />
       <div className="grain" aria-hidden="true" />
     </>
   );

@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type KeyboardEvent } from 'react';
 import { useGSAP } from '@gsap/react';
-import { gsap, reducedMotion } from '../lib/motion';
+import { gsap, reducedMotion, scrollToTarget } from '../lib/motion';
 import { ask, usesModel, type Turn } from '../lib/ask';
-import { workHref } from '../lib/useHashRoute';
 
-const SUGGESTIONS = ['Which sites have a 3D world behind them?', 'What did you build for clients?', 'Tell me about the wedding book', 'What tools do you use?'];
+const SUGGESTIONS = ['Show me the 3D worlds', 'Which clients have you worked with?', 'How do commissions work?', 'Where can I see your résumé?'];
 
 interface Props {
   open: boolean;
@@ -127,14 +126,25 @@ export default function Ask({ open, onClose }: Props) {
                 {t.text}
                 {t.links && t.links.length > 0 && (
                   <span className="mt-4 flex flex-wrap gap-2">
-                    {t.links.map((p) => (
+                    {t.links.map((l) => (
                       <a
-                        key={p.slug}
-                        href={workHref(p.slug)}
-                        onClick={onClose}
+                        key={l.href}
+                        href={l.href}
+                        target={l.external ? '_blank' : undefined}
+                        rel={l.external ? 'noopener' : undefined}
+                        onClick={(e) => {
+                          if (l.external) return;
+                          onClose();
+                          // Sections scroll smoothly; case studies open through the hash route.
+                          if (!l.href.startsWith('#/')) {
+                            e.preventDefault();
+                            window.setTimeout(() => scrollToTarget(l.href), 500);
+                          }
+                        }}
                         className="label rounded-full border border-line px-3 py-2 text-mute hover:border-bone/50 hover:text-bone"
                       >
-                        <span style={{ color: p.tone }}>●</span> {p.title}
+                        <span style={{ color: l.tone ?? 'var(--accent)' }}>●</span> {l.label}
+                        {l.external && ' ↗'}
                       </a>
                     ))}
                   </span>

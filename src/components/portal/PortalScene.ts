@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { projects, featured } from '../../data/projects';
+import { reel } from '../../data/work';
 import { accentAt, reducedMotion, scrollState } from '../../lib/motion';
 import { anchors, emitShowing, type PortalApi } from './bus';
 
@@ -16,7 +16,7 @@ const DEPTH = 0.62;
 const CAM_Z = 11;
 const FOV = 32;
 
-const featuredIndexes = featured.map((f) => projects.indexOf(f));
+const idleIndexes = reel.flatMap((r, i) => (r.idle ? [i] : []));
 
 function arch(path: THREE.Path, w: number, h: number, y0: number) {
   const r = w / 2;
@@ -173,6 +173,7 @@ export class PortalScene implements PortalApi {
   private mix = 0;
   private cycleAt = 0;
   private cycleStep = 0;
+  private quickSwap = true;
 
   private color = new THREE.Color();
   private tone = new THREE.Color();
@@ -209,7 +210,7 @@ export class PortalScene implements PortalApi {
     window.addEventListener('pointermove', this.onHover, { passive: true });
     document.addEventListener('visibilitychange', this.onVisibility);
 
-    const first = featuredIndexes[0] ?? 0;
+    const first = idleIndexes[0] ?? 0;
     this.load(first).then((tex) => {
       if (!this.alive) return;
       this.screens.forEach((s) => this.assign(s, 'A', tex));
@@ -217,7 +218,7 @@ export class PortalScene implements PortalApi {
       emitShowing(first);
     });
     // Warm the rest a little later so the first paint has the bandwidth.
-    window.setTimeout(() => featuredIndexes.forEach((i) => this.load(i)), 1800);
+    window.setTimeout(() => idleIndexes.forEach((i) => this.load(i)), 1800);
 
     this.loop();
   }
@@ -401,7 +402,7 @@ export class PortalScene implements PortalApi {
     const have = this.textures.get(index);
     if (have) return Promise.resolve(have);
     return new Promise((resolve) => {
-      this.loader.load(projects[index].cover.src, (tex) => {
+      this.loader.load(reel[index].src, (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
         tex.generateMipmaps = true;
@@ -547,15 +548,19 @@ export class PortalScene implements PortalApi {
     if (!this.dragging) {
       this.rot.ty += this.rot.vy * dt;
       this.rot.vy *= Math.exp(-dt * 1.6);
-      if (!reducedMotion) this.rot.ty += dt * 0.1;
+      // Linger while the door faces the viewer (either side shows the work) and swing quickly
+      // through the edge-on angles, so the picture is on screen most of the time.
+      if (!reducedMotion) {
+        const edge = Math.abs(Math.sin(this.rot.y));
+        this.rot.ty += dt * (0.1 + 2.6 * edge * edge * edge);
+      }
       this.rot.tx *= Math.exp(-dt * 1.2);
     }
     this.rot.y += (this.rot.ty - this.rot.y) * k(6);
     this.rot.x += (this.rot.tx - this.rot.x) * k(6);
     this.hover.x += (this.hover.tx - this.hover.x) * k(2.5);
     this.hover.y += (this.hover.ty - this.hover.y) * k(2.5);
-    const scrollTurn = reducedMotion ? 0 : scrollState.progress * Math.PI * 1.2;
-    this.door.rotation.set(this.rot.x + this.hover.y * 0.12, this.rot.y + scrollTurn + this.hover.x * 0.25, 0);
+    this.door.rotation.set(this.rot.x + this.hover.y * 0.12, this.rot.y + this.hover.x * 0.25, 0);
     this.camera.position.x = this.hover.x * 0.5;
     this.camera.position.y = 0.2 - this.hover.y * 0.3;
     this.camera.lookAt(this.rig.position.x * 0.04, this.rig.position.y * 0.04, 0);
@@ -567,15 +572,18 @@ export class PortalScene implements PortalApi {
       s.uniforms.uPar.value.set(-facing * 0.06 * sign, this.door.rotation.x * 0.05);
     });
 
-    // What the door shows: the pinned chapter decides, otherwise it cycles the four worlds.
+    // What the door shows: the pinned method step decides; otherwise the next world is swapped
+    // in while the door is edge-on, so every turn reveals a new one instead of a crossfade.
+    const edgeOn = Math.abs(Math.sin(this.door.rotation.y)) > 0.92;
+    this.quickSwap = scrollState.showing < 0;
     if (scrollState.showing >= 0) this.show(scrollState.showing);
-    else if (this.time > this.cycleAt) {
-      this.cycleAt = this.time + 5.5;
-      this.cycleStep = (this.cycleStep + 1) % featuredIndexes.length;
-      if (this.showing >= 0) this.show(featuredIndexes[this.cycleStep]);
+    else if (this.showing >= 0 && this.time > this.cycleAt && (edgeOn || (reducedMotion && !this.dragging))) {
+      this.cycleAt = this.time + (reducedMotion ? 6 : 2.5);
+      this.cycleStep = (this.cycleStep + 1) % idleIndexes.length;
+      this.show(idleIndexes[this.cycleStep]);
     }
     if (this.mix > 0) {
-      this.mix = Math.min(1, this.mix + dt / 1.6);
+      this.mix = Math.min(1, this.mix + dt / (this.quickSwap ? 0.45 : 1.6));
       this.screens.forEach((s) => (s.uniforms.uMix.value = this.mix));
       if (this.mix >= 1) {
         this.screens.forEach((s) => {

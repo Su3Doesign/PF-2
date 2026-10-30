@@ -1,12 +1,14 @@
 import { useEffect, useRef, type MouseEvent } from 'react';
 import { scrollToTarget } from '../lib/motion';
+import { profile } from '../data/projects';
 import Roll from './kit/Roll';
 import Magnetic from './kit/Magnetic';
 
 const LINKS = [
   ['Worlds', '#worlds'],
-  ['Shelf', '#shelf'],
-  ['Ask', '#ask'],
+  ['Clients', '#clients'],
+  ['Library', '#library'],
+  ['Sites', '#shelf'],
 ] as const;
 
 const clock = new Intl.DateTimeFormat('en-GB', {
@@ -61,15 +63,25 @@ export default function Nav({ onAsk, menuOpen, onMenu }: Props) {
 
         <p className="label hidden items-center gap-2 text-bone/70 mix-blend-difference lg:flex" aria-label="Time in Hyderabad">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--accent)] motion-reduce:animate-none" aria-hidden="true" />
-          Open for commissions · HYD <span ref={time} className="text-bone tabular-nums" />
+          Open to remote · HYD <span ref={time} className="text-bone tabular-nums" />
         </p>
 
         <nav aria-label="Sections" className="flex items-center gap-2">
           {LINKS.map(([name, href]) => (
-            <a key={href} href={href} onClick={(e) => go(e, href)} className="label hidden px-3 py-3 text-bone mix-blend-difference md:inline-block">
+            <a key={href} href={href} onClick={(e) => go(e, href)} className="label hidden px-3 py-3 text-bone mix-blend-difference xl:inline-block">
               <Roll text={name} />
             </a>
           ))}
+          <a
+            href={profile.resume}
+            target="_blank"
+            rel="noopener"
+            data-cursor="Résumé"
+            className="label ml-1 hidden h-11 items-center rounded-full border border-bone/30 px-5 text-bone backdrop-blur-md transition-colors duration-500 hover:border-bone sm:flex"
+          >
+            <Roll text="Résumé ↗" />
+            <span className="sr-only"> (opens in a new tab)</span>
+          </a>
           <Magnetic strength={0.25}>
             <button
               type="button"

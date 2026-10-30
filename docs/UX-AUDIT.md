@@ -33,7 +33,7 @@ which already exists. Keep the choice only when sound was turned on last time.
 ## 3. Libraries from public CDNs
 
 **Where:** thesumanth v1 (52 CDN references), Lotus Constructions (14), MERIDIAN, AEVUM, VOLTA,
-VESPERA, the invitation book.
+VESPERA.
 
 **What happens:** three.js, GSAP and Lenis load from jsDelivr, cdnjs and unpkg. If any of those is
 blocked, the page loses its motion or its 3D, and in `Portfolio-testserver` it throws
@@ -74,8 +74,6 @@ link), as the forest’s `work.html` fallback already does.
 
 ### Worth copying
 
-- **The invitation book** handles reduced motion in 15 places and animates only opacity and position,
-  so page turns stay smooth on cheap phones.
 - **The forest** mirrors every 3D stop with a real HTML panel, and falls back to `work.html` when
   WebGL2 is missing.
 - **The Flooded Rotunda** steps its quality tier down on its own when frames stay slow.

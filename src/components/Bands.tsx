@@ -1,7 +1,7 @@
 import Marquee from './kit/Marquee';
 
-const A = ['Worlds first', 'Websites second', 'No templates', '13 sites shipped', 'Built in Hyderabad'];
-const B = ['three.js', 'Blender', 'Unreal Engine 5', 'GLSL', 'GSAP', 'React', 'WebGL'];
+const A = ['Brand systems', '3D environments', 'Campaigns', 'Websites', 'Marketing', 'Hyderabad → Toronto → San Juan'];
+const B = ['Maya', 'ZBrush', 'Substance', 'Arnold', 'Unreal Engine', 'Blender', 'After Effects', 'three.js'];
 
 function Row({ words, outline = false }: { words: string[]; outline?: boolean }) {
   return (

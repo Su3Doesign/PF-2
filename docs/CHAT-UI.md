@@ -34,9 +34,9 @@ nav, from the “Just ask” section, or with <kbd>/</kbd> anywhere on the page.
 │              ┌───────────────────────┐ │  your question: a faint tile, right
 │              │ Tell me about the…    │ │
 │              └───────────────────────┘ │
-│  N & K, an invitation book: A Telugu   │  answer: plain text, left
-│  wedding invitation you turn…          │
-│  [● N & K, an invitation book]         │  links to case studies
+│  Lotus Constructions: A builder’s      │  answer: plain text, left
+│  website where a house rises…          │
+│  [● Lotus Constructions]               │  links to case studies
 │                                        │
 ├────────────────────────────────────────┤
 │ ┌────────────────────────────────┬───┐ │  auto-growing textarea + send
@@ -84,7 +84,7 @@ Content-Type: application/json
 and expects this reply:
 
 ```json
-{ "reply": "Three: Lotus Constructions, the N & K invitation book and CapQ.", "slugs": ["lotus-constructions", "invitation-book", "capq"] }
+{ "reply": "Two: Lotus Constructions and CapQ.", "slugs": ["lotus-constructions", "capq"] }
 ```
 
 `slugs` is optional and becomes the links under the answer. If the endpoint fails, the panel falls back
