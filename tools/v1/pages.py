@@ -1,31 +1,61 @@
-<!DOCTYPE html>
+#!/usr/bin/env python3
+"""Writes index.html and one shell per world. All pages share the same
+chrome; <main> is rendered from data.js, which is what lets the router
+move between them without a reload."""
+
+import os
+
+PAGES = [
+    dict(file="index.html", page="home", project="",
+         title="Amidyala Sai Sumanth — 3D Environment Artist &amp; Visual Designer",
+         desc="3D environment artist and visual designer in Hyderabad. Shrines, ponds and pagodas lit at the one hour they make sense — plus campaign work for Midea Canada, Home Depot Canada, GC Burger and more.",
+         og="assets/images/japa-render-1.webp", canon="https://www.thesumanth.com/v1/",
+         nos="Amidyala Sai Sumanth is a 3D environment artist and visual designer based in Hyderabad. Selected worlds: Roman no Yoake, Fudo Myo-o, Koi Pond. Commercial work for Midea Canada, Home Depot Canada, GC Burger, Eureka, Comfee, KD Displays, Amaya Restaurant and more. Contact sumanth.richie25@icloud.com"),
+    dict(file="roman-no-yoake.html", page="work", project="roman-no-yoake",
+         title="Rōman no Yoake — Amidyala Sai Sumanth",
+         desc="A pagoda above the treeline at first light. Maya, Arnold and fog volumes doing the modelling. Five renders, one sunrise.",
+         og="assets/images/japa-render-1.webp", canon="https://www.thesumanth.com/v1/roman-no-yoake.html",
+         nos="Roman no Yoake (2025) — a pagoda at dawn, built in Maya and lit in Arnold with fog volumes. Five renders and two camera moves."),
+    dict(file="fudo-myo-o.html", page="work", project="fudo-myo-o",
+         title="Fudō Myō-ō — Amidyala Sai Sumanth",
+         desc="A forest shrine lit by a single practical candle. ZBrush sculpts, Arnold, and no fill lights anywhere.",
+         og="assets/images/fudomyo-render-1.webp", canon="https://www.thesumanth.com/v1/fudo-myo-o.html",
+         nos="Fudo Myo-o (2025) — a forest shrine lit entirely by one practical candle. Sculpted in ZBrush, rendered in Arnold."),
+    dict(file="koi-pond.html", page="work", project="koi-pond",
+         title="Koi Pond — Amidyala Sai Sumanth",
+         desc="Bioluminescent water as the only light source. Caustics running the wrong way up the rocks, rendered across two seasons.",
+         og="assets/images/koipond-render-2.webp", canon="https://www.thesumanth.com/v1/koi-pond.html",
+         nos="Koi Pond (2024) — a pond lit only from inside the water, rendered in summer and autumn."),
+]
+
+SHELL = """<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Rōman no Yoake — Amidyala Sai Sumanth</title>
-<meta name="description" content="A pagoda above the treeline at first light. Maya, Arnold and fog volumes doing the modelling. Five renders, one sunrise.">
-<link rel="canonical" href="https://www.thesumanth.com/roman-no-yoake.html">
+<title>{title}</title>
+<meta name="description" content="{desc}">
+<link rel="canonical" href="{canon}">
 <meta name="theme-color" content="#0B0B0D">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://www.thesumanth.com/roman-no-yoake.html">
-<meta property="og:title" content="Rōman no Yoake — Amidyala Sai Sumanth">
-<meta property="og:description" content="A pagoda above the treeline at first light. Maya, Arnold and fog volumes doing the modelling. Five renders, one sunrise.">
-<meta property="og:image" content="https://www.thesumanth.com/assets/images/japa-render-1.webp">
+<meta property="og:url" content="{canon}">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{desc}">
+<meta property="og:image" content="https://www.thesumanth.com/v1/{og}">
 <meta name="twitter:card" content="summary_large_image">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="image" href="assets/images/japa-render-1.webp" fetchpriority="high">
+<link rel="preload" as="image" href="{og}" fetchpriority="high">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,200;0,6..72,300;0,6..72,400;1,6..72,300&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Person","name":"Amidyala Sai Sumanth","url":"https://www.thesumanth.com/","jobTitle":"3D Environment Artist","address":{"@type":"PostalAddress","addressLocality":"Hyderabad","addressCountry":"IN"},"email":"sumanth.richie25@icloud.com","sameAs":["https://behance.net/sumanthrichie","https://instagram.com/sumofDanth"]}
+{{"@context":"https://schema.org","@type":"Person","name":"Amidyala Sai Sumanth","url":"https://www.thesumanth.com/","jobTitle":"3D Environment Artist","address":{{"@type":"PostalAddress","addressLocality":"Hyderabad","addressCountry":"IN"}},"email":"sumanth.richie25@icloud.com","sameAs":["https://behance.net/sumanthrichie","https://instagram.com/sumofDanth"]}}
 </script>
 </head>
 
-<body class="is-booting" data-page="work" data-project="roman-no-yoake">
+<body class="is-booting" data-page="{page}"{projattr}>
 
 <canvas id="gl" aria-hidden="true"></canvas>
 <div class="grain" aria-hidden="true"></div>
@@ -83,7 +113,7 @@
 
 <main id="pageMain"></main>
 
-<noscript><p class="nos">Roman no Yoake (2025) — a pagoda at dawn, built in Maya and lit in Arnold with fog volumes. Five renders and two camera moves.</p></noscript>
+<noscript><p class="nos">{nos}</p></noscript>
 
 <div class="archive" id="archive" hidden>
   <div class="archive__stage" id="archiveStage"></div>
@@ -128,3 +158,11 @@
 <script src="app.js"></script>
 </body>
 </html>
+"""
+
+# The first version is served from public/v1/ since the new site took the root.
+here = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'public', 'v1')
+for p in PAGES:
+    p["projattr"] = ' data-project="%s"' % p["project"] if p["project"] else ""
+    open(os.path.join(here, p["file"]), "w").write(SHELL.format(**p))
+    print("wrote", p["file"])
