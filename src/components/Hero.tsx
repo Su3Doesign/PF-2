@@ -1,7 +1,32 @@
 import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap, reducedMotion, riseChars } from '../lib/motion';
-import { projects } from '../data/projects';
+import { profile, projects } from '../data/projects';
+import { counts } from '../data/work';
+import Magnetic from './kit/Magnetic';
+import Roll from './kit/Roll';
+
+const LEDE =
+  'Amidyala Sai Sumanth: brand and design systems, 3D worlds, and the websites that open them. Head of Marketing at CapQ in Hyderabad; before that, fifteen months with an agency in Toronto.';
+
+function ResumeLink() {
+  return (
+    <span data-fade className="pointer-events-auto mt-5 inline-block shrink-0 md:mt-0">
+      <Magnetic>
+        <a
+          href={profile.resume}
+          target="_blank"
+          rel="noopener"
+          data-cursor="Résumé"
+          className="label flex h-12 items-center gap-2 rounded-full border border-bone/30 px-6 text-bone backdrop-blur-sm transition-colors duration-500 hover:border-bone hover:bg-bone hover:text-ink"
+        >
+          <Roll text="Résumé ↗" />
+          <span className="sr-only"> (opens in a new tab)</span>
+        </a>
+      </Magnetic>
+    </span>
+  );
+}
 import PortalAnchor from './portal/PortalAnchor';
 
 /**
@@ -62,8 +87,10 @@ export default function Hero({ ready }: { ready: boolean }) {
 
       <div data-front className="pointer-events-none absolute inset-0 z-[3]">
         <div data-fade className="label absolute inset-x-10 top-[4.9rem] hidden justify-between text-mute md:flex">
-          <span>(Index) {projects.length} finished sites</span>
-          <span>Worlds first — websites second</span>
+          <span>
+            (Index) {counts.worlds} worlds · {counts.clients} clients · {counts.studies} studies · {projects.length} sites
+          </span>
+          <span>Brand · 3D · Web · Marketing</span>
           <span>17.38°N 78.48°E</span>
         </div>
 
@@ -75,15 +102,19 @@ export default function Hero({ ready }: { ready: boolean }) {
           <p data-fade className="label hidden text-bone md:block">
             Drag the door ↻ 360°
           </p>
-          <p data-fade className="mt-4 max-w-[30rem] text-[0.95rem] leading-relaxed text-mute md:hidden">
-            {projects.length} finished websites by Amidyala Sai Sumanth, 3D environment artist and web designer in Hyderabad.
-          </p>
+          <div className="md:hidden">
+            <p data-fade className="mt-4 max-w-[30rem] text-[0.95rem] leading-relaxed text-mute">{LEDE}</p>
+            <ResumeLink />
+          </div>
         </div>
 
-        <div className="absolute inset-x-10 bottom-[2.6vh] hidden items-end justify-between md:flex">
-          <p data-fade className="max-w-[34rem] text-[0.95rem] leading-relaxed text-mute">
-            {projects.length} finished websites by Amidyala Sai Sumanth, 3D environment artist and web designer in Hyderabad.
-          </p>
+        <div className="absolute inset-x-10 bottom-[2.6vh] hidden items-end justify-between gap-10 md:flex">
+          <div className="flex items-end gap-8">
+            <p data-fade className="max-w-[34rem] text-[0.95rem] leading-relaxed text-mute">
+              {LEDE}
+            </p>
+            <ResumeLink />
+          </div>
           <p data-fade className="label flex items-center gap-3 text-mute">
             <span className="relative block h-8 w-px overflow-hidden bg-line">
               <span className="absolute inset-x-0 top-0 h-1/2 animate-[cue_2.4s_var(--ease-slow)_infinite] bg-bone motion-reduce:animate-none" />

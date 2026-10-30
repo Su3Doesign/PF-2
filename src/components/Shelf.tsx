@@ -16,7 +16,10 @@ const COPIES = 3;
 export default function Shelf() {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>('All');
   const [view, setView] = useState<'rail' | 'index'>('rail');
-  const list = useMemo(() => projects.filter((p) => filter === 'All' || p.kind === filter), [filter]);
+  const list = useMemo(
+    () => projects.filter((p) => filter === 'All' || p.kind === filter).sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured))),
+    [filter],
+  );
   const head = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -31,12 +34,12 @@ export default function Shelf() {
     <section id="shelf" aria-labelledby="shelf-title" className="relative z-[3] bg-ink py-[16vh]">
       <header ref={head} className="px-5 md:px-10">
         <div className="label mb-10 flex justify-between gap-6 text-mute">
-          <span>(05) The whole shelf</span>
-          <span>{projects.length} sites, nothing half-finished</span>
+          <span>(07) Websites</span>
+          <span>{projects.length} finished sites · the front doors</span>
         </div>
         <h2 id="shelf-title" className="display text-[clamp(2.9rem,10.4vw,11.5rem)]">
-          <span className="block">Everything</span>
-          <span className="text-outline block text-[var(--accent)]">that shipped.</span>
+          <span className="block">The front</span>
+          <span className="text-outline block text-[var(--accent)]">doors.</span>
         </h2>
         <div className="mt-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter the sites">

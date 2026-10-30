@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
-import { projects } from '../../data/projects';
+import { reel } from '../../data/work';
 import { anchors, portal, showListeners } from './bus';
 
 interface Props {
@@ -45,7 +45,7 @@ export default function PortalAnchor({ className = '', caption = true }: Props) 
     portal.api?.nudge(d[0], d[1]);
   };
 
-  const shown = index >= 0 ? projects[index] : null;
+  const shown = index >= 0 ? reel[index] : null;
 
   return (
     <div className={`relative ${className}`}>
@@ -65,7 +65,7 @@ export default function PortalAnchor({ className = '', caption = true }: Props) 
       >
         {shown && (
           <img
-            src={shown.cover.src}
+            src={shown.src}
             alt=""
             className="arch portal-fallback absolute top-1/2 left-1/2 hidden aspect-[3/4.4] h-[78%] -translate-x-1/2 -translate-y-1/2 object-cover"
           />

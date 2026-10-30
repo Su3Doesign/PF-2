@@ -295,10 +295,10 @@ export const projects: Project[] = [
   {
     slug: 'capq',
     title: 'CapQ',
-    line: 'A coming-soon page for a finance advisory that already takes enquiries.',
+    line: 'The site for the finance advisory where I run marketing: a coming-soon page that already takes enquiries.',
     kind: 'Client',
     year: 2026,
-    role: 'Design, code',
+    role: 'Head of Marketing · brand, design, code',
     stack: ['Astro', 'Tailwind CSS', 'GSAP', 'Lenis'],
     live: pages('CapQ'),
     repo: gh('CapQ'),
@@ -307,7 +307,7 @@ export const projects: Project[] = [
     gallery: [img('capq', 'form', 'A glass enquiry form with name, mobile number, requirement and amount fields', 'The enquiry form, live before the platform.')],
     story: {
       premise:
-        'A business finance advisory in Hyderabad, matching MSMEs with lenders from 117+ banking and NBFC partners, was launching soon and couldn’t afford a quiet page in the meantime.',
+        'A business finance advisory in Hyderabad, matching MSMEs with lenders from 117+ banking and NBFC partners, where I lead marketing end to end. It was launching soon and couldn’t afford a quiet page in the meantime.',
       idea:
         'A coming-soon page that does the job early: say the promise in four words, Right Capital. Structured Right., then put a WhatsApp line, a phone line and a real enquiry form right under it.',
       built: [
@@ -318,7 +318,8 @@ export const projects: Project[] = [
       ],
       hardPart:
         'Making a pre-launch page do real work. The WhatsApp line, the phone line and the enquiry form all sit within the first two screens, under the promise.',
-      outcome: 'A single static page that collects leads from day one.',
+      outcome:
+        'A single static page that collects leads from day one, inside a brand I run end to end: the identity and design system, the collateral and pitch material, and the expos and MSME outreach around it.',
     },
     facts: [
       ['Partners', '117+'],
@@ -498,48 +499,20 @@ export const projects: Project[] = [
       ['Hidden key', 'W'],
     ],
   },
-  {
-    slug: 'resume',
-    title: 'Résumé',
-    line: 'A one-page résumé that behaves like a title sequence.',
-    kind: 'Self',
-    year: 2026,
-    role: 'Design, code',
-    stack: ['HTML', 'CSS', 'Vanilla JS'],
-    live: pages('Resume'),
-    repo: gh('Resume'),
-    tone: '#8a6cff',
-    cover: img('resume', 'cover', 'AMIDYALA SAI SUMANTH in a large display serif with orbiting rings'),
-    gallery: [
-      img('resume', 'experience', 'Experience section with a graphic designer role card', 'Experience, as cards with real dates.'),
-      img('resume', 'environment', 'ENVIRONMENT DESIGN section title over a mountain mark', 'Each discipline gets its own title card.'),
-    ],
-    story: {
-      premise: 'A résumé that recruiters will skim and art directors will judge.',
-      idea: 'Serve both: a scannable column of roles and dates, framed like the opening of a film.',
-      built: ['A display-serif title card with orbiting rings.', 'Experience as cards with tools tagged.', 'An English and German toggle.'],
-      hardPart: 'It has two readers. Recruiters skim roles and dates; art directors judge the frame. The facts stay plain, scannable text inside the title-card styling.',
-      outcome: 'The résumé linked from thesumanth.com.',
-    },
-    facts: [
-      ['Pages', '1'],
-      ['Languages', 'EN · DE'],
-      ['Build step', 'None'],
-      ['Linked from', 'thesumanth.com'],
-    ],
-  },
 ];
 
-export const featured = projects.filter((p) => p.featured);
 export const bySlug = (slug: string) => projects.find((p) => p.slug === slug);
 
 export const profile = {
   name: 'Amidyala Sai Sumanth',
   short: 'Sumanth',
-  role: '3D environment artist & web designer',
+  role: 'Brand & design systems · 3D artist · Head of Marketing',
   city: 'Hyderabad, India',
-  email: 'sumanth.richie25@icloud.com',
+  email: 'talktorichie.workspace@gmail.com',
+  /** The 2026 résumé, served from this site. */
+  resume: 'resume/Sumanth-Resume-2026.pdf',
   links: [
+    ['LinkedIn', 'https://www.linkedin.com/in/amidyala-sumanth-1ab236250/'],
     ['Behance', 'https://behance.net/sumanthrichie'],
     ['Instagram', 'https://instagram.com/sumofDanth'],
     ['GitHub', 'https://github.com/Su3Doesign'],

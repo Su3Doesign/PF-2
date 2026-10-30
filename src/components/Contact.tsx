@@ -20,7 +20,7 @@ export function AskInvite({ onAsk }: { onAsk: () => void }) {
   return (
     <section ref={root} id="ask" aria-labelledby="ask-invite" className="relative z-[3] border-t border-line bg-ink px-5 py-[18vh] md:px-10">
       <div className="label mb-10 flex justify-between gap-6 text-mute">
-        <span>(06) Ask the archive</span>
+        <span>(09) Ask the archive</span>
         <span>Press / anywhere</span>
       </div>
       <h2 id="ask-invite" className="display text-[clamp(3rem,9vw,10rem)]">
@@ -36,7 +36,7 @@ export function AskInvite({ onAsk }: { onAsk: () => void }) {
         className="group mt-14 flex w-full max-w-[52rem] items-center justify-between gap-4 rounded-[1.75rem] border border-line bg-ink-2 py-3 pr-3 pl-7 text-left transition-colors duration-700 hover:border-[var(--accent)]"
       >
         <span className="title text-[clamp(1.05rem,1.8vw,1.5rem)] font-medium text-faint transition-colors duration-700 group-hover:text-bone">
-          Which site has a 3D world behind it?
+          Which clients have you worked with?
         </span>
         <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[var(--accent)] text-xl text-ink" aria-hidden="true">
           ↑
@@ -96,7 +96,7 @@ export default function Contact() {
 
         <div className="pointer-events-none relative z-[3] flex min-h-[100svh] flex-col justify-end px-5 pt-[54vh] pb-16 md:px-10 md:pt-40">
           <div className="label mb-10 flex flex-wrap justify-between gap-x-6 gap-y-2 text-mute md:max-w-[56vw]">
-            <span>(07) The last door is yours</span>
+            <span>(10) The last door is yours</span>
             <span>
               Hyderabad · <span ref={time} />
             </span>
@@ -122,6 +122,20 @@ export default function Contact() {
                 </button>
               </Magnetic>
             </span>
+            <span data-in className="self-start md:self-auto">
+              <Magnetic>
+                <a
+                  href={profile.resume}
+                  target="_blank"
+                  rel="noopener"
+                  data-cursor="Résumé"
+                  className="label flex h-12 items-center rounded-full bg-[var(--accent)] px-6 text-ink"
+                >
+                  <Roll text="Résumé ↗" />
+                  <span className="sr-only"> (opens in a new tab)</span>
+                </a>
+              </Magnetic>
+            </span>
           </div>
         </div>
       </div>
@@ -137,6 +151,12 @@ export default function Contact() {
                 </a>
               </li>
             ))}
+            <li>
+              <a href={profile.resume} target="_blank" rel="noopener" className="label py-2 text-[var(--accent)]">
+                <Roll text="Résumé ↗" />
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            </li>
             <li>
               <a href="v1/" className="label py-2 text-bone">
                 <Roll text="The first version" />

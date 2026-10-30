@@ -1,39 +1,16 @@
 import { useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap, ScrollTrigger, reducedMotion, riseChars, scrollState } from '../lib/motion';
-import { bySlug, projects } from '../data/projects';
-import { workHref } from '../lib/useHashRoute';
+import { reelIndexOfStep, steps } from '../data/work';
+import { openLightbox } from '../lib/lightbox';
 import PortalAnchor from './portal/PortalAnchor';
 import Roll from './kit/Roll';
 
-const RULES = [
-  {
-    title: 'Find the rule',
-    slug: 'flooded-rotunda',
-    body: 'Every place I build keeps one rule. In the Flooded Rotunda it is that she turns to face whoever comes in, so she became the loading screen: she turns in chalk while the world downloads, then faces you.',
-  },
-  {
-    title: 'Build the world first',
-    slug: 'altair-estates',
-    body: 'Altair Estates was a Blender build and a set of blueprint sheets before it had a URL. The site exports that world, with 808 trees and 2,141 lamps of it, instead of faking a new one.',
-  },
-  {
-    title: 'Decide where the light goes',
-    slug: 'ring-gate',
-    body: 'The Ring Gate spends one day over the Ring, from dawn to the Hollow Sun. Light is the story and the scroll is the clock.',
-  },
-  {
-    title: 'Make the wait part of it',
-    slug: 'overgrown-archive',
-    body: 'Loading is the first scene, never a spinner. In the forest, three quality tiers and a frame governor keep the walk smooth on an ordinary laptop.',
-  },
-  {
-    title: 'Leave a door for everyone',
-    slug: 'invitation-book',
-    body: 'Real HTML behind every 3D stop, reduced motion respected, and a flat version when WebGL is missing. The invitation book turns its pages off the main thread so it stays smooth on modest phones.',
-  },
-];
-
+/**
+ * The seven moves, in order. The door holds still on the left while they scroll past on the
+ * right, and at each one it shows the piece of work where that move is easiest to see: the
+ * clay pass at Blockout, the extinguisher at Texture, the late room at Light.
+ */
 export default function Process() {
   const root = useRef<HTMLElement>(null);
   const grid = useRef<HTMLDivElement>(null);
@@ -44,9 +21,8 @@ export default function Process() {
     () => {
       const q = gsap.utils.selector(root);
       const set = (i: number) => {
-        const p = bySlug(RULES[i].slug)!;
-        scrollState.showing = projects.indexOf(p);
-        scrollState.tone = p.tone;
+        scrollState.showing = reelIndexOfStep(i);
+        scrollState.tone = null;
         setActive(i);
       };
       const clear = () => {
@@ -59,7 +35,7 @@ export default function Process() {
         start: 'top 60%',
         end: 'bottom 40%',
         onEnter: () => set(0),
-        onEnterBack: () => set(RULES.length - 1),
+        onEnterBack: () => set(steps.length - 1),
         onLeave: clear,
         onLeaveBack: clear,
       });
@@ -67,7 +43,7 @@ export default function Process() {
         ScrollTrigger.create({ trigger: el, start: 'top 55%', end: 'bottom 55%', onToggle: (s) => s.isActive && set(i) });
       });
 
-      // The door holds still on the left while the rules scroll past on the right.
+      // The door holds still on the left while the moves scroll past on the right.
       const mm = gsap.matchMedia();
       mm.add('(min-width: 1024px)', () => {
         ScrollTrigger.create({ trigger: grid.current, start: 'top top', end: 'bottom bottom', pin: stage.current, pinSpacing: false, anticipatePin: 1 });
@@ -88,19 +64,22 @@ export default function Process() {
     { scope: root },
   );
 
-  const current = bySlug(RULES[active].slug)!;
+  const current = steps[active];
 
   return (
     <section ref={root} id="method" aria-labelledby="method-title" className="relative">
       <header className="relative z-[3] bg-ink px-5 pt-[16vh] pb-[10vh] md:px-10">
         <div className="label mb-10 flex justify-between gap-6 text-mute">
-          <span>(03) How a door gets built</span>
-          <span>Five rules</span>
+          <span>(04) Method · 七手</span>
+          <span>Reference → Comp</span>
         </div>
         <h2 id="method-title" data-heading className="display text-[clamp(2.9rem,10.4vw,11.5rem)]">
-          <span className="block">Five rules,</span>
-          <span className="text-outline block text-[var(--accent)]">every time.</span>
+          <span className="block">Seven moves,</span>
+          <span className="text-outline block text-[var(--accent)]">every single time.</span>
         </h2>
+        <p className="mt-10 max-w-[34rem] text-[1.08rem] leading-relaxed text-mute">
+          In order. Skipping one shows up in the render three weeks later.
+        </p>
       </header>
 
       <div ref={grid} className="relative lg:grid lg:grid-cols-2">
@@ -117,41 +96,45 @@ export default function Process() {
           </div>
           <div className="pointer-events-none absolute inset-x-5 bottom-6 z-[3] flex items-end justify-between gap-6 md:inset-x-10 md:bottom-9">
             <ol className="flex gap-1.5" aria-hidden="true">
-              {RULES.map((r, i) => (
+              {steps.map((s, i) => (
                 <li
-                  key={r.title}
-                  className="h-1 w-8 rounded-full transition-colors duration-700"
-                  style={{ background: i === active ? current.tone : 'rgb(239 234 227 / 0.16)' }}
+                  key={s.name}
+                  className="h-1 w-6 rounded-full transition-colors duration-700"
+                  style={{ background: i === active ? 'var(--accent)' : 'rgb(239 234 227 / 0.16)' }}
                 />
               ))}
             </ol>
             <p className="label text-right text-mute">
               In the door
               <br />
-              <span className="text-bone">{current.title}</span>
+              <span className="text-bone">{current.caption}</span>
             </p>
           </div>
         </div>
 
-        <ol className="relative z-[3] px-5 md:px-10 lg:py-[30vh]">
-          {RULES.map((r, i) => {
-            const p = bySlug(r.slug)!;
-            return (
-              <li key={r.title} data-rule className="flex min-h-[70svh] flex-col justify-center border-t border-line py-16 lg:min-h-[85vh]">
-                <p data-in className="label mb-6 flex items-center gap-3 text-mute">
-                  <span className="h-2 w-2 rounded-full" style={{ background: p.tone }} />
-                  Rule {String(i + 1).padStart(2, '0')} / {String(RULES.length).padStart(2, '0')}
-                </p>
-                <h3 className="display mb-8 text-[clamp(2.4rem,4.6vw,5rem)]">{r.title}</h3>
-                <p data-in className="max-w-[34rem] text-[1.06rem] leading-relaxed text-mute">
-                  {r.body}
-                </p>
-                <a data-in href={workHref(p.slug)} data-cursor="Read" className="label mt-10 self-start py-2" style={{ color: p.tone }}>
-                  <Roll text={`The story of ${p.title} →`} />
-                </a>
-              </li>
-            );
-          })}
+        <ol className="relative z-[3] px-5 md:px-10 lg:py-[26vh]">
+          {steps.map((s, i) => (
+            <li key={s.name} data-rule className="flex min-h-[64svh] flex-col justify-center border-t border-line py-14 lg:min-h-[78vh]">
+              <p data-in className="label mb-6 flex items-center gap-3 text-mute">
+                <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
+                Move {String(i + 1).padStart(2, '0')} / {String(steps.length).padStart(2, '0')}
+              </p>
+              <h3 className="display mb-8 text-[clamp(2.6rem,5vw,5.6rem)]">{s.name}</h3>
+              <p data-in className="title max-w-[30rem] text-[clamp(1.25rem,1.9vw,1.7rem)] leading-snug text-bone/90">
+                {s.text}
+              </p>
+              <button
+                data-in
+                type="button"
+                onClick={() => openLightbox([{ ...s.media, caption: s.caption }], 0, s.name)}
+                data-cursor="View"
+                className="label mt-10 flex items-center gap-4 self-start text-mute hover:text-bone"
+              >
+                <img src={s.media.thumb} alt="" loading="lazy" className="h-14 w-20 rounded-lg object-cover lg:hidden" />
+                <Roll text={`See it in ${s.caption} →`} />
+              </button>
+            </li>
+          ))}
         </ol>
       </div>
     </section>
