@@ -49,7 +49,6 @@ const LOOK: Record<string, { tone: string; hour: string }> = {
 export const worlds: World[] = (data.worlds as Omit<World, 'tone' | 'hour'>[]).map((w) => ({ ...w, ...LOOK[w.id] }));
 export const clients = data.clients as Client[];
 export const studies = data.studies as Media[];
-export const tiers = data.tiers as { n: string; name: string; for: string; items: string[]; flag?: string }[];
 
 const study = (name: string, kind?: string) => studies.find((s) => s.name === name && (!kind || s.kind === kind))!;
 
@@ -84,6 +83,61 @@ export const reel: ReelItem[] = [
   ...steps.map((s) => ({ src: s.media.src, title: s.caption, tone: '#8b6bff' })),
 ];
 export const reelIndexOfStep = (i: number) => worlds.length + 2 + i;
+
+export interface Commission {
+  /** The first blank in "I'd like ___ for ___." */
+  what: string;
+  /** What the second blank jumps to when this one is picked. */
+  usual: string;
+  arrives: string[];
+  time: string;
+  example: { src: string; poster?: string; video?: boolean; caption: string };
+}
+
+const tier = (name: string) => (data.tiers as { name: string; items: string[] }[]).find((t) => t.name === name)!;
+const lower = (s: string) => s.replace(/ · /g, ' and ').replace(/^[A-Z](?=[a-z ])/, (c) => c.toLowerCase());
+const fromTier = (name: string) => {
+  const items = tier(name).items.map(lower);
+  return { arrives: items.slice(0, -1), time: items[items.length - 1] };
+};
+const shot = (world: number, label: string) => worlds[world].shots.find((s) => s.label === label)!;
+
+/** What Sumanth takes on, as the blanks of one sentence. The 3D options are PF-1's tiers. */
+export const commissions: Commission[] = [
+  {
+    what: 'a single frame',
+    usual: 'an album cover',
+    ...fromTier('One Frame'),
+    example: { src: worlds[1].plate.src, caption: `${worlds[1].title}: one frame, held at ${worlds[1].hour}` },
+  },
+  {
+    what: 'a whole world',
+    usual: 'a brand campaign',
+    ...fromTier('The World'),
+    example: { src: shot(2, 'Wide, night').src, caption: `${worlds[2].title}: one place, ${worlds[2].shots.length} renders` },
+  },
+  {
+    what: 'the full pipeline',
+    usual: 'a film or a game',
+    ...fromTier('The Pipeline'),
+    example: {
+      src: shot(0, 'Turntable').src,
+      poster: shot(0, 'Turntable').poster,
+      video: true,
+      caption: `${worlds[0].title}: the turntable pass`,
+    },
+  },
+  {
+    what: 'a brand and a website',
+    usual: 'my own company',
+    arrives: ['the brand and its design system', 'the website, designed and built by hand', 'launch assets for social, print and the expo floor'],
+    time: 'scoped together',
+    example: { src: 'work/capq/cover.webp', caption: 'CapQ: brand, design system and site' },
+  },
+];
+
+/** The second blank. */
+export const commissionFor = ['an album cover', 'a brand campaign', 'a product launch', 'a film or a game', 'a studio pitch', 'my own company'];
 
 export const counts = {
   worlds: worlds.length,

@@ -1,5 +1,5 @@
 import { projects, profile, type Project } from '../data/projects';
-import { about, clients, counts, studies, tiers, worlds } from '../data/work';
+import { about, clients, commissions, counts, studies, worlds } from '../data/work';
 import { workHref } from './useHashRoute';
 
 export interface AnswerLink {
@@ -76,7 +76,7 @@ export function answerLocally(question: string): Reply {
 
   if (/\b(commission|price|pricing|cost|rates?|quote|budget|package|tiers?)\b/.test(q)) {
     return {
-      text: `Three ways to start:\n${bullet(tiers.map((t) => `${t.name}: ${t.for} ${t.items[t.items.length - 1]}.`))}`,
+      text: `Commissions are one sentence: “I’d like ___ for ___.” Fill in the blanks and it becomes an email. What he takes on:\n${bullet(commissions.map((c) => `${c.what}: ${c.arrives.join(', ')}. Usually ${c.time}.`))}`,
       links: [section('Commissions', 'commissions')],
     };
   }

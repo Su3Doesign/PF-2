@@ -139,6 +139,14 @@
     background: var(--color-line);
   }
 
+  /* A blank in the commissions sentence: a dashed rule that stays while the words change. */
+  .blank {
+    background: repeating-linear-gradient(90deg, currentColor 0 0.16em, transparent 0.16em 0.28em) left bottom 0.06em / 100% 0.045em no-repeat;
+  }
+  button:is(:hover, :focus-visible) .blank {
+    background-image: linear-gradient(currentColor, currentColor);
+  }
+
   /* Text that rolls up on hover: each letter carries its own copy as a shadow one line below. */
   .roll {
     display: inline-flex;

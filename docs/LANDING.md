@@ -15,7 +15,7 @@ violet at the top and turns to dawn at the bottom, so the page reads as one nigh
 | 5 | Clients | The commercial half | **Ships on a Friday.** | Bento wall that flips through each client's work |
 | 6 | Library | Range | **Thirty-nine studies. Throw it around.** | Endless drag canvas |
 | 7 | Websites | The front doors themselves | **The front doors.** | Scroll-snap rail or index; case studies |
-| 8 | Commissions | How to start | **Three ways to start.** | Tilt cards |
+| 8 | Commissions | How to start, without a pricing table | *I’d like **a whole world** for **a brand campaign**.* | The sentence is the form: tap a blank to change it, then send it as an email |
 | 9 | Ask | Give skimmers a shortcut | **Don’t want to scroll? Ask.** | Opens the chat panel |
 | 10 | Contact | One clear action | **Have a place that needs a door?** | The door at dawn; a giant SUMANTH that thins under the cursor |
 

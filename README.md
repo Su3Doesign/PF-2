@@ -50,7 +50,7 @@ Each piece of work appears in one place only.
 | 05 | Clients | 16 clients, 129 pieces including 21 films | Bento wall; tiles flip through the work on hover; full gallery in the lightbox |
 | 06 | Library | 39 studies | An endless canvas you throw in any direction |
 | 07 | Websites | 12 finished sites | Scroll-snap rail or index list; story-shaped case studies at `#/work/<slug>` |
-| 08 | Commissions | One Frame, The World, The Pipeline | Tilt cards, each with a pre-filled email |
+| 08 | Commissions | “I’d like ___ for ___.”: a single frame, a whole world, the full pipeline, a brand and a website | Tap a blank to change it; what arrives, the usual timeline and an example follow; the sentence is sent as an email |
 | 09 | Ask | A chat panel that answers from all of the above | |
 | 10 | Contact | Email, **Résumé**, links; the door again at dawn; a giant SUMANTH that thins under the cursor | |
 
@@ -122,7 +122,7 @@ The rail, the index, the counters, the chat answers and the case study all updat
 
 ## Adding 3D and visual-design work
 
-The worlds, method, clients, studies and commission tiers come from the PF-1 portfolio, so the two never drift
+The worlds, method, clients, studies and the 3D commissions come from the PF-1 portfolio, so the two never drift
 apart:
 
 1. Copy any new files from PF-1's `public/assets/` (images, videos, posters, `thumbs/640`) into
