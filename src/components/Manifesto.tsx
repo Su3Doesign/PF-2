@@ -115,6 +115,18 @@ export default function Manifesto() {
                 <span className="sr-only"> (opens in a new tab)</span>
               </a>
             </Magnetic>
+            <Magnetic>
+              <a
+                href={profile.behance}
+                target="_blank"
+                rel="noopener"
+                data-cursor="Behance"
+                className="label flex h-14 items-center rounded-full border border-bone/30 px-7 text-bone transition-colors duration-500 hover:border-bone hover:bg-bone hover:text-ink"
+              >
+                <Roll text="Behance ↗" />
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            </Magnetic>
           </div>
         </div>
 

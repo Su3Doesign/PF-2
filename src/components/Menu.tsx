@@ -120,6 +120,19 @@ export default function Menu({ open, onClose }: Props) {
             </span>
             <span className="sr-only"> (opens in a new tab)</span>
           </a>
+          <a
+            data-in
+            href={profile.behance}
+            target="_blank"
+            rel="noopener"
+            className="group flex items-center justify-between gap-6 rounded-[1.75rem] border border-line px-7 py-6 transition-colors duration-500 hover:border-bone"
+          >
+            <span className="label text-mute">Case studies · boards · credits</span>
+            <span className="display text-[clamp(2rem,3.4vw,3.2rem)]">
+              <Roll text="Behance ↗" />
+            </span>
+            <span className="sr-only"> (opens in a new tab)</span>
+          </a>
 
           {about.desk && (
             <figure data-in className="flex items-center gap-5">

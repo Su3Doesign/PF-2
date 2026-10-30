@@ -511,9 +511,11 @@ export const profile = {
   email: 'talktorichie.workspace@gmail.com',
   /** The 2026 résumé, served from this site. */
   resume: 'resume/Sumanth-Resume-2026.pdf',
+  /** Full case studies, boards and credits. */
+  behance: 'https://www.behance.net/sumanthrichie',
   links: [
     ['LinkedIn', 'https://www.linkedin.com/in/amidyala-sumanth-1ab236250/'],
-    ['Behance', 'https://behance.net/sumanthrichie'],
+    ['Behance', 'https://www.behance.net/sumanthrichie'],
     ['Instagram', 'https://instagram.com/sumofDanth'],
     ['GitHub', 'https://github.com/Su3Doesign'],
   ] as [string, string][],

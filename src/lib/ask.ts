@@ -23,6 +23,7 @@ export interface Turn {
 const site = (p: Project): AnswerLink => ({ label: p.title, href: workHref(p.slug), tone: p.tone });
 const section = (label: string, id: string, tone?: string): AnswerLink => ({ label, href: `#${id}`, tone });
 const resume: AnswerLink = { label: 'Résumé', href: profile.resume, external: true, tone: '#8b6bff' };
+const behance: AnswerLink = { label: 'Behance', href: profile.behance, external: true, tone: '#1769ff' };
 
 // Words that point at a website without naming it.
 const ALIASES: Record<string, string[]> = {
@@ -62,6 +63,13 @@ const bullet = (rows: string[]) => rows.map((r) => `• ${r}`).join('\n');
 export function answerLocally(question: string): Reply {
   const q = question.toLowerCase();
   const ws = words(question);
+
+  if (/\b(behance|socials?|instagram|linkedin|github)\b/.test(q)) {
+    return {
+      text: `The full case studies, boards and credits are on Behance. Sumanth is also on ${profile.links.filter(([n]) => n !== 'Behance').map(([n]) => n).join(', ')}.`,
+      links: [behance, ...profile.links.filter(([n]) => n !== 'Behance').map(([label, href]) => ({ label, href, external: true }))],
+    };
+  }
 
   if (/\b(r[eé]sum[eé]|cv|experience|education|degree|studied|study at|college|qualification|background)\b/.test(q)) {
     return {

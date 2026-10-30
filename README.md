@@ -55,7 +55,8 @@ Each piece of work appears in one place only.
 | 10 | Contact | Email, **Résumé**, links; the door again at dawn; a giant SUMANTH that thins under the cursor | |
 
 The résumé is `public/resume/Sumanth-Resume-2026.pdf`. Every Résumé button links to it: the nav, the hero, the
-about section, the menu and the footer.
+about section, the menu and the footer. Behance (`profile.behance`, for the full case studies, boards and credits) sits beside it in the
+hero, the about section, the menu and the contact section, and closes the clients wall.
 
 ### The door
 

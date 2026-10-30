@@ -11,7 +11,7 @@ const LEDE =
 
 function ResumeLink() {
   return (
-    <span data-fade className="pointer-events-auto mt-5 inline-block shrink-0 md:mt-0">
+    <span data-fade className="pointer-events-auto mt-5 flex shrink-0 items-center gap-6 md:mt-0">
       <Magnetic>
         <a
           href={profile.resume}
@@ -24,6 +24,10 @@ function ResumeLink() {
           <span className="sr-only"> (opens in a new tab)</span>
         </a>
       </Magnetic>
+      <a href={profile.behance} target="_blank" rel="noopener" data-cursor="Behance" className="label py-3 text-bone/80 transition-colors hover:text-bone">
+        <Roll text="Behance ↗" />
+        <span className="sr-only"> (opens in a new tab)</span>
+      </a>
     </span>
   );
 }

@@ -107,11 +107,11 @@ export default function Contact() {
             <span className="block text-[var(--accent)]">a door?</span>
           </h2>
 
-          <div className="pointer-events-auto mt-14 flex flex-col gap-5 md:flex-row md:items-center">
-            <a data-in href={`mailto:${profile.email}`} data-cursor="Write" className="title text-[clamp(1.35rem,3.2vw,3rem)] font-medium">
+          <div className="pointer-events-auto mt-14 flex flex-wrap items-center gap-3 md:gap-5">
+            <a data-in href={`mailto:${profile.email}`} data-cursor="Write" className="basis-full md:basis-auto title text-[clamp(1.35rem,3.2vw,3rem)] font-medium">
               <Roll text={profile.email} />
             </a>
-            <span data-in className="self-start md:self-auto">
+            <span data-in>
               <Magnetic>
                 <button
                   type="button"
@@ -122,7 +122,7 @@ export default function Contact() {
                 </button>
               </Magnetic>
             </span>
-            <span data-in className="self-start md:self-auto">
+            <span data-in>
               <Magnetic>
                 <a
                   href={profile.resume}
@@ -132,6 +132,20 @@ export default function Contact() {
                   className="label flex h-12 items-center rounded-full bg-[var(--accent)] px-6 text-ink"
                 >
                   <Roll text="Résumé ↗" />
+                  <span className="sr-only"> (opens in a new tab)</span>
+                </a>
+              </Magnetic>
+            </span>
+            <span data-in>
+              <Magnetic>
+                <a
+                  href={profile.behance}
+                  target="_blank"
+                  rel="noopener"
+                  data-cursor="Behance"
+                  className="label flex h-12 items-center rounded-full border border-bone/30 px-6 text-bone transition-colors duration-500 hover:border-bone hover:bg-bone hover:text-ink"
+                >
+                  <Roll text="Behance ↗" />
                   <span className="sr-only"> (opens in a new tab)</span>
                 </a>
               </Magnetic>

@@ -3,6 +3,7 @@ import { useGSAP } from '@gsap/react';
 import { gsap, reducedMotion, riseChars } from '../lib/motion';
 import { clients, counts, type Client } from '../data/work';
 import { openLightbox } from '../lib/lightbox';
+import { profile } from '../data/projects';
 
 // Tiles grow with how much work there is to show.
 const span = (n: number) =>
@@ -76,6 +77,20 @@ export default function Clients() {
           <Tile key={c.name} client={c} />
         ))}
       </ul>
+
+      <a
+        href={profile.behance}
+        target="_blank"
+        rel="noopener"
+        data-cursor="Behance"
+        className="group mt-16 flex flex-col gap-4 border-y border-line py-8 md:flex-row md:items-baseline md:justify-between md:gap-10"
+      >
+        <span className="label text-mute">The long versions</span>
+        <span className="title text-[clamp(1.7rem,3.6vw,3.6rem)] leading-[1.05] transition-colors duration-500 group-hover:text-[var(--accent)]">
+          Full case studies, boards and credits <span className="whitespace-nowrap">on Behance ↗</span>
+        </span>
+        <span className="sr-only"> (opens in a new tab)</span>
+      </a>
     </section>
   );
 }
