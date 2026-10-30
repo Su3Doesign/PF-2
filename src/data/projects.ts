@@ -257,42 +257,6 @@ export const projects: Project[] = [
     ],
   },
   {
-    slug: 'invitation-book',
-    title: 'N & K, an invitation book',
-    line: 'A Telugu wedding invitation you turn the pages of, laid on a pooja tray.',
-    kind: 'Client',
-    year: 2026,
-    role: 'Design, illustration direction, code',
-    stack: ['HTML', 'CSS', 'Vanilla JS', 'Web Audio'],
-    live: pages('NikhithawedsKoundinya'),
-    repo: gh('NikhithawedsKoundinya'),
-    tone: '#e8a33a',
-    cover: img('invitation-book', 'cover', 'An open invitation book with Telugu text on a table with bananas, turmeric, kumkum and a lit diya'),
-    gallery: [],
-    story: {
-      premise:
-        'A wedding invitation that guests would open on their phones, and that still had to carry the traditional hierarchy of a printed Telugu card.',
-      idea:
-        'A tall open book on an overhead pooja arrangement, with bananas, a coconut, turmeric, kumkum, rice and a diya. Each section sits on exactly one leaf. You turn pages; you never scroll.',
-      built: [
-        'Page turns that lift the outside edge with a travelling shadow. Only opacity and position animate, so the turn runs off the main thread on modest phones.',
-        'A traditional Telugu hierarchy for family, bride, groom and muhurtham, set in Ramabhadra and Gurajada, with a temple border, mango toranam and muggu ornament from the print references.',
-        'Arrows, keys, a chapter menu and swipe, plus music and auto-read controls that the arrows always stay clear of.',
-        'Reduced motion gets an immediate page change.',
-      ],
-      hardPart:
-        'Fitting every composition on one leaf on every screen without shrinking the type. On short screens the wording reflows to keep the reading width instead.',
-      outcome:
-        'Sent to guests as a single link, with no continuation pages and no scrolling inside the book.',
-    },
-    facts: [
-      ['Language', 'Telugu'],
-      ['Scrolling', 'None'],
-      ['Turns', 'Off main thread'],
-      ['Typefaces', 'Ramabhadra · Gurajada'],
-    ],
-  },
-  {
     slug: 'capq',
     title: 'CapQ',
     line: 'The site for the finance advisory where I run marketing: a coming-soon page that already takes enquiries.',

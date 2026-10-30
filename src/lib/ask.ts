@@ -32,7 +32,6 @@ const ALIASES: Record<string, string[]> = {
   'ring-gate': ['ring', 'gate', 'tirthavel', 'kaalavalaya', 'book', 'mahabharata', 'concept', 'art'],
   'flooded-rotunda': ['rotunda', 'statue', 'flooded', 'water', 'sketchbook', 'unreal', 'nanite', 'romanesque'],
   'lotus-constructions': ['lotus', 'construction', 'builder', 'building', 'contractor', 'engineer', 'street'],
-  'invitation-book': ['wedding', 'invitation', 'telugu', 'marriage', 'book', 'pages'],
   capq: ['capq', 'finance', 'loan', 'astro', 'tailwind', 'glass', 'coming', 'soon'],
   aevum: ['watch', 'clock', 'time', 'aevum'],
   volta: ['volta', 'fashion', 'brutalism', 'loud', 'clothes'],

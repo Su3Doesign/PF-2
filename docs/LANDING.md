@@ -28,7 +28,7 @@ Alternatives for each slot, written in the same voice. Swap them in `src/compone
 2. Places that don’t exist, with a URL.
 3. Every website here is a door. Step through.
 4. Worlds first. Websites second. Never templates.
-5. Thirteen doors. Each one opens onto somewhere I built.
+5. Eleven doors. Each one opens onto somewhere I built.
 
 **The idea**
 1. Every site here began as a place. *(shipped)*
@@ -38,7 +38,7 @@ Alternatives for each slot, written in the same voice. Swap them in `src/compone
 **Method**
 1. Five rules, every time. *(shipped)*
 2. How a door gets built.
-3. Same five moves, thirteen times.
+3. Same five moves, eleven times.
 
 **Worlds**
 1. Four worlds, four doors. *(shipped)*
@@ -48,7 +48,7 @@ Alternatives for each slot, written in the same voice. Swap them in `src/compone
 **Shelf**
 1. Everything that shipped. *(shipped)*
 2. The whole shelf, nothing half-finished.
-3. Thirteen sites, no templates.
+3. Eleven sites, no templates.
 
 **Contact**
 1. Have a place that needs a door? *(shipped)*
@@ -66,6 +66,7 @@ Only finished sites are on the page. These repositories were reviewed and left o
 | `hyperion-site` | Uses a model named `hyperion_trial_v1.glb`, and the build stalled on its loader when tested. |
 | `Vedapriya-portfolio` | The contact config still has `YOUR_EMAIL` and other placeholder tokens. |
 | `igloo-inc-clone` | A recreation of another studio’s site, not original work. |
+| One personal project | Finished, but personal; kept off at Sumanth’s request. |
 | `meridian` | Empty repository. |
 | `car-mansion`, `ring-gate-citadel`, `Colosseum`, `world-1/2/3`, `Garage-1` | 3D world builds, not websites. Three of them are inside the shelf already, as the worlds behind Altair Estates, the Ring Gate and the Flooded Rotunda. `wizardingworld` is in Worlds as The Castle on the Crag. |
 

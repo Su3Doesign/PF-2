@@ -1,7 +1,7 @@
 # Sumanth: Front Doors
 
 The portfolio of **Amidyala Sai Sumanth**, 3D environment artist and web designer in Hyderabad. It collects the
-**thirteen finished websites** from the Su3Doesign repositories, and each one is the front door to a world built first.
+**eleven finished websites** from the Su3Doesign repositories, and each one is the front door to a world built first.
 
 One obsidian door, rendered live with three.js, travels down the page. You can turn it all the way round by
 dragging. Its UV light starts violet and ends at dawn as you scroll, and it shows whichever world the page
@@ -49,7 +49,7 @@ Each piece of work appears in one place only.
 | 04 | Method | The seven moves, Reference → Comp | The door pins and shows the study where each move is easiest to see |
 | 05 | Clients | 16 clients, 129 pieces including 21 films | Bento wall; tiles flip through the work on hover; full gallery in the lightbox |
 | 06 | Library | 39 studies | An endless canvas you throw in any direction |
-| 07 | Websites | 12 finished sites | Scroll-snap rail or index list; story-shaped case studies at `#/work/<slug>` |
+| 07 | Websites | 11 finished sites | Scroll-snap rail or index list; story-shaped case studies at `#/work/<slug>` |
 | 08 | Commissions | “I’d like ___ for ___.”: a single frame, a whole world, the full pipeline, a brand and a website | Tap a blank to change it; what arrives, the usual timeline and an example follow; the sentence is sent as an email |
 | 09 | Ask | A chat panel that answers from all of the above | |
 | 10 | Contact | Email, **Résumé**, links; the door again at dawn; a giant SUMANTH that thins under the cursor | |
@@ -83,7 +83,7 @@ index.html
 src/
   main.tsx, App.tsx       fonts, providers, section order, routes
   index.css               Tailwind v4 theme tokens, grain, utilities
-  data/projects.ts        the twelve websites, plus the profile (email, links, résumé)
+  data/projects.ts        the eleven websites, plus the profile (email, links, résumé)
   data/work.ts            the 3D and visual-design work, with each world's colour and hour and the door's reel
   data/pf1.json           imported from PF-1 by tools/import-pf1.mjs
   lib/
@@ -141,8 +141,8 @@ previews, drop them in with the same names and change the note.
 
 ## Which repositories made the cut
 
-All 29 repositories were cloned and every website among them was rendered and read. Thirteen are finished
-and on the shelf. The rest, and the reason for each, are listed in [`docs/LANDING.md`](docs/LANDING.md#what-was-left-off-and-why).
+All 29 repositories were cloned and every website among them was rendered and read. Eleven finished sites
+are on the shelf. The rest, and the reason for each, are listed in [`docs/LANDING.md`](docs/LANDING.md#what-was-left-off-and-why).
 
 ## Accessibility and fallbacks
 

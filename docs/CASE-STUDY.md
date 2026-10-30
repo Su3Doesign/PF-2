@@ -4,12 +4,11 @@
 
 ---
 
-## The problem: thirteen doors, no hallway
+## The problem: eleven doors, no hallway
 
 By October 2026 Sumanth had shipped a lot of web work: a neon forest you walk at night, an estate that draws
 itself as you drive through it, an art book built on a 156-metre stone ring, a drowned rotunda whose statue turns
-to face you, a builder’s site where a house rises as you scroll, and a Telugu wedding invitation you turn the pages
-of.
+to face you, and a builder’s site where a house rises as you scroll.
 
 It was spread across 29 repositories and a dozen `github.io` addresses, next to test benches,
 abandoned experiments and 3D builds that were never meant to be websites. His existing portfolios showed the 3D
@@ -21,7 +20,8 @@ finished.
 Every repository was cloned and every website in it was served locally and walked through in a browser, with
 screenshots taken at three scroll depths. The rule was simple: **if it isn’t finished, it isn’t on the shelf.**
 
-- **Thirteen** made it.
+- **Eleven** made it. Two more were finished but stay off the shelf: the résumé, which has its own button,
+  and one personal project.
 - **Eight** didn’t: a CV that goes black after its intro, a portfolio still showing `YOUR_EMAIL`, a car site stuck
   on its loader, three test benches, a recreation of another studio’s site, and an empty repository.
 - **Eight** weren’t websites at all, and three of those turned out to be the worlds *behind* websites that made
@@ -51,7 +51,7 @@ page with the visitor and opening onto each world in turn.
   project’s colour.
 - **Then the doors open.** The four flagship worlds start as small cards and widen to full screen as you scroll,
   with their names sliding apart in layers.
-- **Then the whole shelf.** All thirteen sit on an endless horizontal rail that scrolls natively, so trackpads,
+- **Then the whole shelf.** All eleven sit on an endless horizontal rail that scrolls natively, so trackpads,
   thumbs and arrow keys all just work.
 - **The last door is yours.** The door comes back for the contact section, lit at dawn.
 
@@ -90,7 +90,7 @@ Every effect also has an exit:
 
 ## Where it landed
 
-- **13 finished sites**, each with a story-shaped case study: premise → idea → what was built → the hard part
+- **11 finished sites**, each with a story-shaped case study: premise → idea → what was built → the hard part
   → where it landed.
 - **About 150 KB of gzipped JavaScript** before first paint, plus about 90 KB of fonts. three.js (144 KB gzipped) arrives afterwards, so
   the headline never waits for it.
