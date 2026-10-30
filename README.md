@@ -45,7 +45,7 @@ Each piece of work appears in one place only.
 | 01 | Hero | **FRONT / DOORS**, with the 3D door between the words showing the worlds; **Résumé** button | SplitText, three.js |
 | — | Tapes | Brand systems, 3D, campaigns, websites; the tools | Marquees that follow scroll speed and direction |
 | 02 | Who’s building | The line, the résumé statement, tools, the desk on loop, the path so far, numbers | Word-by-word light-up with image pills |
-| 03 | Worlds | Rōman no Yoake, Fudō Myō-ō, Koi Pond, each in its own colour, hour and kanji | Card-to-full-bleed expansion, then a film strip of renders and turntables |
+| 03 | Worlds | Rōman no Yoake, Fudō Myō-ō, Koi Pond and The Castle on the Crag (from the `wizardingworld` repo), each in its own colour, hour and kanji | Card-to-full-bleed expansion, then a film strip of renders and turntables |
 | 04 | Method | The seven moves, Reference → Comp | The door pins and shows the study where each move is easiest to see |
 | 05 | Clients | 16 clients, 129 pieces including 21 films | Bento wall; tiles flip through the work on hover; full gallery in the lightbox |
 | 06 | Library | 39 studies | An endless canvas you throw in any direction |
@@ -133,6 +133,11 @@ apart:
 
 Each world's colour and hour, and the study the door shows at each step of the method, are set in
 `src/data/work.ts`.
+
+The fourth world, The Castle on the Crag, is not on PF-1. Its frames are the Cycles previews from the
+`wizardingworld` repository's `Previews/`, converted to WebP in `public/worlds/castle/` (thumbnails in `thumbs/`).
+Its shot list and copy sit in `src/data/work.ts` next to the others. If final Unreal renders replace the
+previews, drop them in with the same names and change the note.
 
 ## Which repositories made the cut
 

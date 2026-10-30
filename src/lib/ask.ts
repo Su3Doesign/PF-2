@@ -97,7 +97,7 @@ export function answerLocally(question: string): Reply {
     };
   }
 
-  if (/\b(3d|environments?|worlds?|renders?|maya|arnold|zbrush|pagoda|shrine|koi|roman|fudo|personal)\b/.test(q) && !/\b(site|website|web)\b/.test(q)) {
+  if (/\b(3d|environments?|worlds?|renders?|maya|arnold|zbrush|pagoda|shrine|koi|roman|fudo|personal|castle|crag|wizard\w*|hogwarts|quidditch|blender|cycles)\b/.test(q) && !/\b(site|website|web)\b/.test(q)) {
     return {
       text: `${counts.worlds} personal worlds, each held at its own hour:\n${bullet(worlds.map((w) => `${w.title} (${w.hour}): ${w.sub}`))}`,
       links: [section('Worlds', 'worlds', worlds[0].tone)],

@@ -142,13 +142,13 @@ export default function Commissions() {
 
   return (
     <section ref={root} id="commissions" aria-labelledby="commissions-title" className="relative z-[3] overflow-hidden bg-ink px-5 py-[18vh] md:px-10">
-      <p
+      {/* Drawn as generated content: it is decoration, not text to read or contrast-check. */}
+      <span
         aria-hidden="true"
         lang="ja"
-        className="pointer-events-none absolute top-[14vh] right-4 text-[clamp(5rem,12vw,13rem)] leading-none font-bold text-bone/[0.05] [font-family:'Hiragino_Sans','Noto_Sans_JP','Yu_Gothic',sans-serif] [writing-mode:vertical-rl]"
-      >
-        絵馬
-      </p>
+        data-k="絵馬"
+        className="pointer-events-none absolute top-[14vh] right-4 text-[clamp(5rem,12vw,13rem)] leading-none font-bold text-bone/[0.05] [font-family:'Hiragino_Sans','Noto_Sans_JP','Noto_Sans_CJK_JP','Yu_Gothic',sans-serif] [writing-mode:vertical-rl] before:content-[attr(data-k)]"
+      />
       <div className="label mb-12 flex flex-wrap justify-between gap-x-6 gap-y-2 text-mute">
         <h2 id="commissions-title">(08) Commissions</h2>
         <span>Open for commissions · 2026</span>

@@ -10,7 +10,7 @@ violet at the top and turns to dawn at the bottom, so the page reads as one nigh
 | 1 | Hero | Say what Sumanth does in one breath | **FRONT / DOORS**; h1: **I build worlds, then their front doors.** | Letters rise; the words slide apart while the door, showing the worlds, comes forward |
 | 1b | Tapes | Name the craft without a paragraph | *Brand systems ✦ 3D environments ✦ Campaigns ✦ Websites* | Crossing marquees that follow scroll speed and direction |
 | 2 | Who’s building | Who he is, in his own words | *I build places that don’t exist…* | Word-by-word light-up with image pills; the résumé statement, tools, path, numbers |
-| 3 | Worlds | The best personal work, big | **Three worlds, three hours.** | Each plate opens to full-bleed; kanji down the side; a film strip after |
+| 3 | Worlds | The best personal work, big | **Four worlds, four hours.** | Each plate opens to full-bleed; kanji down the side; a film strip after |
 | 4 | Method (pinned) | Show there is a craft behind the look | **Seven moves, every single time.** | The door pins; each move puts its study in the door |
 | 5 | Clients | The commercial half | **Ships on a Friday.** | Bento wall that flips through each client's work |
 | 6 | Library | Range | **Thirty-nine studies. Throw it around.** | Endless drag canvas |
@@ -67,6 +67,6 @@ Only finished sites are on the page. These repositories were reviewed and left o
 | `Vedapriya-portfolio` | The contact config still has `YOUR_EMAIL` and other placeholder tokens. |
 | `igloo-inc-clone` | A recreation of another studio’s site, not original work. |
 | `meridian` | Empty repository. |
-| `car-mansion`, `ring-gate-citadel`, `Colosseum`, `wizardingworld`, `world-1/2/3`, `Garage-1` | 3D world builds, not websites. Three of them are inside the shelf already, as the worlds behind Altair Estates, the Ring Gate and the Flooded Rotunda. |
+| `car-mansion`, `ring-gate-citadel`, `Colosseum`, `world-1/2/3`, `Garage-1` | 3D world builds, not websites. Three of them are inside the shelf already, as the worlds behind Altair Estates, the Ring Gate and the Flooded Rotunda. `wizardingworld` is in Worlds as The Castle on the Crag. |
 
 Add any of them back by adding an entry to `src/data/projects.ts`.

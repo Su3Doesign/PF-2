@@ -46,7 +46,51 @@ const LOOK: Record<string, { tone: string; hour: string }> = {
   'koi-pond': { tone: '#3fe0c8', hour: '21:12' },
 };
 
-export const worlds: World[] = (data.worlds as Omit<World, 'tone' | 'hour'>[]).map((w) => ({ ...w, ...LOOK[w.id] }));
+// The castle is not on PF-1: it comes from the wizardingworld repository, whose previews are
+// Cycles path-traces of the Unreal assets (see public/worlds/castle).
+const CASTLE_SHOTS: [file: string, w: number, h: number, label: string][] = [
+  ['02-boats-night', 853, 1280, 'Boats, night'],
+  ['07-astronomy-tower', 1280, 720, 'Astronomy Tower'],
+  ['08-station-night', 1280, 720, 'From the station'],
+  ['06-forestedge-hut', 1280, 720, 'Forest edge, dusk'],
+  ['14-boathouse-stairs', 1280, 720, 'Boathouse stairs'],
+  ['03-lake-sunset', 1280, 720, 'Loch, sunset'],
+  ['01-gorge-mist', 720, 1280, 'Gorge, mist'],
+  ['15-covered-bridge', 1280, 720, 'Covered bridge'],
+  ['10-cliff-moss', 720, 1280, 'Moss on the granite'],
+  ['11-gorge-river', 720, 1280, 'River gorge'],
+  ['09-grand-orbit', 1280, 720, 'The whole crag'],
+  ['04-viaduct-walk', 1280, 720, 'Viaduct walk'],
+  ['05-quidditch-aerial', 1280, 720, 'Stadium, from the air'],
+  ['16-quidditch-pitch', 1280, 720, 'The pitch'],
+  ['17-flying-lesson', 1280, 720, 'Flying lesson'],
+  ['layout-map', 1600, 1600, 'Shot plan'],
+];
+const castleMedia = (file: string, w: number, h: number, label?: string): Media => ({
+  src: `worlds/castle/${file}.webp`,
+  thumb: `worlds/castle/thumbs/${file}.webp`,
+  w,
+  h,
+  type: 'image',
+  label,
+});
+
+const castle: World = {
+  id: 'castle-on-the-crag',
+  title: 'The Castle on the Crag',
+  jp: '岩上の城',
+  sub: 'A wizarding-school castle above a Highland loch, generated entirely from code',
+  year: '2026',
+  note: 'Forty-five towers on two jointed-granite crags, a viaduct, the boathouse stairs, a stadium and 644,000 trees, moss cushions and boulders. Every piece is generated from code, with no scans and no alpha cards. Built for Unreal Engine 5 with Nanite and Lumen; these frames are path-traced Cycles previews of the same assets, cameras and light.',
+  tags: ['Python', 'Blender', 'Cycles', 'Unreal Engine 5', 'Nanite', '17 cameras'],
+  alt: 'A many-towered castle lit from every window on a granite cliff above a dark loch, mountains behind',
+  plate: castleMedia('13-night-cliff', 1280, 720),
+  shots: CASTLE_SHOTS.map(([f, w, h, label]) => castleMedia(f, w, h, label)),
+  tone: '#f5c46a',
+  hour: '23:56',
+};
+
+export const worlds: World[] = [...(data.worlds as Omit<World, 'tone' | 'hour'>[]).map((w) => ({ ...w, ...LOOK[w.id] })), castle];
 export const clients = data.clients as Client[];
 export const studies = data.studies as Media[];
 
@@ -114,7 +158,7 @@ export const commissions: Commission[] = [
     what: 'a whole world',
     usual: 'a brand campaign',
     ...fromTier('The World'),
-    example: { src: shot(2, 'Wide, night').src, caption: `${worlds[2].title}: one place, ${worlds[2].shots.length} renders` },
+    example: { src: castle.plate.src, caption: `${castle.title}: one place, ${castle.shots.length + 1} frames` },
   },
   {
     what: 'the full pipeline',

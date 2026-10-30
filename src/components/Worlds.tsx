@@ -7,8 +7,10 @@ import InViewVideo from './kit/InViewVideo';
 import Magnetic from './kit/Magnetic';
 import Roll from './kit/Roll';
 
+const COUNT = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven'][worlds.length] ?? String(worlds.length);
+
 /**
- * The three personal worlds, each held at its own hour and lit in its own colour. The plate
+ * The personal worlds, each held at its own hour and lit in its own colour. The plate
  * opens from a card to the full screen; the world's name in kanji runs down the side; after
  * it, a strip of the renders and turntables, each opening full size.
  */
@@ -30,12 +32,12 @@ export default function Worlds() {
           <span>{worlds.map((w) => w.hour).join(' · ')}</span>
         </div>
         <h2 id="worlds-title" className="display text-[clamp(2.9rem,10.4vw,11.5rem)]">
-          <span className="block">Three worlds,</span>
-          <span className="text-outline block text-[var(--accent)]">three hours.</span>
+          <span className="block">{COUNT} worlds,</span>
+          <span className="text-outline block text-[var(--accent)]">{COUNT.toLowerCase()} hours.</span>
         </h2>
         <p className="mt-10 max-w-[34rem] text-[1.08rem] leading-relaxed text-mute">
-          Quiet places, each held at the one hour it actually makes sense. Built in Maya and ZBrush, textured in Substance, lit
-          and rendered in Arnold.
+          Quiet places, each held at the one hour it actually makes sense. The first three built in Maya and ZBrush, textured in
+          Substance and rendered in Arnold; the castle generated from code for Unreal Engine 5.
         </p>
       </header>
       {worlds.map((w, i) => (
@@ -118,7 +120,7 @@ function World({ world: w, index }: { world: WorldT; index: number }) {
             data-kanji
             aria-hidden="true"
             lang="ja"
-            className="pointer-events-none absolute top-[12vh] right-3 text-[clamp(3.6rem,9vw,9.5rem)] leading-[1] font-bold text-[var(--tone)] [font-family:'Hiragino_Sans','Hiragino_Kaku_Gothic_ProN','Noto_Sans_JP','Yu_Gothic','Meiryo',sans-serif] [text-shadow:0_6px_40px_rgb(10_9_12/0.5)] [writing-mode:vertical-rl] md:right-8"
+            className="pointer-events-none absolute top-[12vh] right-3 text-[clamp(3.6rem,9vw,9.5rem)] leading-[1] font-bold text-[var(--tone)] [font-family:'Hiragino_Sans','Hiragino_Kaku_Gothic_ProN','Noto_Sans_JP','Noto_Sans_CJK_JP','Yu_Gothic','Meiryo',sans-serif] [text-shadow:0_6px_40px_rgb(10_9_12/0.5)] [writing-mode:vertical-rl] md:right-8"
           >
             {w.jp}
           </p>
