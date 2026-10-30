@@ -1,133 +1,113 @@
-# thesumanth.com
+# Sumanth: Front Doors
 
-Portfolio for **Amidyala Sai Sumanth**, 3D environment artist & visual designer.
-Four pages, one canvas, no build step, no backend.
+The portfolio of **Amidyala Sai Sumanth**, 3D environment artist and web designer in Hyderabad. It collects the
+**thirteen finished websites** from the Su3Doesign repositories, and each one is the front door to a world built first.
+
+One obsidian door, rendered live with three.js, travels down the page. You can turn it all the way round by
+dragging. Its UV light starts violet and ends at dawn as you scroll, and it shows whichever world the page
+is talking about.
 
 ```bash
-python3 -m http.server 8080      # → http://localhost:8080
+npm install
+npm run dev        # http://localhost:5173
+npm run build      # type-check + production build into dist/
+npm run preview    # serve dist/
 ```
 
-Do not open `index.html` by double-clicking — `file://` blocks WebGL texture
-loading and you will see the fallback instead of the site.
+Needs Node 20.19 or newer (22 in CI).
 
----
+## What is on the page
+
+| Section | What it does | Built with |
+|---------|--------------|------------|
+| Loader | Counts to 100 against the fonts and the first door image, then lifts like a shutter | GSAP |
+| Hero | Fullscreen. Three layers (the word “Doors”, the 3D door, the headline) drift at different speeds | GSAP ScrollTrigger, three.js |
+| The idea | The paragraph lights up word by word as you scroll; counters | ScrollTrigger scrub |
+| Method | **The door pins** on the left while five rules scroll on the right. Each rule swaps the world in the door and tints its light | ScrollTrigger `pin` |
+| Worlds | Four flagship sites. **Each image opens** from a small card to full-bleed, and the title lines slide apart | ScrollTrigger scrub, `clip-path` |
+| Shelf | All 13 sites on an **infinite horizontal rail** with filters and parallax inside each card | CSS scroll-snap |
+| Ask | A minimal chat panel that answers from the case studies | React |
+| Contact | The door comes back, lit at dawn | three.js |
+| Case studies | `#/work/<slug>`: premise, idea, what was built, the hard part, the outcome, a gallery, next door | React, ScrollTrigger |
+
+Lenis smooths the scroll. A custom cursor (a dot with a slow ring) labels what you’re over: *Drag*, *Open*,
+*Read*, *Visit*.
+
+### The door
+
+`src/components/portal/PortalScene.ts`
+
+- **360° with no plugin.** Dragging sets a target angle, releasing throws it with inertia, and at rest it drifts
+  slowly. Arrow keys turn it too. There are no OrbitControls: it is about forty lines of pointer maths.
+- **A point light that follows the scroll.** Its colour follows the page from UV violet to dawn amber, leans
+  toward the pinned project’s tone in the method section, and brightens with scroll speed. At the top of the page it
+  waits behind the door, and the first scroll brings it through the opening.
+- **One canvas, many places.** Elements marked as anchors (`PortalAnchor`) register in a small bus. Each frame
+  the scene finds the anchor most on screen, then moves and scales the door into it. Pinning the method stage
+  pins the door with it, and the hero, method and contact share one WebGL context.
+- **A world behind the opening.** The screen inside the arch is a shader with a cover-fit, a rising wipe
+  between projects, and a parallax shift as the door turns, so the image reads as a place behind the door, not a
+  picture on it.
+- three.js loads in its own chunk after first paint. Without WebGL2 each anchor shows a still image in an arch.
 
 ## Structure
 
 ```
-index.html            home
-roman-no-yoake.html   world 01
-fudo-myo-o.html       world 02
-koi-pond.html         world 03
-data.js               all copy and file lists — the only file you edit
-gl.js                 the WebGL engine
-app.js                router, page builders, overlays, motion
-styles.css            design tokens and components
-tools/pages.py        regenerates the four page shells
-tools/optimize.py     processes new artwork
+index.html
+src/
+  main.tsx, App.tsx       fonts, providers, section order, routes
+  index.css               Tailwind v4 theme tokens, grain, utilities
+  data/projects.ts        every site: copy, facts, story, images, links (the only file to edit for content)
+  lib/
+    motion.ts             GSAP + ScrollTrigger + Lenis, scroll state for WebGL, the UV-to-dawn accent
+    useHashRoute.ts       #/work/<slug> routing for GitHub Pages
+    ask.ts                local answers, optional model endpoint
+  components/
+    Loader, Cursor, Nav, Hero, Manifesto, Process, Worlds, Shelf, CaseStudy, Ask, Contact
+    portal/               PortalScene (three.js), PortalCanvas, PortalAnchor, bus
+public/
+  work/<slug>/*.webp      covers and gallery images
+  v1/                     the first thesumanth.com, still running
+docs/
+  LANDING.md              sections and a headline bank
+  CASE-STUDY.md           the story of this site
+  UX-AUDIT.md             top five UX issues across the live sites, with quick fixes
+  CHAT-UI.md              the chat panel’s design and its endpoint contract
+tools/
+  capture.mjs             screenshot a site into public/work/<slug>/
+  v1/                     the first version’s page and image scripts
 ```
 
-Pages are thin shells. `<main>` is rendered from `data.js`, which is what
-lets the router move between worlds without a reload — the canvas keeps
-running and the two hero plates dissolve into each other.
+## Adding a site
 
----
+1. Put images in `public/work/<slug>/`. `cover.webp` (16:9, about 1600–1920 px wide) is required; gallery images
+   are optional. `node tools/capture.mjs <slug> <url>` will take the screenshots for you.
+2. Add an entry to `projects` in `src/data/projects.ts`. Set `featured: true` to give it a full-screen chapter in
+   Worlds; set `tone` to the colour the door’s light should lean toward.
 
-## What is in the engine
+The shelf, the counters, the chat answers and the case study all update from that one entry.
 
-**DOM-synced planes.** Any element carrying `data-gl` is drawn as a 28×20
-subdivided plane locked to that element's rect every frame. Scroll velocity
-curls it, the cursor dents it, chromatic split scales with speed, and it
-resolves in scanline-ordered render buckets.
+## Which repositories made the cut
 
-**The glass artifact.** An icosahedron displaced by 3D simplex noise, with
-finite-difference normals so it lights correctly on the deformed surface. It
-really refracts: the scene renders to an offscreen target, then the glass
-samples it three times at different offsets for per-channel dispersion.
+All 29 repositories were cloned and every website among them was rendered and read. Thirteen are finished
+and on the shelf. The rest, and the reason for each, are listed in [`docs/LANDING.md`](docs/LANDING.md#what-was-left-off-and-why).
 
-**The archive.** An infinite draggable mosaic. Twenty-four tiles ride a
-wrapping lattice; each time a tile crosses into a new lattice cell it hashes
-its coordinates to a different one of the 164 pieces and swaps texture. So it
-never repeats a screen and never ends. Throw it, filter it by client, click
-anything to open it full size. Press **A** from anywhere.
+## Accessibility and fallbacks
 
-**Page transitions.** Navigating between worlds runs a slice dissolve in
-GLSL — 22 horizontal bands, each starting at its own time, with a liquid
-displacement at the midpoint and a bright seam on the moving edge. The DOM
-swaps under it at 50%.
+- `prefers-reduced-motion`: native scroll, no scrubbing or pinning tricks, no idle spin, static states shown.
+- The door is a focusable group with a live label; arrow keys turn it.
+- Case studies are modal dialogs with focus moved in, trapped, and handed back; <kbd>Esc</kbd> closes them.
+- The shelf is a native scroller (keyboard, touch and trackpad), and its clones are hidden from assistive tech.
+- No WebGL2: still images in arches. No JavaScript: a pointer to `/v1/`.
+- Text never relies on an animation finishing to be visible under reduced motion.
 
-**The key light.** Bottom-left, draggable. It is not decoration: it drives
-the specular direction on the glass, the rake across every plate, the colour
-temperature readout, and the site's accent colour, which is recomputed live.
+## Deploy
 
-**Post.** Bloom, then barrel distortion, pointer ripple, velocity-driven
-chromatic aberration, grain and vignette.
+`.github/workflows/deploy.yml` builds and publishes `dist/` to GitHub Pages on every push to `main`;
+`ci.yml` builds every pull request. One-time setup: **Settings → Pages → Source: GitHub Actions**.
 
-Every shader is compiled with `glslangValidator` before shipping, and the
-whole engine is executed against real three.js r147 with a stubbed GPU to
-catch runtime errors.
+`public/CNAME` still says `www.thesumanth.com`, as before. If that domain is meant to keep serving the forest
+(`PF-1`), remove the file here and use the Pages URL, or give this site its own subdomain. The build uses relative
+paths, so it works at `su3doesign.github.io/PF-2/` too.
 
-Hidden: press **W** for wireframe view of everything the GPU is drawing.
-
----
-
-## Editing
-
-`data.js` holds it all.
-
-- `WORLDS` — each world's plate, copy, stats, and `chapters` (a kicker, a
-  heading, a paragraph, and its media). Add a chapter and the page grows.
-- `CLIENTS` — name, group, role, file list. Add a client and it appears in
-  the archive and its filter chip.
-- `STUDIES` — the graphics and product work.
-- `MOSAIC` is assembled from those two automatically.
-
-Adding a world means adding an entry to `WORLDS` and a line in `tools/pages.py`,
-then re-running it.
-
-New artwork:
-
-```bash
-python3 tools/optimize.py ~/Desktop/new-renders
-```
-
----
-
-## About protecting the images
-
-Be clear-eyed: anything a browser displays has already been downloaded to the
-viewer's machine. No script can change that, and any site claiming otherwise
-is selling comfort. Blocking right-click stops a casual save and nothing more
-— the file is still in the network panel.
-
-What this build actually does:
-
-1. **The hero, every world plate and the entire archive are drawn in WebGL.**
-   There is no `<img>` element to right-click, no source path in the element
-   inspector, and dragging the canvas gives you nothing.
-2. **Right-click and drag-out are disabled**, with a note pointing at your
-   email instead of a dead end.
-3. **Only web-resolution files exist on the server** — 2000px renders, 1400px
-   social crops, 1280px video. The 4K originals are not deployed and should
-   stay on your drive.
-
-If you want more than that, the real answers are outside the browser: embed
-your name in the EXIF/XMP copyright fields of everything you publish, and
-register the work you care about. A visible watermark is the only genuinely
-effective deterrent, and it costs you the image.
-
----
-
-## Failure behaviour
-
-Nothing is animation-gated. No WebGL or a failed CDN and `data-gl` elements
-show their `<img>`; the site reads normally. No GSAP and everything is still
-visible and scrollable. `prefers-reduced-motion` disables smooth scroll,
-bucket reveals, the pinned rail, dissolves and scramble text.
-
-## Performance
-
-First view is roughly 2–3 MB. Images lazy-load 700px ahead, videos are
-`preload="none"` behind poster frames, the 3 MB chest model waits until the
-footer is near, DPR is capped at 1.75, the refraction target renders at 60%
-scale, and the texture cache holds 70 entries with in-use tiles pinned.
+The first version of this repository now lives at `/v1/`, unchanged apart from its canonical URLs.

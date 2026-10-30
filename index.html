@@ -1,130 +1,32 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Amidyala Sai Sumanth — 3D Environment Artist &amp; Visual Designer</title>
-<meta name="description" content="3D environment artist and visual designer in Hyderabad. Shrines, ponds and pagodas lit at the one hour they make sense — plus campaign work for Midea Canada, Home Depot Canada, GC Burger and more.">
-<link rel="canonical" href="https://www.thesumanth.com/">
-<meta name="theme-color" content="#0B0B0D">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://www.thesumanth.com/">
-<meta property="og:title" content="Amidyala Sai Sumanth — 3D Environment Artist &amp; Visual Designer">
-<meta property="og:description" content="3D environment artist and visual designer in Hyderabad. Shrines, ponds and pagodas lit at the one hour they make sense — plus campaign work for Midea Canada, Home Depot Canada, GC Burger and more.">
-<meta property="og:image" content="https://www.thesumanth.com/assets/images/japa-render-1.webp">
-<meta name="twitter:card" content="summary_large_image">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="image" href="assets/images/japa-render-1.webp" fetchpriority="high">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,200;0,6..72,300;0,6..72,400;1,6..72,300&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
-
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Person","name":"Amidyala Sai Sumanth","url":"https://www.thesumanth.com/","jobTitle":"3D Environment Artist","address":{"@type":"PostalAddress","addressLocality":"Hyderabad","addressCountry":"IN"},"email":"sumanth.richie25@icloud.com","sameAs":["https://behance.net/sumanthrichie","https://instagram.com/sumofDanth"]}
-</script>
-</head>
-
-<body class="is-booting" data-page="home">
-
-<canvas id="gl" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
-<div class="wipe" id="wipe" aria-hidden="true"></div>
-
-<div class="boot" id="boot">
-  <div class="boot__inner">
-    <div class="boot__grid" id="bootGrid" aria-hidden="true"></div>
-    <div class="boot__side">
-      <p class="boot__name">AMIDYALA<br>SAI SUMANTH</p>
-      <p class="boot__task" id="bootTask">allocating buckets</p>
-    </div>
-  </div>
-  <div class="boot__pct"><span id="bootPct">000</span><i>%</i></div>
-  <div class="boot__rule"><i id="bootRule"></i></div>
-</div>
-
-<header class="topbar">
-  <a class="topbar__mark" href="./" data-link data-magnet>
-    <span class="topbar__sig">SUMANTH</span>
-    <span class="topbar__role">3D ENV · VISUAL DESIGN</span>
-  </a>
-  <div class="topbar__mid"><span class="topbar__live"><i></i>OPEN FOR COMMISSIONS</span></div>
-  <button class="topbar__menu" id="menuBtn" data-magnet aria-expanded="false" aria-controls="indexPanel">
-    <span data-scramble>INDEX</span>
-    <i class="topbar__burger"><b></b><b></b></i>
-  </button>
-</header>
-
-<nav class="index" id="indexPanel" aria-label="Site index" hidden>
-  <div class="index__list">
-    <a class="index__row" href="roman-no-yoake.html" data-link data-project="roman-no-yoake" data-peek="assets/images/japa-render-3.webp"><i>01</i><span>Rōman no Yoake</span><b>浪漫の夜明け</b></a>
-    <a class="index__row" href="fudo-myo-o.html" data-link data-project="fudo-myo-o" data-peek="assets/images/fudomyo-render-2.webp"><i>02</i><span>Fudō Myō-ō</span><b>不動明王</b></a>
-    <a class="index__row" href="koi-pond.html" data-link data-project="koi-pond" data-peek="assets/images/koipond-render-5.webp"><i>03</i><span>Koi Pond</span><b>錦鯉の池</b></a>
-    <a class="index__row" href="#archive" data-goto="archive" data-peek="assets/images/gcburger-campaign-4.webp"><i>04</i><span>The Archive</span><b>164</b></a>
-    <a class="index__row" href="#commissions" data-goto="commissions" data-peek="assets/images/10.webp"><i>05</i><span>Commissions</span><b>3 tiers</b></a>
-    <a class="index__row" href="#contact" data-goto="contact" data-peek="assets/images/17.webp"><i>06</i><span>Contact</span><b>↗</b></a>
-  </div>
-  <div class="index__peek" id="indexPeek"><img id="peekImg" alt="" aria-hidden="true" draggable="false"></div>
-  <div class="index__foot">
-    <span>HYDERABAD · 17.38°N 78.48°E</span>
-    <span id="indexClock">--:--:-- IST</span>
-    <span>PRESS A FOR THE ARCHIVE</span>
-  </div>
-</nav>
-
-<div class="rig" id="rig">
-  <span class="rig__label">KEY LIGHT</span>
-  <div class="rig__pad" id="rigPad" tabindex="0" role="slider" aria-label="Key light position"
-       aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
-    <i class="rig__puck" id="rigPuck"></i>
-  </div>
-  <span class="rig__read" id="rigRead">4200K · HIGH</span>
-</div>
-
-<main id="pageMain"></main>
-
-<noscript><p class="nos">Amidyala Sai Sumanth is a 3D environment artist and visual designer based in Hyderabad. Selected worlds: Roman no Yoake, Fudo Myo-o, Koi Pond. Commercial work for Midea Canada, Home Depot Canada, GC Burger, Eureka, Comfee, KD Displays, Amaya Restaurant and more. Contact sumanth.richie25@icloud.com</p></noscript>
-
-<div class="archive" id="archive" hidden>
-  <div class="archive__stage" id="archiveStage"></div>
-  <div class="archive__ui">
-    <div class="archive__top">
-      <span class="archive__k">THE ARCHIVE · 164 PIECES · DRAG ANYWHERE</span>
-      <button id="archiveClose" data-magnet>CLOSE ✕</button>
-    </div>
-    <div class="archive__chips" id="archiveChips"></div>
-  </div>
-  <div class="archive__label" id="archiveLabel"><b></b><span></span></div>
-</div>
-
-<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Media viewer" hidden>
-  <div class="lb__bar">
-    <span id="lbTitle">—</span><span id="lbCount">1 / 1</span>
-    <button id="lbClose" data-magnet>CLOSE ✕</button>
-  </div>
-  <button class="lb__nav lb__nav--prev" id="lbPrev" aria-label="Previous">←</button>
-  <div class="lb__stage" id="lbStage"></div>
-  <button class="lb__nav lb__nav--next" id="lbNext" aria-label="Next">→</button>
-  <p class="lb__hint">← → browse · ESC close</p>
-</div>
-
-<div class="cursor" id="cursor" aria-hidden="true"><span id="cursorLabel"></span></div>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/Pass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/shaders/CopyShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/ShaderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/MaskPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/EffectComposer.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/RenderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
-<script src="data.js"></script>
-<script src="gl.js"></script>
-<script src="app.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Sumanth — Front Doors</title>
+    <meta
+      name="description"
+      content="Thirteen finished websites by Amidyala Sai Sumanth, 3D environment artist and web designer in Hyderabad. Every site is the front door to a world built first."
+    />
+    <meta name="theme-color" content="#09080b" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="canonical" href="https://www.thesumanth.com/" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Sumanth — Front Doors" />
+    <meta property="og:description" content="I build worlds, then I build their front doors. Thirteen finished websites." />
+    <meta property="og:image" content="https://www.thesumanth.com/og.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preload" as="image" href="work/overgrown-archive/cover.webp" type="image/webp" fetchpriority="high" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      <p style="padding: 2rem; font-family: system-ui; color: #ece7df; background: #09080b">
+        This portfolio needs JavaScript for its 3D door and scroll story. The first version, which reads without it, is at
+        <a href="v1/" style="color: #a58bff">/v1/</a>.
+      </p>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
