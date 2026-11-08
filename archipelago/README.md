@@ -60,6 +60,7 @@ src/
 scripts/
   build-assets.mjs   models (re-packed from the project repos) and images (renders, boards, Behance packs)
   build-pages.mjs    work index, 49 case studies (each with its full stitched board), about, contact, 404, the crawlable list in index.html, sitemap
+  build-altair.mjs   the Altair Estates house: crops, decimates and packs world/house.glb from the Altair repo (ALTAIR_SRC=…) into public/models/altair.glb
   build-castle.mjs   the Castle on the Crag: merges the converted castle + terrain FBX exports (CASTLE_SRC=…) into public/models/castle.glb
 ```
 

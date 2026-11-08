@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import Lenis from 'lenis';
 import { App } from './core/app';
 import { Rig, curve, span } from './core/voyage';
-import { BEATS, TOTAL, beatAt, buildKeys, RAIL, storyFromScroll, scrollFromStory, SCROLL_TOTAL } from './core/story';
+import { BEATS, TOTAL, beatAt, buildKeys, RAIL, storyFromScroll, scrollFromStory, SCROLL_TOTAL, DWELLS, dwellAt } from './core/story';
 import { createSky } from './world/sky';
 import { createClouds } from './world/clouds';
 import { createMotes } from './world/motes';
@@ -15,7 +15,7 @@ import { createMonuments } from './world/monuments';
 import { createWorlds } from './world/worlds';
 import { createBrands } from './world/brands';
 import { createFinale, LIGHTHOUSE, SEA_Y } from './world/finale';
-import { G } from './world/shared';
+import { G, PATCH } from './world/shared';
 import { studioEnvironment, modelProgress, onLoadProgress } from './core/loaders';
 import { UI } from './ui/ui';
 import { Sound } from './audio/sound';
@@ -42,6 +42,7 @@ function boot() {
   const canvas = document.querySelector<HTMLCanvasElement>('#gl')!;
   const app = new App(canvas);
   const q = app.quality;
+  PATCH.lite = q.tier < 3 && (q.mobile || q.tablet || q.tier === 1);
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let calm = reduce;
   (window as any).__app = app;
@@ -102,7 +103,7 @@ function boot() {
     const { p, t } = trackAt(race.uH); const n = new THREE.Vector3(-t.z, 0, t.x);
     return machines.root.localToWorld(p.addScaledVector(t, -back).addScaledVector(n, side).setY(p.y + lift));
   };
-  const rig = new Rig(buildKeys(arch.islands, { cragView: cragAt, cragAt, road: monuments.road, roadParent: monuments.root, floors: brands.floors, towerRoot: brands.root, chase }));
+  const rig = new Rig(buildKeys(arch.islands, { cragView: cragAt, cragAt, road: monuments.road, roadParent: monuments.root, floors: brands.floors, towerRoot: brands.root, chase, estate: monuments.estateMarks }));
 
   // tower stops for the altimeter
   const floorVh: Record<string, number> = {};
@@ -116,13 +117,52 @@ function boot() {
 
   // ---------------------------------------------------------------- scroll
   const vhPx = () => innerHeight;
-  const lenis = new Lenis({ lerp: calm ? 1 : 0.08, wheelMultiplier: 0.75, touchMultiplier: 1.3, smoothWheel: !calm });
+  // touch is driven by Lenis too (syncTouch), so a release can be turned into exactly one step
+  const coarse = matchMedia('(pointer: coarse)').matches;
+  const lenis = new Lenis({ lerp: calm ? 1 : 0.08, wheelMultiplier: 0.75, touchMultiplier: 1.15, smoothWheel: !calm, syncTouch: coarse && !calm, syncTouchLerp: 0.09 });
   // vh is in story units; scroll covers more ground where there is more to see
   let vh = 0, vel = 0, speed = 0;
   lenis.on('scroll', (l: { scroll: number; velocity: number }) => { vh = storyFromScroll(l.scroll / vhPx() * 100); vel = l.velocity; });
   let flyTarget = -1;
   const fly = (target: number, dur = 2.2) => { flyTarget = target; lenis.scrollTo((scrollFromStory(target) / 100) * vhPx(), { duration: calm ? 0 : dur, easing: (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) }); };
-  let snapped = -1, idle = 0;
+  let idle = 0, lastDir = 1, wasSailing = false, restFor = 0;
+  // ---- stops: every work has a dwell; between them, scrolling never comes to rest
+  /** Where to land in a dwell, entering it from below (dir 1) or above (dir -1). */
+  const entry = (i: number, dir: number) => { const [a, b] = DWELLS[i]; return dir > 0 ? a + (b - a) * 0.15 : b - (b - a) * 0.15; };
+  const step = (dir: number) => {
+    const d = dwellAt(vh);
+    let i = d.i;
+    // from inside a dwell, go to the neighbour; from between two, go to the one ahead
+    if (d.inside || (dir > 0 ? DWELLS[i][0] <= vh : DWELLS[i][1] >= vh)) i += dir;
+    i = Math.max(0, Math.min(DWELLS.length - 1, i));
+    fly(entry(i, dir), 1.3);
+  };
+  if (coarse && !calm) {
+    let t0 = 0, v0 = 0;
+    addEventListener('touchstart', () => { t0 = performance.now(); v0 = vh; }, { passive: true });
+    addEventListener('touchend', (e) => {
+      if ((e.target as HTMLElement).closest('[data-lenis-prevent], .panel, .menu, .list, .board, button, a') || openSlug) return;
+      const dv = vh - v0, dt = (performance.now() - t0) / 1000;
+      if (Math.abs(scrollFromStory(vh) - scrollFromStory(v0)) < 1.2) return;           // a tap
+      const dir = Math.sign(dv), d0 = dwellAt(v0), d1 = dwellAt(vh);
+      const flick = Math.abs(dv) / Math.max(0.05, dt) > 40;
+      // a slow drag that ends inside a stop stays there; a flick, or a release in between, moves one stop
+      if (d1.inside && !flick) return;
+      let i = d0.inside ? d0.i + dir : (dir > 0 ? (DWELLS[d0.i][0] > v0 ? d0.i : d0.i + 1) : (DWELLS[d0.i][1] < v0 ? d0.i : d0.i - 1));
+      i = Math.max(0, Math.min(DWELLS.length - 1, i));
+      setTimeout(() => fly(entry(i, dir), 1.1), 0);   // after Lenis has set off its own inertia
+    }, { passive: true });
+  }
+  addEventListener('keydown', (e) => {
+    if (openSlug || (e.target as HTMLElement).closest('input, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (document.body.classList.contains('menu-open') || document.body.classList.contains('list-open')) return;
+    const k = e.key;
+    if (k === ' ' && (e.target as HTMLElement).closest('button, a, select')) return;
+    if (k === 'ArrowDown' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { e.preventDefault(); step(1); }
+    else if (k === 'ArrowUp' || k === 'PageUp' || (k === ' ' && e.shiftKey)) { e.preventDefault(); step(-1); }
+  });
+  document.getElementById('stepNext')?.addEventListener('click', () => step(1));
+  document.getElementById('stepPrev')?.addEventListener('click', () => step(-1));
 
   // ---------------------------------------------------------------- interface
   const sound = new Sound();
@@ -294,10 +334,28 @@ function boot() {
     ui.setBeat(beat);
     if (beat.id !== lastBeat) { lastBeat = beat.id; onBeat(beat.id); }
 
-    // soft snap at island arrivals
-    if (Math.abs(vel) < 0.2 && !openSlug && !calm) { idle += dt; } else idle = 0;
-    if (idle > 0.35) for (const b of BEATS) if (b.snap && Math.abs(vh - b.snap) < 6 && Math.abs(vh - b.snap) > 0.4 && snapped !== b.snap) { snapped = b.snap; fly(b.snap, 0.9); }
-    if (!BEATS.some((b) => b.snap && Math.abs(vh - b.snap) < 6)) snapped = -1;
+    // phones and tablets drop to 30 fps while resting on a stop: half the heat, so no throttling later
+    if ((q.mobile || q.tablet) && !calm) { restFor = Math.abs(vel) < 0.05 && !pressing && !dragging ? restFor + dt : 0; app.fpsCap = restFor > 1.2 ? 30 : 0; }
+    const sailing = vh > 40 && vh < 1985 && !openSlug;
+    if (sailing !== wasSailing) { wasSailing = sailing; document.body.classList.toggle('sailing', sailing); }
+    // when scrolling stops between two stops, settle into the one you were heading for
+    if (Math.abs(vel) > 0.05) lastDir = Math.sign(vel);
+    if (Math.abs(vel) < 0.2 && !openSlug && !calm && !pressing) { idle += dt; } else idle = 0;
+    if (idle > 0.32 && Math.abs(vh - flyTarget) > 0.5) {
+      const d = dwellAt(vh);
+      if (!d.inside) {
+        const [a, b] = DWELLS[d.i];
+        const ahead = lastDir > 0 ? (a > vh ? d.i : d.i + 1) : (b < vh ? d.i : d.i - 1);
+        const behind = lastDir > 0 ? ahead - 1 : ahead + 1;
+        // most of the way through a travel, carry on; just set off, fall back
+        const i0 = Math.max(0, Math.min(DWELLS.length - 1, behind)), i1 = Math.max(0, Math.min(DWELLS.length - 1, ahead));
+        const s0 = scrollFromStory(lastDir > 0 ? DWELLS[i0][1] : DWELLS[i0][0]), s1 = scrollFromStory(lastDir > 0 ? DWELLS[i1][0] : DWELLS[i1][1]), sn = scrollFromStory(vh);
+        const k = Math.abs(sn - s0) / Math.max(1, Math.abs(s1 - s0));
+        const i = k > 0.25 ? i1 : i0;
+        fly(entry(i, k > 0.25 ? lastDir : -lastDir), 1.0);
+      }
+      idle = -1;   // once per rest
+    }
 
     // ---- island state
     mState.t = t;
@@ -340,7 +398,7 @@ function boot() {
     if (inspect.a > 0.001 && inspect.pos.lengthSq() > 0) { const k = inspect.a * inspect.a * (3 - 2 * inspect.a); camPos.lerp(inspect.pos, k); camLook.lerp(inspect.look, k); }
     // never below an island's surface
     // (not on the Altair road, which is cut into the cliff below the terrace)
-    const onRoad = vh > 1122 && vh < 1215;
+    const onRoad = vh > 1122 && vh < 1235;
     for (const isl of floorIslands) {
       if (onRoad && isl.group === arch.islands.monuments.group) continue;
       floorV.copy(camPos); isl.group.worldToLocal(floorV);
@@ -505,7 +563,7 @@ function boot() {
   }
 
   // ---------------------------------------------------------------- loading and entry
-  const needed = ['hyperion', 'f1', 'agera', 'helmet', 'head', 'camera', 'gate', 'castle'];
+  const needed = ['hyperion', 'f1', 'agera', 'helmet', 'head', 'camera', 'gate', 'castle', 'altair'];
   let shown = 0, readyAll = false;
   const slowT = setTimeout(() => document.getElementById('ldSlow')?.classList.add('on'), 6000);
   const tickLoad = () => {
@@ -549,5 +607,6 @@ function boot() {
   // in still mode, a test harness sets vh and renders once
   (window as any).__go = (v: number, t = 20) => { vh = v; window.scrollTo(0, (scrollFromStory(v) / 100) * innerHeight); for (let i = 0; i < 3; i++) app.renderOnce(t + i / 60); };
   (window as any).__open = openPanel;
+  (window as any).__state = () => ({ vh, vel });
   void works; void RAIL; void SEA_Y;
 }

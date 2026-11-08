@@ -39,8 +39,9 @@ export const BEATS: Beat[] = [
   { id: 'head', from: 960, to: 1030, island: 'monuments', works: ['parian'] },
   { id: 'halden', from: 1030, to: 1080, island: 'monuments', works: ['halden'] },
   { id: 'studies', from: 1080, to: 1120, island: 'monuments', works: ['sculpting', 'clock', 'extinguisher', 'interiors'] },
-  { id: 'road', from: 1120, to: 1210, island: 'monuments', works: ['altair'] },
-  { id: 'toBrands', from: 1210, to: 1270, island: 'transit', pull: 'Brands are buildings. You climb them one floor at a time.' },
+  { id: 'road', from: 1120, to: 1200, island: 'monuments', works: ['altair'] },
+  { id: 'estate', from: 1200, to: 1232, island: 'monuments', works: ['altair'] },
+  { id: 'toBrands', from: 1232, to: 1270, island: 'transit', pull: 'Brands are buildings. You climb them one floor at a time.' },
   { id: 'street', from: 1270, to: 1320, island: 'brands', works: ['gcburger', 'midea', 'investohome', 'three-houses', 'brand-systems', 'shelf-table'], snap: 1296 },
   { id: 'kerb', from: 1320, to: 1360, island: 'brands', works: ['kerb'] },
   { id: 'deccan', from: 1360, to: 1400, island: 'brands', works: ['deccan'] },
@@ -57,12 +58,31 @@ export const BEATS: Beat[] = [
 ];
 
 /**
- * The story is authored in units (2000 in all); scroll covers more ground where there is
- * more to look at, so each island gets room to breathe. A piecewise-linear warp maps one
- * to the other in both directions.
+ * The story is authored in units (2000 in all). Scroll is mapped onto it in two kinds of
+ * stretch: a dwell for every stop, where the camera rests on a work and scroll moves it
+ * only gently, and the travel between stops. Dwells take a fixed amount of scroll however
+ * short they are in the story, so no work goes by in a flick.
  */
-const WARP: [number, number][] = [[0, 1], [180, 1.3], [540, 1], [580, 1.6], [860, 1], [910, 1.3], [1210, 1], [1270, 1.35], [1710, 1], [2000, 1]];
-const KNOTS: [number, number][] = (() => { const k: [number, number][] = [[0, 0]]; for (let i = 0; i < WARP.length - 1; i++) { const [a, f] = WARP[i], b = WARP[i + 1][0]; k.push([b, k[k.length - 1][1] + (b - a) * f]); } return k; })();
+export const DWELLS: [number, number][] = [
+  [0, 40], [135, 150], [205, 225], [258, 280], [306, 322], [346, 358], [382, 398], [420, 434], [452, 464], [485, 499], [516, 524],
+  [556, 566], [600, 608], [628, 648], [658, 666], [688, 692], [714, 730], [746, 756], [772, 782], [804, 808], [828, 832], [850, 854],
+  [880, 890], [932, 940], [978, 1020], [1052, 1058], [1098, 1112], [1130, 1195], [1206, 1222], [1245, 1255],
+  [1290, 1305], [1340, 1344], [1380, 1384], [1420, 1424], [1460, 1464], [1503, 1507], [1536, 1540], [1553, 1557], [1576, 1580], [1591, 1595], [1604, 1608], [1616, 1620],
+  [1640, 1650], [1680, 1700], [1745, 1800], [1905, 1915], [1990, 2000],
+];
+const dwellScroll = (a: number, b: number) => Math.min(140, Math.max(60, (b - a) * 2.2));
+const travelScroll = (gap: number) => Math.min(110, Math.max(28, gap * 0.8));
+const KNOTS: [number, number][] = (() => {
+  const k: [number, number][] = [[0, 0]]; let v = 0, sv = 0;
+  for (const [a, b] of DWELLS) {
+    if (a > v) { sv += travelScroll(a - v); k.push([a, sv]); }
+    sv += dwellScroll(Math.max(a, v), b); k.push([b, sv]); v = b;
+  }
+  if (v < TOTAL) { sv += travelScroll(TOTAL - v); k.push([TOTAL, sv]); }
+  return k;
+})();
+/** Each dwell in scroll units (vh), for snapping and stepping. */
+export const DWELL_SCROLL = DWELLS.map(([a, b]) => ({ a, b, sa: 0, sb: 0 }));
 export const SCROLL_TOTAL = KNOTS[KNOTS.length - 1][1];
 export function storyFromScroll(sv: number) {
   for (let i = 0; i < KNOTS.length - 1; i++) { const [a, sa] = KNOTS[i], [b, sb] = KNOTS[i + 1]; if (sv <= sb) return a + (b - a) * Math.max(0, (sv - sa) / (sb - sa)); }
@@ -71,6 +91,13 @@ export function storyFromScroll(sv: number) {
 export function scrollFromStory(v: number) {
   for (let i = 0; i < KNOTS.length - 1; i++) { const [a, sa] = KNOTS[i], [b, sb] = KNOTS[i + 1]; if (v <= b) return sa + (sb - sa) * Math.max(0, (v - a) / (b - a)); }
   return SCROLL_TOTAL;
+}
+for (const d of DWELL_SCROLL) { d.sa = scrollFromStory(d.a); d.sb = scrollFromStory(d.b); }
+/** The stop a story position belongs to: inside a dwell, or the nearest one on either side. */
+export function dwellAt(v: number) {
+  let best = 0, bd = Infinity;
+  for (let i = 0; i < DWELLS.length; i++) { const [a, b] = DWELLS[i]; const d = v < a ? a - v : v > b ? v - b : 0; if (d < bd) { bd = d; best = i; } }
+  return { i: best, inside: bd === 0 };
 }
 
 export function beatAt(vh: number) {
@@ -90,6 +117,8 @@ export function buildKeys(islands: Islands, dyn: {
   floors: { slug: string; view: THREE.Vector3; look: THREE.Vector3 }[]; towerRoot: THREE.Object3D;
   /** A point riding with the Hyperion on the circuit: metres behind, above and outside it. */
   chase: (back: number, lift: number, side: number) => THREE.Vector3;
+  /** The Altair house at the end of the road: two camera marks and the point they look at. */
+  estate: { view: () => THREE.Vector3; view2: () => THREE.Vector3; look: () => THREE.Vector3 };
 }): Key[] {
   const W = (id: IslandId, x: number, y: number, z: number) => islands[id].group.localToWorld(new THREE.Vector3(x, y, z));
   const T = (v: THREE.Vector3) => dyn.towerRoot.localToWorld(v.clone());
@@ -153,7 +182,9 @@ export function buildKeys(islands: Islands, dyn: {
     { at: 1098, pos: W('monuments', -4, 7.5, 7), look: W('monuments', -27, 5, 6) },
     { at: 1112, pos: W('monuments', -5, 7, 8), look: W('monuments', -27, 5, 6) },
     ...roadScrub(0.0, 0.92, 1130, 1195, 7, 0.08),
-    { at: 1208, pos: () => road(1, 6)().add(new THREE.Vector3(0, 4, 0)), look: road(1, 10) },
+    // the house at the end of the drive
+    { at: 1206, pos: dyn.estate.view, look: dyn.estate.look },
+    { at: 1222, pos: dyn.estate.view2, look: dyn.estate.look },
     // the long glide to the tower
     { at: 1245, pos: new THREE.Vector3(260, 170, -110), look: T(new THREE.Vector3(0, 40, 0)) },
     { at: 1290, pos: T(fl('gcburger').view.clone().add(new THREE.Vector3(0, 3, 10))), look: T(fl('gcburger').look) },

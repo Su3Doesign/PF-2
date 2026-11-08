@@ -38,15 +38,18 @@ export function detectQuality(gl?: WebGL2RenderingContext | null): Quality {
   const q = Number(params.get('q'));
   if (q === 1 || q === 2 || q === 3) tier = q;
   const dprMax = coarse ? (tablet ? 1.1 : 1.25) : tier === 3 ? 1.75 : tier === 2 ? 1.25 : 1;
+  // touch screens (phones and tablets) pay most for full-screen layers and per-pixel lights,
+  // so they get fewer cloud layers, fewer lights and lighter particle counts than a laptop
+  const touch = coarse && params.get('q') === null;
   return {
     tier,
     dpr: Math.min(window.devicePixelRatio || 1, dprMax),
-    clouds: tier === 3 ? 5 : tier === 2 ? 4 : 3,
-    motes: tier === 3 ? 16000 : tier === 2 ? 9000 : 4500,
-    falls: tier === 3 ? 3000 : tier === 2 ? 1800 : 900,
-    heroFall: tier === 3 ? 30000 : tier === 2 ? 16000 : 8000,
-    detail: tier === 3 ? 1.1 : tier === 2 ? 0.9 : 0.65,
-    lights: tier === 3 ? 8 : 6,
+    clouds: touch ? (tablet ? 3 : 2) : tier === 3 ? 5 : tier === 2 ? 4 : 3,
+    motes: touch ? (tablet ? 5000 : 3000) : tier === 3 ? 16000 : tier === 2 ? 9000 : 4500,
+    falls: touch ? (tablet ? 1000 : 700) : tier === 3 ? 3000 : tier === 2 ? 1800 : 900,
+    heroFall: touch ? (tablet ? 9000 : 6000) : tier === 3 ? 30000 : tier === 2 ? 16000 : 8000,
+    detail: touch ? (tablet ? 0.75 : 0.6) : tier === 3 ? 1.1 : tier === 2 ? 0.9 : 0.65,
+    lights: tier === 3 ? 8 : touch ? 4 : 6,
     fancyPost: tier === 3,
     mobile,
     tablet,

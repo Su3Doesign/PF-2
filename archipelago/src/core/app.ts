@@ -22,6 +22,8 @@ export class App {
   dprScale = 1;
   still = false;
   renderOnce: (t?: number) => void = () => {};
+  /** 0 for every display frame; 30 to halve the work while nothing is moving. */
+  fpsCap = 0;
 
   constructor(public canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance', stencil: false, depth: true, preserveDrawingBuffer: location.search.includes('still') });
@@ -67,6 +69,8 @@ export class App {
     const loop = () => {
       if (!this.still) requestAnimationFrame(loop);
       const now = performance.now();
+      // optional frame cap (touch devices at rest): skip this display frame if it comes too soon
+      if (this.fpsCap > 0 && !this.still && now - this.last < 1000 / this.fpsCap - 3) return;
       const dt = this.still ? 1 / 60 : Math.min(0.05, (now - this.last) / 1000);
       this.last = now;
       if (!this.running || (document.hidden && !this.still)) return;
@@ -94,10 +98,13 @@ export class App {
   degrade = 0;
   onDegrade: (level: number) => void = () => {};
   private govern(dt: number) {
-    if (dt > 0.024) this.slow += dt; else this.slow = Math.max(0, this.slow - dt * 0.5);
-    if (this.slow > 1.5) {
+    // a long frame now and then (a flight, a page switch) is fine; a run of them is not
+    const budget = this.fpsCap > 0 ? 1 / this.fpsCap : 1 / 60;
+    if (dt > budget * 1.45 && dt < 0.5) this.slow += dt; else this.slow = Math.max(0, this.slow - dt * 0.5);
+    if (this.slow > 1.0) {
       this.slow = 0;
-      if (this.dprScale > 0.7) { this.dprScale = Math.max(0.7, this.dprScale - 0.15); this.resize(); }
+      const floor = this.quality.mobile || this.quality.tablet ? 0.6 : 0.7;
+      if (this.dprScale > floor) { this.dprScale = Math.max(floor, this.dprScale - 0.15); this.resize(); }
       else if (this.degrade < 3) { this.degrade++; this.onDegrade(this.degrade); }
     }
   }

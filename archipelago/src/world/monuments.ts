@@ -4,7 +4,7 @@ import { rng } from './shared';
 import { marbleMaterial, std, glowMaterial, imageMaterial } from './materials';
 import { makeArtefact, type Artefact } from './artefact';
 import { loadModel, fitModel, applyEnv, loadTexture } from '../core/loaders';
-import type { Island } from './island';
+import { createIsland, type Island } from './island';
 import type { Quality } from '../core/quality';
 import images from '../data/images.json';
 
@@ -152,19 +152,25 @@ export function createMonuments(island: Island, env: THREE.Texture, q: Quality) 
     trees.setMatrixAt(i, m4.compose(v, qt.setFromAxisAngle(new THREE.Vector3(0, 1, 0), r() * 6), sc.set(s, s * (0.8 + r() * 0.6), s)));
   }
   root.add(trees);
-  // the monolith where the road ends
+  // ---- Altair Estates: the house the road drives to, on its own sea cliff past the road's end.
+  // The model is the estate's own (world/house.glb, see scripts/build-altair.mjs); its sea side
+  // faces back up the road, so the arrival shot sees the terraces stepping down the cliff.
   const end = road.getPointAt(1);
-  const mono = new THREE.Group(); mono.position.copy(end).add(new THREE.Vector3(0, 0, 0)); root.add(mono);
-  mono.lookAt(0, end.y, 0);
-  mono.add(new THREE.Mesh(new THREE.BoxGeometry(9, 22, 6), std(0x0d0e12, 0.35, 0.3, { contour: 2 })).translateY(10).translateZ(-5));
-  mono.add(new THREE.Mesh(new THREE.BoxGeometry(7.4, 0.12, 0.1), glowMaterial(0xffd9a0, 4)).translateY(12).translateZ(-1.95));
-  mono.add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 8, 0.1), glowMaterial(0xffd9a0, 3)).translateY(8).translateZ(-1.95).translateX(2.2));
-  const monoLight = new VPoint(0xffd9a0, 300, 30, 1.6); monoLight.position.set(0, 6, 2); mono.add(monoLight);
+  const outward = new THREE.Vector3(end.x, 0, end.z).normalize();
+  const estate = createIsland({ seed: 91, radius: 24, stretch: [1.15, 1.3], topColor: '#33402a', rockColor: '#8a7e70', underColor: '#3a3430', irregular: 0.22, flat: 0.92, detail: q.detail * 0.6, roots: 6, depth: 46 });
+  estate.group.position.copy(end).addScaledVector(outward, 46).add(new THREE.Vector3(0, -2, 0));
+  estate.group.rotation.y = Math.atan2(outward.z, -outward.x);   // the islet's +x looks back at the road
+  root.add(estate.group);
+  const estateHouse = new THREE.Group(); estate.group.add(estateHouse);
+  const estateWarm = new VPoint(0xffc48a, 520, 60, 1.4); estateWarm.position.set(14, 10, 0); estate.group.add(estateWarm);
+  const estateCool = new VPoint(0x9fb7ff, 260, 70, 1.4); estateCool.position.set(-18, 26, -14); estate.group.add(estateCool);
+  const roadLight = new VPoint(0xffd9a0, 220, 26, 1.6); roadLight.position.copy(end).add(new THREE.Vector3(0, 5, 0)); root.add(roadLight);
   anchor('roadTop', roadPts[0].x, roadPts[0].y, roadPts[0].z);
   anchor('roadMid', road.getPointAt(0.5).x, road.getPointAt(0.5).y, road.getPointAt(0.5).z);
-  anchor('monolith', end.x, end.y + 10, end.z);
-  const altairHit = new THREE.Group(); altairHit.add(new THREE.Mesh(new THREE.BoxGeometry(9, 22, 6))); altairHit.position.copy(mono.position).add(new THREE.Vector3(0, 10, 0)); root.add(altairHit); (altairHit.children[0] as THREE.Mesh).visible = false;
-  artefacts.push(makeArtefact('altair', altairHit, root, 1.1, 1));
+  anchor('monolith', end.x, end.y + 6, end.z);
+  // camera marks for the arrival: from the end of the road, then a step to the side
+  const estateAt = (x: number, y: number, z: number) => estate.group.localToWorld(new THREE.Vector3(x, y, z));
+  const estateMarks = { view: () => estateAt(36, 11, 14), view2: () => estateAt(31, 8, -19), look: () => estateAt(0, 1.5, 0) };
 
   // four studies on plinths, as framed prints
   const studies: [string, number][] = [['sculpting', 2.3], ['clock', 2.7], ['extinguisher', 3.1], ['interiors', 3.5]];
@@ -205,6 +211,37 @@ export function createMonuments(island: Island, env: THREE.Texture, q: Quality) 
       root.add(cam); cameraModel = cam;
       artefacts.push(makeArtefact('halden', cam, root, 1.1, 0.6));
     }),
+    loadModel('altair').then((g) => {
+      const W = new THREE.Color(1, 1, 1);
+      // plain lit materials: the estate's vertex colours already carry its palette
+      const lit = (color: number, roughness: number, metalness = 0, vertexColors = true) => new THREE.MeshStandardMaterial({ color, roughness, metalness, vertexColors });
+      const mats: Record<string, THREE.Material> = {
+        stone: lit(0xf3e2c4, 0.85),
+        cliff: lit(0xb3a08a, 0.95),
+        rock: lit(0xffffff, 0.9),
+        lawn: lit(0xa8d27a, 0.9),
+        sand: lit(0xd8c8a2, 0.9, 0, false),
+        metal: lit(0xffffff, 0.45, 0.55),
+        wood: lit(0xffffff, 0.7),
+        dark: lit(0xffffff, 0.6, 0.2),
+        roof: lit(0x2c2b29, 0.7, 0.2, false),
+        steel: lit(0x34373c, 0.35, 0.8, false),
+        glass: new THREE.MeshStandardMaterial({ color: 0x0c1118, roughness: 0.15, metalness: 0.2, emissive: 0xffb36a, emissiveIntensity: 1.1 }),
+        pool: new THREE.MeshBasicMaterial({ color: new THREE.Color(0x3fd6ff).multiplyScalar(1.3), toneMapped: false }),
+        glow: new THREE.MeshBasicMaterial({ vertexColors: true, color: W.clone().multiplyScalar(2.4), toneMapped: false }),
+      };
+      g.scene.traverse((o) => {
+        const m = o as THREE.Mesh; if (!m.isMesh) return;
+        const part = m.name.split('__')[1] ?? (m.material as THREE.Material).name;
+        m.material = mats[part] ?? mats.stone;
+      });
+      applyEnv(g.scene, env, 0.6);
+      // the plateau the house stands on is y = 27 in the estate's metres; the house centre is x 112, z -14
+      const S = 0.22;
+      const inner = new THREE.Group(); inner.scale.setScalar(S); inner.position.set(-112 * S, -27 * S, 14 * S); inner.add(g.scene);
+      estateHouse.add(inner);
+      artefacts.push(makeArtefact('altair', estateHouse, root, 1.05, 1.2));
+    }),
   ]).catch((e) => console.warn('monuments models', e));
 
   let lastLit = -1, lastAll = false;
@@ -225,5 +262,5 @@ export function createMonuments(island: Island, env: THREE.Texture, q: Quality) 
   update({ t: 0, lampsLit: 1, headTurn: 0, gold: 0.1 });
   const lampIndex = (tFrac: number) => Math.round(Math.min(1, tFrac) * LAMPS);
 
-  return { root, anchors, artefacts, update, ready, road, lamps, lampIndex, LAMPS, getHead: () => headMesh, getCamera: () => cameraModel };
+  return { root, anchors, artefacts, update, ready, road, lamps, lampIndex, LAMPS, getHead: () => headMesh, getCamera: () => cameraModel, estate: estate.group, estateMarks };
 }

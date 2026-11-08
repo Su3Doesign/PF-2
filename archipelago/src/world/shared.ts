@@ -24,10 +24,13 @@ export interface PatchOpts {
  * read as rough without textures), albedo variation, and the chart mode (ink surfaces with
  * gold iso-height contour lines). Every world surface goes through here.
  */
+/** Set once at start-up: on phones and tablets surfaces keep their tint but skip the fine bump. */
+export const PATCH = { lite: false };
 export function patchMaterial<T extends THREE.MeshStandardMaterial>(mat: T, o: PatchOpts = {}): T {
   // bump strength is normalised by frequency, so a fine noise never tilts normals steeper than a coarse one
-  const bs = o.bumpScale ?? 0.6, bump = (o.bump ?? 0) * Math.min(1, 0.22 / bs), tint = (o.tint ?? 0) * 0.75, contour = o.contour ?? 6, glow = o.chartGlow ?? 1;
+  const bs = o.bumpScale ?? 0.6, bump0 = (o.bump ?? 0) * Math.min(1, 0.22 / bs), tint = (o.tint ?? 0) * 0.75, contour = o.contour ?? 6, glow = o.chartGlow ?? 1;
   mat.onBeforeCompile = (shader) => {
+    const bump = PATCH.lite ? 0 : bump0, lite = PATCH.lite;
     shader.uniforms.uChart = G.uChart;
     shader.uniforms.uTime = G.uTime;
     shader.uniforms.uDim = G.uDim;
@@ -44,7 +47,7 @@ export function patchMaterial<T extends THREE.MeshStandardMaterial>(mat: T, o: P
       .replace('#include <color_fragment>', `#include <color_fragment>
         ${tint > 0 ? `{ vec3 wn = normalize(vWNorm);
           float t1 = triLo(vWPos * ${(bs * 0.03).toFixed(4)}, wn);
-          float t2 = tri(vWPos * ${(bs * 0.25).toFixed(4)}, wn);
+          float t2 = ${lite ? '0.5' : `tri(vWPos * ${(bs * 0.25).toFixed(4)}, wn)`};
           diffuseColor.rgb *= mix(1.0 - ${tint.toFixed(3)}, 1.0 + ${(tint * 0.6).toFixed(3)}, t1) * (1.0 + (t2 - 0.5) * ${(tint * 0.5).toFixed(3)}); }` : ''}`)
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
         ${bump > 0 ? `{ float hgt = tri(vWPos * ${(bs * 0.12).toFixed(4)}, normalize(vWNorm));
@@ -72,7 +75,7 @@ export function patchMaterial<T extends THREE.MeshStandardMaterial>(mat: T, o: P
         }
         gl_FragColor.rgb *= 1.0 - uDim * 0.7;`);
   };
-  mat.customProgramCacheKey = () => `p${bump}_${bs}_${tint}_${contour}_${glow}`;
+  mat.customProgramCacheKey = () => `p${bump0}_${bs}_${tint}_${contour}_${glow}_${PATCH.lite ? 1 : 0}`;
   return mat;
 }
 
