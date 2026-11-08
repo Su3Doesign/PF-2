@@ -59,7 +59,8 @@ src/
   pages.ts           work index filters, case-study live frames, contact form, the 404 sea
 scripts/
   build-assets.mjs   models (re-packed from the project repos) and images (renders, boards, Behance packs)
-  build-pages.mjs    work index, 48 case studies, about, contact, 404, the crawlable list in index.html, sitemap
+  build-pages.mjs    work index, 49 case studies (each with its full stitched board), about, contact, 404, the crawlable list in index.html, sitemap
+  build-castle.mjs   the Castle on the Crag: merges the converted castle + terrain FBX exports (CASTLE_SRC=…) into public/models/castle.glb
 ```
 
 ## Adding a work

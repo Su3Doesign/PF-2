@@ -3,12 +3,14 @@ import * as THREE from 'three';
 import Lenis from 'lenis';
 import { App } from './core/app';
 import { Rig, curve, span } from './core/voyage';
-import { BEATS, TOTAL, beatAt, buildKeys, RAIL } from './core/story';
+import { BEATS, TOTAL, beatAt, buildKeys, RAIL, storyFromScroll, scrollFromStory, SCROLL_TOTAL } from './core/story';
 import { createSky } from './world/sky';
 import { createClouds } from './world/clouds';
 import { createMotes } from './world/motes';
 import { createArchipelago, LAYOUT, type IslandId } from './world/archipelago';
-import { createMachines } from './world/machines';
+import { createMachines, ENTRY_H, ENTRY_F, trackAt } from './world/machines';
+import { LightPool } from './world/lights';
+import { TinyCuller } from './world/cull';
 import { createMonuments } from './world/monuments';
 import { createWorlds } from './world/worlds';
 import { createBrands } from './world/brands';
@@ -56,6 +58,11 @@ function boot() {
   const brands = createBrands(arch.islands.brands, env, q);
   const finale = createFinale(app.scene);
   app.scene.updateMatrixWorld(true);
+  // a few real lights, handed each frame to the virtual lights nearest the camera
+  const pool = new LightPool(app.scene, q.lights);
+  pool.scan(app.scene);
+  const culler = new TinyCuller();
+  document.getElementById('voyage')!.style.height = `calc(${SCROLL_TOTAL}vh + 100vh)`;
 
   // the voyage route: a dotted gold line through the islands, shown from above
   const routePts = [new THREE.Vector3(30, 120, 700), LAYOUT.worlds.pos, LAYOUT.machines.pos, LAYOUT.monuments.pos, LAYOUT.brands.pos, new THREE.Vector3(LIGHTHOUSE.x, 60, LIGHTHOUSE.z)].map((p, i) => p.clone().add(new THREE.Vector3(0, i === 0 || i === 5 ? 0 : 6, 0)));
@@ -66,16 +73,36 @@ function boot() {
   [LAYOUT.worlds.pos, LAYOUT.machines.pos, LAYOUT.monuments.pos, LAYOUT.brands.pos].forEach((p, i) => stations.setMatrixAt(i, new THREE.Matrix4().makeTranslation(p.x, p.y + 6, p.z)));
   app.scene.add(stations);
 
-  const artefacts = (): Artefact[] => [...machines.artefacts, ...monuments.artefacts, ...worlds.artefacts, ...brands.artefacts];
+  // artefacts arrive as models load; the flat list is rebuilt only when the count changes
+  let artCache: Artefact[] = [];
+  const artefacts = (): Artefact[] => {
+    const n = machines.artefacts.length + monuments.artefacts.length + worlds.artefacts.length + brands.artefacts.length;
+    if (n !== artCache.length) artCache = [...machines.artefacts, ...monuments.artefacts, ...worlds.artefacts, ...brands.artefacts];
+    return artCache;
+  };
   const contents: { id: IslandId; root: THREE.Object3D }[] = [
-    { id: 'machines', root: machines.root }, { id: 'monuments', root: monuments.root }, { id: 'worlds', root: worlds.root }, { id: 'brands', root: brands.root },
+    { id: 'machines', root: machines.root }, { id: 'monuments', root: monuments.root }, { id: 'worlds', root: worlds.root }, { id: 'worlds', root: worlds.crag.group }, { id: 'brands', root: brands.root },
   ];
+  const contentRoots = new Set(contents.map((c) => c.root));
+  /** An artefact can be picked only while its island's contents are on stage. */
+  const live = (a: Artefact) => { let o: THREE.Object3D | null = a.hit; while (o) { if (contentRoots.has(o)) return o.visible; o = o.parent; } return true; };
+
+  // when frames stay long after resolution has stepped down, shed the costliest layers
+  app.onDegrade = (level) => {
+    const layers = clouds.group.children;
+    if (level >= 1) layers.forEach((l, i) => { l.visible = i % 2 === 0; });
+    if (level >= 2) { motes.points.geometry.setDrawRange(0, Math.floor(q.motes / 2)); arch.heroFall.points.geometry.setDrawRange(0, Math.floor(q.heroFall / 2)); }
+    if (level >= 3) { layers.forEach((l, i) => { l.visible = i === 0; }); app.bloom.intensity = 0.7; }
+  };
 
   // ---------------------------------------------------------------- the camera path
-  // the chase camera rides behind and above the Hyperion, looking past it down the track
-  const carPos = () => { const a = machines.trackAt(mState.race - 0.05).p.clone(); const b = machines.trackAt(mState.race).p; a.lerp(b, 0.1).add(new THREE.Vector3(0, 2.6, 0)); const side = machines.trackAt(mState.race - 0.05).t; a.add(new THREE.Vector3(side.z, 0, -side.x).multiplyScalar(2.2)); return arch.islands.machines.group.localToWorld(a); };
-  const carAhead = () => arch.islands.machines.group.localToWorld(machines.trackAt(mState.race + 0.03).p.clone().add(new THREE.Vector3(0, 0.6, 0)));
-  const rig = new Rig(buildKeys(arch.islands, { carPos, carAhead, road: monuments.road, roadParent: monuments.root, floors: brands.floors, towerRoot: brands.root }));
+  const cragAt = (x: number, y: number, z: number) => worlds.crag.group.localToWorld(new THREE.Vector3(x, y, z));
+  const race = { uH: ENTRY_H };
+  const chase = (back: number, lift: number, side: number) => {
+    const { p, t } = trackAt(race.uH); const n = new THREE.Vector3(-t.z, 0, t.x);
+    return machines.root.localToWorld(p.addScaledVector(t, -back).addScaledVector(n, side).setY(p.y + lift));
+  };
+  const rig = new Rig(buildKeys(arch.islands, { cragView: cragAt, cragAt, road: monuments.road, roadParent: monuments.root, floors: brands.floors, towerRoot: brands.root, chase }));
 
   // tower stops for the altimeter
   const floorVh: Record<string, number> = {};
@@ -89,16 +116,18 @@ function boot() {
 
   // ---------------------------------------------------------------- scroll
   const vhPx = () => innerHeight;
-  const lenis = new Lenis({ lerp: calm ? 1 : 0.085, wheelMultiplier: 0.9, touchMultiplier: 1.4, smoothWheel: !calm });
+  const lenis = new Lenis({ lerp: calm ? 1 : 0.08, wheelMultiplier: 0.75, touchMultiplier: 1.3, smoothWheel: !calm });
+  // vh is in story units; scroll covers more ground where there is more to see
   let vh = 0, vel = 0, speed = 0;
-  lenis.on('scroll', (l: { scroll: number; velocity: number }) => { vh = l.scroll / vhPx() * 100; vel = l.velocity; });
-  const fly = (target: number, dur = 2.2) => lenis.scrollTo((target / 100) * vhPx(), { duration: calm ? 0 : dur, easing: (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) });
+  lenis.on('scroll', (l: { scroll: number; velocity: number }) => { vh = storyFromScroll(l.scroll / vhPx() * 100); vel = l.velocity; });
+  let flyTarget = -1;
+  const fly = (target: number, dur = 2.2) => { flyTarget = target; lenis.scrollTo((scrollFromStory(target) / 100) * vhPx(), { duration: calm ? 0 : dur, easing: (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) }); };
   let snapped = -1, idle = 0;
 
   // ---------------------------------------------------------------- interface
   const sound = new Sound();
   let openSlug: string | null = null;
-  const inspect = { a: 0, target: 0, pos: new THREE.Vector3(), look: new THREE.Vector3() };
+  const inspect = { a: 0, target: 0, pos: new THREE.Vector3(), look: new THREE.Vector3(), art: null as Artefact | null, pending: '' };
   const ui = new UI({
     fly: (v) => { closePanel(); fly(v); },
     open: (slug) => openPanel(slug),
@@ -117,24 +146,61 @@ function boot() {
     sound.play('open');
     lenis.stop();
     G.uDim.value = 0;
-    // inspect pose: frame the artefact on the left of the screen
-    const art = artefacts().find((a) => a.slug === slug);
-    const cam = app.camera;
-    if (art && art.hit.getWorldPosition(new THREE.Vector3()).distanceTo(cam.position) < 260) {
-      const c = art.hit.getWorldPosition(new THREE.Vector3());
-      const box = new THREE.Box3().setFromObject(art.hit); const r = box.getSize(new THREE.Vector3()).length() * 0.62;
-      const dir = cam.position.clone().sub(c).setY(0).normalize();
-      const d = Math.max(r * 1.6, 6);
-      inspect.pos.copy(c).addScaledVector(dir, d).add(new THREE.Vector3(0, r * 0.35, 0));
-      const right = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0, 1, 0)).normalize();
-      inspect.look.copy(c).addScaledVector(right, innerWidth > 820 ? d * 0.32 : 0);
-      inspect.target = 1;
-    } else inspect.target = 0.0001;
+    // the camera closes in on the work itself; if it lives elsewhere on the voyage, fly there first
+    const beat = BEATS.find((b) => b.works?.includes(slug));
+    inspect.art = null; inspect.target = 0;
+    if (beat && (vh < beat.from || vh > beat.to)) { lenis.start(); fly((beat.from + beat.to) / 2, 1.8); inspect.pending = slug; }
+    else beginInspect(slug);
     try { history.replaceState(null, '', `#${slug}`); } catch { /* ignore */ }
   }
+  function beginInspect(slug: string) {
+    inspect.pending = '';
+    const art = artefacts().find((a) => a.slug === slug && live(a));
+    if (!art) return;
+    inspect.art = art; inspect.target = 1; lenis.stop();
+    computeInspect(true);
+  }
+  const ib = new THREE.Box3(), ic = new THREE.Vector3(), isz = new THREE.Vector3(), idir = new THREE.Vector3(), iright = new THREE.Vector3(), UP = new THREE.Vector3(0, 1, 0);
+  let inspectDir = new THREE.Vector3();
+  /** Frames the artefact to fill the left of the screen (the panel takes the right), and follows it if it moves. */
+  function computeInspect(first = false) {
+    const art = inspect.art; if (!art) return;
+    // a tower room is framed from its own doorway (from outside, the walls would hide it)
+    const room = brands.floors.find((f) => f.slug === art.slug && f.slug !== 'magma');
+    if (room) {
+      inspect.pos.copy(room.view); brands.root.localToWorld(inspect.pos);
+      ic.copy(room.look); brands.root.localToWorld(ic);
+      idir.copy(ic).sub(inspect.pos); const d = idir.length();
+      iright.crossVectors(idir.normalize(), UP).normalize();
+      inspect.look.copy(ic).addScaledVector(iright, innerWidth > 820 ? d * 0.2 : 0);
+      return;
+    }
+    ib.setFromObject(art.hit); ib.getCenter(ic); ib.getSize(isz);
+    const radius = Math.max(0.8, isz.length() * 0.5);
+    const fovR = THREE.MathUtils.degToRad(app.camera.fov);
+    const dist = radius / Math.sin(fovR / 2) * (innerWidth > 820 ? 0.95 : 1.25);
+    if (first) { inspectDir.copy(app.camera.position).sub(ic).setY(0); if (inspectDir.lengthSq() < 1e-4) inspectDir.set(0, 0, 1); inspectDir.normalize(); }
+    idir.copy(inspectDir).multiplyScalar(Math.cos(0.32)).add(UP.clone().multiplyScalar(Math.sin(0.32))).normalize();
+    // S-3 only reads as an impossible triangle from one direction: inspect it from there
+    const pen = art.slug === 's3' ? app.scene.getObjectByName('penrose') : undefined;
+    if (pen) {
+      // the line through the bars' first corner along their (1,1,1) diagonal: anywhere on it, the triangle closes
+      idir.set(1, 1, 1).normalize().applyQuaternion(pen.getWorldQuaternion(new THREE.Quaternion()));
+      pen.getWorldPosition(isz);
+      const along = ic.clone().sub(isz).dot(idir);
+      inspect.pos.copy(isz).addScaledVector(idir, along + dist);
+      iright.crossVectors(idir.clone().negate(), UP).normalize();
+      inspect.look.copy(ic).addScaledVector(iright, innerWidth > 820 ? dist * 0.24 : 0);
+      return;
+    }
+    inspect.pos.copy(ic).addScaledVector(idir, dist);
+    iright.crossVectors(idir.clone().negate(), UP).normalize();
+    inspect.look.copy(ic).addScaledVector(iright, innerWidth > 820 ? dist * 0.24 : 0);
+  }
   function closePanel() {
+    inspect.pending = '';
     if (!openSlug) return;
-    openSlug = null; ui.closePanel(); inspect.target = 0; lenis.start();
+    openSlug = null; ui.closePanel(); inspect.target = 0; inspect.art = null; lenis.start();
     try { history.replaceState(null, '', location.pathname + location.search); } catch { /* ignore */ }
   }
 
@@ -151,7 +217,7 @@ function boot() {
   const pick = () => {
     if (!pointerOnCanvas || openSlug) return null;
     ray.setFromCamera(ndc, app.camera);
-    const hits = ray.intersectObjects(artefacts().filter((a) => a.hit.parent?.visible !== false).map((a) => a.hit), false);
+    const hits = ray.intersectObjects(artefacts().filter(live).map((a) => a.hit), false);
     for (const h of hits) { if (h.distance < 320) return h.object.userData.slug as string; }
     return null;
   };
@@ -207,7 +273,8 @@ function boot() {
   let lapStart = 0, lapRecordT = 0, idleKerb = 0, welcomed = false, foghorned = false;
 
   // ---------------------------------------------------------------- state
-  const mState = { p: 0, race: 0, park: 0, explode: 0, wire: 0.5, speed: 0, t: 0 };
+  const mState = { uH: ENTRY_H, uF: ENTRY_F, park: 0, explode: 0, wire: 0.5, speed: 0, t: 0 };
+  let drift = 0;
   const worldsState: { t: number; stir: number; feed: number; goldKoi: boolean; ripple?: THREE.Vector3 } = { t: 0, stir: 0, feed: 0, goldKoi: false };
   const sunDir = new THREE.Vector3();
   const tmp = new THREE.Vector3();
@@ -215,6 +282,9 @@ function boot() {
   const parallax = new THREE.Vector2();
   let lastBeat = '';
 
+  const floorIslands = [...(Object.keys(LAYOUT) as IslandId[]).map((id) => ({ group: arch.islands[id].group, r: LAYOUT[id].radius })), { group: worlds.crag.group, r: 30 }];
+  const floorV = new THREE.Vector3(), towerV = new THREE.Vector3(), wpTmp = new THREE.Vector3();
+  const placed: [number, number][] = [];
   const project = (v: THREE.Vector3) => { tmp.copy(v).project(app.camera); return { x: (tmp.x * 0.5 + 0.5) * innerWidth, y: (-tmp.y * 0.5 + 0.5) * innerHeight, vis: tmp.z < 1 && tmp.z > -1 && Math.abs(tmp.x) < 1.15 && Math.abs(tmp.y) < 1.15 }; };
 
   app.onFrame((dt, t) => {
@@ -231,11 +301,19 @@ function boot() {
 
     // ---- island state
     mState.t = t;
-    const racing = vh > 600 && vh < 715;
-    mState.race = (mState.race + dt * (racing ? 0.045 + speed * 0.22 : 0.02)) % 1;
-    mState.park = span(vh, 690, 712);
-    mState.explode = span(vh, 722, 748);
-    mState.wire = 1 - span(vh, 752, 776);
+    // the race is a function of scroll, so the cars always reach their pit entries at 690;
+    // idling adds laps, and the fade into the pits only ever completes a lap, never rewinds one
+    if (vh > 560 && vh < 690 && !openSlug) drift += dt * 0.03 * (1 - Math.min(1, Math.abs(vel) / 4));
+    const toPit = span(vh, 664, 690);
+    const lapFix = drift + (Math.ceil(drift) - drift) * toPit;
+    const raceK = Math.min(0, vh - 690) / 110;
+    mState.uH = ENTRY_H + raceK * 1.5 + (vh < 690 ? lapFix : 0);
+    mState.uF = ENTRY_F + raceK * 1.7 + (vh < 690 ? lapFix * 1.1 - (Math.ceil(lapFix * 1.1) - lapFix * 1.1) * 0 : 0);
+    if (vh >= 690) drift = 0;
+    race.uH = mState.uH;
+    mState.park = span(vh, 690, 716);
+    mState.explode = span(vh, 742, 756);
+    mState.wire = 1 - span(vh, 766, 782);
     mState.speed = speed;
     machines.update(mState);
     monuments.update({ t, lampsLit: lampEgg ? 1 : span(vh, 1126, 1198), headTurn: -0.5 + span(vh, 960, 1030) * 1.2, gold: span(vh, 1012, 1030) * 0.9 + 0.05, allLamps: lampEgg });
@@ -256,8 +334,18 @@ function boot() {
     // gentle cursor parallax
     parallax.lerp(ndc.x > -2 ? ndc : new THREE.Vector2(), 0.04);
     if (!calm) { const right = new THREE.Vector3().subVectors(camLook, camPos).cross(new THREE.Vector3(0, 1, 0)).normalize(); const k = camPos.distanceTo(camLook) * 0.012; camPos.addScaledVector(right, parallax.x * k); camPos.y += parallax.y * k * 0.6; }
-    inspect.a += (inspect.target - inspect.a) * (1 - Math.exp(-dt * 2.8));
-    if (inspect.a > 0.001 && inspect.pos.lengthSq() > 0) { camPos.lerp(inspect.pos, inspect.a); camLook.lerp(inspect.look, inspect.a); }
+    if (inspect.pending && Math.abs(vh - flyTarget) < 1.5 && Math.abs(vel) < 0.5) beginInspect(inspect.pending);
+    if (inspect.art) computeInspect();
+    inspect.a += (inspect.target - inspect.a) * (1 - Math.exp(-dt * 2.6));
+    if (inspect.a > 0.001 && inspect.pos.lengthSq() > 0) { const k = inspect.a * inspect.a * (3 - 2 * inspect.a); camPos.lerp(inspect.pos, k); camLook.lerp(inspect.look, k); }
+    // never below an island's surface
+    // (not on the Altair road, which is cut into the cliff below the terrace)
+    const onRoad = vh > 1122 && vh < 1215;
+    for (const isl of floorIslands) {
+      if (onRoad && isl.group === arch.islands.monuments.group) continue;
+      floorV.copy(camPos); isl.group.worldToLocal(floorV);
+      if (floorV.y < 0.9 && floorV.y > -30 && (floorV.x / (isl.r * 1.2)) ** 2 + (floorV.z / (isl.r * 1.0)) ** 2 < 1) { floorV.y = 0.9; camPos.copy(isl.group.localToWorld(floorV)); }
+    }
     // portrait screens: keep the landscape framing's width with a wider lens and a small dolly back
     let fov = rig.fov;
     const aspect = app.camera.aspect;
@@ -325,8 +413,14 @@ function boot() {
     // ---- island content culling
     for (const c of contents) {
       const d = LAYOUT[c.id].pos.distanceTo(camPos);
-      c.root.visible = d < 700 || chart > 0.01 || vh < 140;
+      c.root.visible = d < 560 || chart > 0.01 || vh < 140;
     }
+    // inside the tower's footprint (the climb into the molten core), the walls step aside
+    towerV.copy(camPos); brands.root.worldToLocal(towerV);
+    const inCore = Math.hypot(towerV.x, towerV.z) < 11 && towerV.y > 1 && towerV.y < 127;
+    for (const o of brands.exterior) o.visible = !inCore;
+    pool.update(camPos, dt);
+    culler.update(app.camera, innerHeight * Math.min(devicePixelRatio, 2), q.tier === 3 ? 0.8 : 1.2, readyAll ? 400 : 0);
 
     // ---- DOM: hero, labels, tags, pins, readouts
     ui.setHero(span(vh, 0, 90));
@@ -336,22 +430,38 @@ function boot() {
       const p = project(tmp.copy(LAYOUT[id].pos).add(new THREE.Vector3(0, chart > 0.5 ? 0 : -LAYOUT[id].radius * 0.95, 0)));
       ui.placeIslandLabel(id, p.x, p.y + (chart > 0.5 ? 40 : 0), showIslandLabels && p.vis ? 1 - span(vh, 60, 140) * (1 - chart) : 0);
     }
+    // the tower room the lens is in (nearest stop, by distance to each room's camera)
+    let towerFloor: (typeof brands.floors)[number] | null = null;
+    if (vh > 1240 && vh < 1720) {
+      towerV.copy(camPos); brands.root.worldToLocal(towerV); let best = Infinity;
+      for (const f of brands.floors) { if (f.slug === 'magma') continue; const d = f.view.distanceTo(towerV); if (d < best) { best = d; towerFloor = f; } }
+    }
+    // labels for this stop's works: kept clear of the HUD, the works column and each other
     const keep = new Set<string>();
-    if (!openSlug && chart < 0.5) {
+    if (!openSlug && chart < 0.5 && innerWidth > 720) {
+      placed.length = 0;
+      const right = innerWidth - Math.min(420, innerWidth * 0.3);
       for (const a of artefacts()) {
-        if (!(beat.works ?? []).includes(a.slug)) continue;
-        const wp = a.label.getWorldPosition(new THREE.Vector3());
-        const p = project(wp);
-        if (!p.vis || wp.distanceTo(camPos) > 220) continue;
+        if (!(beat.works ?? []).includes(a.slug) || !live(a)) continue;
+        a.label.getWorldPosition(wpTmp);
+        if (wpTmp.distanceTo(camPos) > 220) continue;
+        // in the tower, only the floor the lens is on (other floors are behind concrete)
+        if (vh > 1240 && vh < 1625 && towerFloor) { floorV.copy(wpTmp); brands.root.worldToLocal(floorV); if (floorV.distanceTo(towerFloor.center) > 16) continue; }
+        const p = project(wpTmp);
+        if (!p.vis) continue;
+        const x = Math.max(110, Math.min(right - 100, p.x)), y = Math.max(150, Math.min(innerHeight - 140, p.y));
+        if (Math.abs(x - p.x) > 140 || Math.abs(y - p.y) > 160) continue;
+        if (placed.some(([px, py]) => Math.abs(px - x) < 190 && Math.abs(py - y) < 70)) continue;
+        placed.push([x, y]);
         keep.add(a.slug);
-        ui.placeTag(a.slug, p.x, p.y, true, hoverSlug === a.slug);
+        ui.placeTag(a.slug, x, y, true, hoverSlug === a.slug);
       }
     }
     ui.hideTagsExcept(keep);
     // map pins: every artefact on the chart
     if (chart > 0.3) {
       for (const a of artefacts()) {
-        const p = project(a.hit.getWorldPosition(new THREE.Vector3()));
+        const p = project(a.hit.getWorldPosition(wpTmp));
         const el = ui.pin(a.slug); el.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`; el.style.display = p.vis ? '' : 'none';
       }
     }
@@ -361,26 +471,31 @@ function boot() {
       if (s !== hoverSlug) { hoverSlug = s; ui.hover(s); if (s) sound.play('tick'); }
     }
     // readouts
-    const lapOn = vh > 618 && vh < 702;
+    const lapOn = vh > 618 && vh < 692;
     ui.showReadout('lap', lapOn);
-    if (lapOn) { if (lapStart === 0 || mState.race < 0.01) lapStart = t; ui.setLap((t - lapStart) % 60, speed); if (speed > 0.92) { lapRecordT += dt; if (lapRecordT > 2) { lapRecordT = -999; ui.toast('New lap record'); try { localStorage.setItem('arch-lap', String(t - lapStart)); } catch { /* ignore */ } } } }
+    if (lapOn) { if (lapStart === 0) lapStart = t; ui.setLap((t - lapStart) % 60, speed); if (speed > 0.92) { lapRecordT += dt; if (lapRecordT > 2) { lapRecordT = -999; ui.toast('New lap record'); try { localStorage.setItem('arch-lap', String(t - lapStart)); } catch { /* ignore */ } } } }
     const roadOn = vh > 1124 && vh < 1212;
     ui.showReadout('counter', roadOn);
     if (roadOn) { const k = span(vh, 1126, 1198); if (k < 0.999) ui.setCounter('Lamps', Math.round(k * 2141 + (lampEgg ? 1 : 0)), 2141); else ui.setCounter(vh < 1205 ? 'Trees' : 'Cameras', vh < 1205 ? 808 : 52); }
     const towerOn = vh > 1272 && vh < 1708;
     ui.showReadout('alt', towerOn);
-    if (towerOn) { const metres = (camPos.y - LAYOUT.brands.pos.y) * 2.2; const s = beat.works?.[0] ?? ''; ui.setAlt(Math.max(0, metres), s, brands.floors.find((f) => f.slug === s)?.level ?? ''); }
+    if (towerOn) {
+      // the floor the lens is level with, not the first work of the beat
+      const metres = (camPos.y - LAYOUT.brands.pos.y) * 2.2; const fl = towerFloor;
+      const inCoreNow = vh > 1625 && vh < 1672;
+      ui.setAlt(Math.max(0, metres), inCoreNow ? 'magma' : fl?.slug ?? '', inCoreNow ? 'Core shaft' : fl?.level ?? '');
+    }
     if (beat.id === 'kerb' && Math.abs(vel) < 0.05) { idleKerb += dt; if (idleKerb > 20) { idleKerb = -999; ui.toast('Pit stop: a mechanic brings you a coffee'); } } else if (idleKerb > 0) idleKerb = 0;
     if (beat.id === 'gate' && returning && !welcomed) { welcomed = true; ui.toast('Welcome back. She remembers you.'); }
     // the wall into the molten core: a flash as the crack opens
-    ui.flash(Math.max(0, 1 - Math.abs(vh - 1627) / 5) * 0.85);
+    ui.flash(Math.max(0, 1 - Math.abs(vh - 1627) / 4) * 0.9);
 
     // ---- sound
     const isl = beat.island ?? '';
     sound.mix({
       bed: 0.5, worlds: isl === 'worlds' ? 0.7 : 0, machines: isl === 'machines' ? 0.7 : 0, monuments: isl === 'monuments' ? 0.6 : 0,
       brands: isl === 'brands' && beat.id !== 'magma' ? 0.6 : 0, magma: beat.id === 'magma' ? 0.6 + span(vh, 1625, 1665) * 0.4 : 0, sea: vh > 1830 ? 0.7 : 0,
-    }, speed, racing ? 0.4 + speed : 0);
+    }, speed, vh > 600 && vh < 692 ? 0.4 + speed : 0);
     ui.tickCursor();
   });
 
@@ -390,7 +505,7 @@ function boot() {
   }
 
   // ---------------------------------------------------------------- loading and entry
-  const needed = ['hyperion', 'f1', 'agera', 'helmet', 'head', 'camera', 'gate'];
+  const needed = ['hyperion', 'f1', 'agera', 'helmet', 'head', 'camera', 'gate', 'castle'];
   let shown = 0, readyAll = false;
   const slowT = setTimeout(() => document.getElementById('ldSlow')?.classList.add('on'), 6000);
   const tickLoad = () => {
@@ -403,6 +518,8 @@ function boot() {
   tickLoad();
   Promise.all([machines.ready, monuments.ready, worlds.ready, document.fonts.ready]).then(() => {
     readyAll = true; clearTimeout(slowT); ui.setLoad(1);
+    pool.scan(app.scene);
+    culler.scan(app.scene);
     // compile everything up front so the first flight never hitches
     app.renderer.compile(app.scene, app.camera);
     if (params.has('skipintro') || params.has('still')) { document.getElementById('loader')?.remove(); enter(false); return; }
@@ -419,7 +536,7 @@ function boot() {
     const b = to ? BEATS.find((x) => x.works?.includes(to)) : null;
     if (b) setTimeout(() => fly((b.from + b.to) / 2, 3.2), 400);
     const v = Number(params.get('vh'));
-    if (v) { window.scrollTo(0, (v / 100) * innerHeight); vh = v; }
+    if (v) { window.scrollTo(0, (scrollFromStory(v) / 100) * innerHeight); vh = v; }
     (window as any).__ready = true;
   }
 
@@ -430,7 +547,7 @@ function boot() {
   // the frame loop drives Lenis too
   app.onFrame(() => lenis.raf(performance.now()));
   // in still mode, a test harness sets vh and renders once
-  (window as any).__go = (v: number, t = 20) => { vh = v; window.scrollTo(0, (v / 100) * innerHeight); for (let i = 0; i < 3; i++) app.renderOnce(t + i / 60); };
+  (window as any).__go = (v: number, t = 20) => { vh = v; window.scrollTo(0, (scrollFromStory(v) / 100) * innerHeight); for (let i = 0; i < 3; i++) app.renderOnce(t + i / 60); };
   (window as any).__open = openPanel;
   void works; void RAIL; void SEA_Y;
 }

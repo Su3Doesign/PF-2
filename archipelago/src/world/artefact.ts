@@ -15,21 +15,32 @@ export interface Artefact {
 
 const hitMat = new THREE.MeshBasicMaterial({ visible: false });
 
-/** Builds a hit box and label anchor around an object's current bounds. */
-export function makeArtefact(slug: string, object: THREE.Object3D, parent: THREE.Object3D, pad = 1.1, labelLift = 0.6): Artefact {
+/**
+ * Builds a hit box and a label anchor around an object, parented to the object itself so
+ * both travel with it (the cars race, the helmet turns). The box is measured in the
+ * object's own frame. `_parent` is kept for call-site compatibility.
+ */
+export function makeArtefact(slug: string, object: THREE.Object3D, _parent: THREE.Object3D | null, pad = 1.1, labelLift = 0.6): Artefact {
   object.updateMatrixWorld(true);
-  parent.updateMatrixWorld(true);
-  const box = new THREE.Box3().setFromObject(object);
-  const inv = new THREE.Matrix4().copy(parent.matrixWorld).invert();
+  const inv = new THREE.Matrix4().copy(object.matrixWorld).invert();
+  const box = new THREE.Box3(); const tmp = new THREE.Box3(); const m = new THREE.Matrix4();
+  object.traverse((o) => {
+    const mesh = o as THREE.Mesh;
+    if (!mesh.isMesh || !mesh.geometry || mesh.userData.slug) return;
+    if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+    tmp.copy(mesh.geometry.boundingBox!).applyMatrix4(m.multiplyMatrices(inv, mesh.matrixWorld));
+    box.union(tmp);
+  });
+  if (box.isEmpty()) box.setFromCenterAndSize(new THREE.Vector3(), new THREE.Vector3(1, 1, 1));
   const c = box.getCenter(new THREE.Vector3());
   const s = box.getSize(new THREE.Vector3()).multiplyScalar(pad);
-  const hit = new THREE.Mesh(new THREE.BoxGeometry(Math.max(s.x, 0.5), Math.max(s.y, 0.5), Math.max(s.z, 0.5)), hitMat);
-  hit.position.copy(c.clone().applyMatrix4(inv));
+  const hit = new THREE.Mesh(new THREE.BoxGeometry(Math.max(s.x, 0.4), Math.max(s.y, 0.4), Math.max(s.z, 0.4)), hitMat);
+  hit.position.copy(c);
   hit.userData.slug = slug;
-  parent.add(hit);
+  object.add(hit);
   const label = new THREE.Object3D();
-  label.position.copy(new THREE.Vector3(c.x, box.max.y + labelLift, c.z).applyMatrix4(inv));
-  parent.add(label);
+  label.position.set(c.x, box.max.y + labelLift / Math.max(1e-3, object.getWorldScale(new THREE.Vector3()).y), c.z);
+  object.add(label);
   return { slug, object, hit, label, hovered: false, hover: 0, baseRotY: object.rotation.y };
 }
 

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { VPoint, VSpot } from './lights';
 import { rng } from './shared';
 import { marbleMaterial, std, glowMaterial, imageMaterial } from './materials';
 import { makeArtefact, type Artefact } from './artefact';
@@ -49,9 +50,39 @@ export function createMonuments(island: Island, env: THREE.Texture, q: Quality) 
   plinth.add(new THREE.Mesh(new THREE.CylinderGeometry(7.5, 8.2, 1.2, 8), stone).translateY(0.6));
   plinth.add(new THREE.Mesh(new THREE.CylinderGeometry(5.2, 5.6, 4.2, 8), marbleBlock).translateY(3.3));
   const plate = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.9, 0.1), glowMaterial(0xc9a86a, 0.9)); plate.position.set(0, 3.3, 5.0); plinth.add(plate);
-  const headLight = new THREE.SpotLight(0xfff0dd, 420, 70, 0.42, 0.7, 1.4); headLight.position.set(18, 34, 20); headLight.target.position.copy(HEAD).add(new THREE.Vector3(0, 12, 0)); root.add(headLight, headLight.target);
-  const rimL = new THREE.SpotLight(0x8ea7ff, 260, 70, 0.5, 0.8, 1.4); rimL.position.set(-22, 20, -26); rimL.target.position.copy(HEAD).add(new THREE.Vector3(0, 11, 0)); root.add(rimL, rimL.target);
+  const headLight = new VSpot(0xfff0dd, 420, 70, 0.42, 0.7, 1.4); headLight.position.set(18, 34, 20); headLight.target.position.copy(HEAD).add(new THREE.Vector3(0, 12, 0)); root.add(headLight, headLight.target);
+  const rimL = new VSpot(0x8ea7ff, 260, 70, 0.5, 0.8, 1.4); rimL.position.set(-22, 20, -26); rimL.target.position.copy(HEAD).add(new THREE.Vector3(0, 11, 0)); root.add(rimL, rimL.target);
   anchor('head', HEAD.x, 13, HEAD.z);
+
+  // the atelier around the colossal head: scaffold towers, planks and a hoist with a block
+  const wood = std(0x5b4330, 0.85, 0, { contour: 0 });
+  const scaffold = new THREE.Group(); scaffold.position.copy(HEAD); root.add(scaffold);
+  for (const [x, z] of [[-9, -6], [-9, 6], [9, -6], [9, 6], [-9, -14], [9, -14]] as const) {
+    scaffold.add(new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 22, 6), darkMetal).translateX(x).translateY(11).translateZ(z));
+  }
+  for (const yy of [6, 11, 16, 21]) for (const x of [-9, 9]) {
+    scaffold.add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 20), darkMetal).translateX(x).translateY(yy).translateZ(-4));
+    scaffold.add(new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.12, 20), wood).translateX(x).translateY(yy - 0.12).translateZ(-4));
+  }
+  const hoist = new THREE.Group(); hoist.position.set(-16, 0, -14); root.add(hoist);
+  hoist.add(new THREE.Mesh(new THREE.BoxGeometry(0.6, 26, 0.6), darkMetal).translateY(13));
+  hoist.add(new THREE.Mesh(new THREE.BoxGeometry(14, 0.5, 0.5), darkMetal).translateX(5).translateY(26));
+  hoist.add(new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 10), darkMetal).translateX(10).translateY(21));
+  const hoistBlock = new THREE.Mesh(new THREE.BoxGeometry(3, 2, 2.2), marbleBlock); hoistBlock.position.set(10, 14, 0); hoist.add(hoistBlock);
+  // a ring of columns round the quarry, some whole, some broken
+  const colGeo = new THREE.CylinderGeometry(0.9, 1.0, 1, 20, 1); colGeo.translate(0, 0.5, 0);
+  const cols = new THREE.InstancedMesh(colGeo, marbleBlock, 22);
+  const caps = new THREE.InstancedMesh(new THREE.BoxGeometry(2.4, 0.6, 2.4), marbleBlock, 22);
+  for (let i = 0; i < 22; i++) {
+    const a = 4.4 + 0.5 + (i / 22) * Math.PI * 1.55; const rad = 44 + (i % 2) * 3;
+    const h = i % 4 === 1 ? 3 + r() * 4 : 13 + r() * 2;
+    v.set(Math.cos(a) * rad, -0.6, Math.sin(a) * rad);
+    cols.setMatrixAt(i, m4.compose(v, qt.identity(), sc.set(1, h, 1)));
+    caps.setMatrixAt(i, m4.compose(v.clone().setY(h - 0.3), qt.identity(), sc.set(h > 10 ? 1 : 0.001, 1, h > 10 ? 1 : 0.001)));
+  }
+  root.add(cols, caps);
+  // studies: the same head, half-carved, emerging from blocks across the quarry
+  const studyHeads: [number, number, number, number, number][] = [[-24, -26, 4.2, 0.8, 2.1], [26, -22, 3.4, -0.9, 1.7], [-30, 12, 3.0, 1.9, 1.4]];
 
   // Halden: the field camera on its tripod, under a north-light frame, aimed at the head
   const CAM = new THREE.Vector3(17, 0, 15);
@@ -63,8 +94,7 @@ export function createMonuments(island: Island, env: THREE.Texture, q: Quality) 
   const mullions = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(8, 5.4, 4, 3)), new THREE.LineBasicMaterial({ color: 0x3a3c44 }));
   mullions.position.copy(glass.position); mullions.rotation.copy(glass.rotation); north.add(mullions);
   const softbox = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 3.2), glowMaterial(0xfff4e6, 2.2)); softbox.position.set(-5, 3.2, 1); softbox.rotation.y = 0.9; north.add(softbox);
-  const northLight = new THREE.RectAreaLight(0xe8eeff, 0, 1, 1); north.add(northLight);
-  const halden = new THREE.PointLight(0xfff0e0, 140, 14, 1.6); halden.position.set(-3, 5, 2); north.add(halden);
+  const halden = new VPoint(0xfff0e0, 140, 14, 1.6); halden.position.set(-3, 5, 2); north.add(halden);
   anchor('camera', CAM.x, 3, CAM.z);
 
   // the Altair road: a spiral down the cliff from the terrace edge
@@ -116,9 +146,9 @@ export function createMonuments(island: Island, env: THREE.Texture, q: Quality) 
   const trees = new THREE.InstancedMesh(treeGeo, std(0x1d2a22, 0.95, 0, { contour: 0, chartGlow: 0.4 }), TREES);
   for (let i = 0; i < TREES; i++) {
     const t = r(); const p = road.getPointAt(t); const tan = road.getTangentAt(t);
-    const outward = new THREE.Vector3(-tan.z, 0, tan.x).normalize().multiplyScalar((r() < 0.5 ? 1 : -1) * (RW / 2 + 1.6 + r() * 3.5));
+    const outward = new THREE.Vector3(-tan.z, 0, tan.x).normalize().multiplyScalar((r() < 0.5 ? 1 : -1) * (RW / 2 + 3.4 + r() * 5));
     v.copy(p).add(outward); v.y -= 0.2;
-    const s = 0.6 + r() * 0.9;
+    const s = 0.45 + r() * 0.6;
     trees.setMatrixAt(i, m4.compose(v, qt.setFromAxisAngle(new THREE.Vector3(0, 1, 0), r() * 6), sc.set(s, s * (0.8 + r() * 0.6), s)));
   }
   root.add(trees);
@@ -129,7 +159,7 @@ export function createMonuments(island: Island, env: THREE.Texture, q: Quality) 
   mono.add(new THREE.Mesh(new THREE.BoxGeometry(9, 22, 6), std(0x0d0e12, 0.35, 0.3, { contour: 2 })).translateY(10).translateZ(-5));
   mono.add(new THREE.Mesh(new THREE.BoxGeometry(7.4, 0.12, 0.1), glowMaterial(0xffd9a0, 4)).translateY(12).translateZ(-1.95));
   mono.add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 8, 0.1), glowMaterial(0xffd9a0, 3)).translateY(8).translateZ(-1.95).translateX(2.2));
-  const monoLight = new THREE.PointLight(0xffd9a0, 300, 30, 1.6); monoLight.position.set(0, 6, 2); mono.add(monoLight);
+  const monoLight = new VPoint(0xffd9a0, 300, 30, 1.6); monoLight.position.set(0, 6, 2); mono.add(monoLight);
   anchor('roadTop', roadPts[0].x, roadPts[0].y, roadPts[0].z);
   anchor('roadMid', road.getPointAt(0.5).x, road.getPointAt(0.5).y, road.getPointAt(0.5).z);
   anchor('monolith', end.x, end.y + 10, end.z);
@@ -145,9 +175,9 @@ export function createMonuments(island: Island, env: THREE.Texture, q: Quality) 
     g.add(new THREE.Mesh(new THREE.BoxGeometry(2.6, 2.4, 1.6), marbleBlock).translateY(1.2));
     if (img?.cover) {
       const { mat } = imageMaterial(loadTexture(img.cover), 1.25);
-      const frame = new THREE.Mesh(new THREE.BoxGeometry(5.0, 3.3, 0.22), darkMetal); frame.position.set(0, 4.2, 0); frame.rotation.x = -0.12; g.add(frame);
-      const pic = new THREE.Mesh(new THREE.PlaneGeometry(4.7, 2.94), mat); pic.position.set(0, 4.2, 0.12); pic.rotation.x = -0.12; g.add(pic);
-      const lamp = new THREE.PointLight(0xfff0dc, 40, 8, 1.6); lamp.position.set(0, 6.5, 2); g.add(lamp);
+      const frame = new THREE.Mesh(new THREE.BoxGeometry(6.6, 4.3, 0.22), darkMetal); frame.position.set(0, 5.0, 0); frame.rotation.x = -0.1; g.add(frame);
+      const pic = new THREE.Mesh(new THREE.PlaneGeometry(6.3, 3.94), mat); pic.position.set(0, 5.0, 0.12); pic.rotation.x = -0.1; g.add(pic);
+      const lamp = new VPoint(0xfff0dc, 40, 8, 1.6); lamp.position.set(0, 6.5, 2); g.add(lamp);
       artefacts.push(makeArtefact(slug, frame, root, 1.1, 0.5));
     }
   }
@@ -157,6 +187,10 @@ export function createMonuments(island: Island, env: THREE.Texture, q: Quality) 
   const ready = Promise.all([
     loadModel('head').then((g) => {
       g.scene.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh) { m.material = marble; } });
+      for (const [x, z, size, ry, sink] of studyHeads) {
+        const h2 = fitModel(g.scene.clone(), size * 2.2); h2.position.set(x, -sink, z); h2.rotation.y = ry; root.add(h2);
+        root.add(new THREE.Mesh(new THREE.BoxGeometry(size * 2.4, sink * 1.6 + 1.2, size * 2.2), marbleBlock).translateX(x).translateY((sink * 1.6 + 1.2) / 2 - 0.6).translateZ(z));
+      }
       const head = fitModel(g.scene, 14);
       head.position.copy(HEAD).add(new THREE.Vector3(0, 5.4, 0));
       root.add(head); headMesh = head;
@@ -173,11 +207,15 @@ export function createMonuments(island: Island, env: THREE.Texture, q: Quality) 
     }),
   ]).catch((e) => console.warn('monuments models', e));
 
+  let lastLit = -1, lastAll = false;
   function update(s: { t: number; lampsLit: number; headTurn: number; gold: number; allLamps?: boolean }) {
     gold.value = s.gold;
     if (headMesh) headMesh.rotation.y = s.headTurn;
-    // lamps light in sequence down the road
-    const lit = s.lampsLit;
+    if (hoistBlock) hoistBlock.position.y = 14 + Math.sin(s.t * 0.35) * 3;
+    // lamps light in sequence down the road (only rewritten when the count changes)
+    const lit = Math.round(s.lampsLit * 400) / 400;
+    if (lit === lastLit && !!s.allLamps === lastAll) return;
+    lastLit = lit; lastAll = !!s.allLamps;
     for (let i = 0; i <= LAMPS; i++) {
       const on = lampT[i] <= lit && (i !== 1377 || s.allLamps);
       lamps.setColorAt(i, on ? lampOn : lampOff);

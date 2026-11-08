@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { NOISE } from './glsl';
+import { TEXNOISE, makeNoiseTexture } from './noise';
 
 /** Uniforms every world material shares, so one write moves the whole archipelago. */
 export const G = {
@@ -8,6 +8,7 @@ export const G = {
   uTod: { value: 0 },
   uWire: { value: 0 },    // Konami: viewport shading, wireframe
   uDim: { value: 0 },     // overlays open: the world dims
+  tNoise: { value: makeNoiseTexture() as THREE.Texture },
 };
 
 export interface PatchOpts {
@@ -30,6 +31,7 @@ export function patchMaterial<T extends THREE.MeshStandardMaterial>(mat: T, o: P
     shader.uniforms.uChart = G.uChart;
     shader.uniforms.uTime = G.uTime;
     shader.uniforms.uDim = G.uDim;
+    shader.uniforms.tNoise = G.tNoise;
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vWPos;\nvarying vec3 vWNorm;')
       .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvWPos = (modelMatrix * vec4(transformed, 1.0)).xyz;\nvWNorm = normalize(mat3(modelMatrix) * objectNormal);');
@@ -38,15 +40,14 @@ export function patchMaterial<T extends THREE.MeshStandardMaterial>(mat: T, o: P
       .replace('#include <common>', `#include <common>
         varying vec3 vWPos; varying vec3 vWNorm;
         uniform float uChart; uniform float uTime; uniform float uDim;
-        ${bump > 0 || tint > 0 ? NOISE : ''}`)
+        ${bump > 0 || tint > 0 ? TEXNOISE : ''}`)
       .replace('#include <color_fragment>', `#include <color_fragment>
-        ${tint > 0 ? `{ float tn = snoise(vWPos * ${(bs * 0.35).toFixed(4)}) * 0.5 + 0.5; float tn2 = snoise(vWPos * ${(bs * 2.1).toFixed(4)});
-          float fwt = length(fwidth(vWPos)) * ${(bs * 2.1).toFixed(4)};
-          diffuseColor.rgb *= mix(1.0 - ${tint.toFixed(3)}, 1.0 + ${(tint * 0.6).toFixed(3)}, tn) * (1.0 + tn2 * ${(tint * 0.25).toFixed(3)} * (1.0 - smoothstep(0.1, 0.4, fwt))); }` : ''}`)
+        ${tint > 0 ? `{ vec3 wn = normalize(vWNorm);
+          float t1 = triLo(vWPos * ${(bs * 0.03).toFixed(4)}, wn);
+          float t2 = tri(vWPos * ${(bs * 0.25).toFixed(4)}, wn);
+          diffuseColor.rgb *= mix(1.0 - ${tint.toFixed(3)}, 1.0 + ${(tint * 0.6).toFixed(3)}, t1) * (1.0 + (t2 - 0.5) * ${(tint * 0.5).toFixed(3)}); }` : ''}`)
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
-        ${bump > 0 ? `{ float fw = length(fwidth(vWPos)) * ${bs.toFixed(4)};
-          float hgt = snoise(vWPos * ${bs.toFixed(4)}) * 0.6 * (1.0 - smoothstep(0.15, 0.5, fw))
-                    + snoise(vWPos * ${(bs * 3.1).toFixed(4)}) * 0.28 * (1.0 - smoothstep(0.03, 0.1, fw));
+        ${bump > 0 ? `{ float hgt = tri(vWPos * ${(bs * 0.12).toFixed(4)}, normalize(vWNorm));
           vec3 dpx = dFdx(vViewPosition), dpy = dFdy(vViewPosition);
           float dhx = dFdx(hgt), dhy = dFdy(hgt);
           vec3 r1 = cross(dpy, normal), r2 = cross(normal, dpx);

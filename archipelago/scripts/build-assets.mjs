@@ -104,16 +104,16 @@ const IMAGES = [
   ['kerb', P('44', 'images/01.png'), P('44', 'cover-808x632.jpg')],
   ['lotus', W('lotus-constructions/cover.webp'), W('lotus-constructions/render.webp'), W('lotus-constructions/structure.webp'), P('30', 'images/02.jpg')],
   ['capq', W('capq/cover.webp'), W('capq/form.webp'), P('28', 'images/02.jpg')],
-  ['magma', P('19', 'images/02.jpg'), P('19', 'images/01.jpg'), P('19', 'cover-808x632.jpg')],
+  ['magma', P('19', 'images/02.jpg'), P('19', 'images/01.jpg')],
   ['rem', P('45', 'images/rem-ig-01.png'), ...['rem-ig-02', 'rem-ig-06', 'rem-ig-04', 'rem-ig-05', 'rem-ig-07', 'rem-ig-08', 'rem-sheet-01'].map((n) => P('45', `images/${n}.png`))],
   ['deccan', seg('IMG_2336.JPG', 0), ...[5, 7, 13, 15, 19, 21].map((i) => seg('IMG_2336.JPG', i))],
   ['lagrange', seg('IMG_2330.JPG', 0, 1000), ...[7, 23, 24, 26, 29, 19].map((i) => seg('IMG_2330.JPG', i, 1000))],
   ['maruneta', seg('IMG_2331.JPG', 0), ...[5, 7, 20, 22, 25, 27].map((i) => seg('IMG_2331.JPG', i))],
-  ['rujuvu', seg('IMG_2332.JPG', 0), ...[5, 8, 14, 22, 23, 24].map((i) => seg('IMG_2332.JPG', i))],
+  ['rujuvu', D('IMG_2333.PNG'), ...[0, 5, 8, 14, 22, 23, 24].map((i) => seg('IMG_2332.JPG', i))],
   ['bsnl', seg('IMG_2335.JPG', 0), ...[10, 14, 25, 26, 28, 35].map((i) => seg('IMG_2335.JPG', i))],
   ['kosh', seg('IMG_2337.JPG', 0), ...[1, 4, 9, 16, 20, 21].map((i) => seg('IMG_2337.JPG', i))],
-  ['photon', seg('IMG_2339.JPG', 0), ...[5, 11, 15, 20, 23, 24].map((i) => seg('IMG_2339.JPG', i))],
-  ['mitti', D('IMG_5739.PNG'), ...[0, 4, 6, 12, 13, 14, 19].map((i) => seg('IMG_2340.JPG', i))],
+  ['photon', D('IMG_2338.PNG'), ...[0, 5, 11, 15, 20, 23, 24].map((i) => seg('IMG_2339.JPG', i))],
+  ['mitti', D('IMG_2341.PNG'), ...[0, 4, 6, 12, 13, 14, 19].map((i) => seg('IMG_2340.JPG', i))],
   ['three-houses', P('25', 'images/01.jpg'), P('25', 'images/02.jpg')],
   ['midea', P('31', 'images/01.jpg'), P('31', 'images/02.jpg')],
   ['investohome', P('27', 'images/01.jpg'), P('27', 'images/02.jpg')],
@@ -130,7 +130,7 @@ const IMAGES = [
   ['graphic-designs', P('21', 'images/01.png')],
   ['ebook', P('22', 'cover-808x632.jpg')],
   // About: the personal identity
-  ['self', D('IMG_5741.PNG'), D('IMG_2095.JPG'), D('IMG_2094.JPG')],
+  ['s3', D('IMG_5741.PNG'), D('IMG_5739.PNG'), seg('IMG_2095.JPG', 0, 1300), seg('IMG_2094.JPG', 0, 1300)],
 ];
 
 async function load(src) {
@@ -141,6 +141,17 @@ async function load(src) {
   }
   return sharp(src, { limitInputPixels: false });
 }
+
+// The full stitched presentations (Behance-length boards), shown whole in "Know more about it"
+// and on each case-study page. Tall boards are cut into tiles that stack without a seam.
+const BOARDS = {
+  lagrange: [D('IMG_2330.JPG')], maruneta: [D('IMG_2331.JPG')], rujuvu: [D('IMG_2332.JPG')], bsnl: [D('IMG_2335.JPG')],
+  deccan: [D('IMG_2336.JPG')], kosh: [D('IMG_2337.JPG')], photon: [D('IMG_2339.JPG')], mitti: [D('IMG_2340.JPG')],
+  s3: [D('IMG_5741.PNG'), D('IMG_2095.JPG'), D('IMG_2094.JPG')],
+  kerb: [P('44', 'images/01.png')],
+  rem: [...Array.from({ length: 14 }, (_, i) => P('45', `images/rem-sheet-${String(i + 1).padStart(2, '0')}.png`)), ...Array.from({ length: 8 }, (_, i) => P('45', `images/rem-ig-${String(i + 1).padStart(2, '0')}.png`))],
+};
+const TILE_H = 2400, BOARD_W = 1200;
 
 if (want('images')) {
   const meta = {};
@@ -168,6 +179,26 @@ if (want('images')) {
       const info = await (await load(g)).resize({ width: w, withoutEnlargement: true }).webp({ quality: 78 }).toFile(out('public', name));
       meta[slug].gallery.push({ src: name, w: info.width, h: info.height });
     }
+  }
+  for (const [slug, srcs] of Object.entries(BOARDS)) {
+    if (!meta[slug]) meta[slug] = { cover: null, thumb: null, gallery: [] };
+    fs.rmSync(path.join(ROOT, 'public/img/work', slug, 'board'), { recursive: true, force: true });
+    const tiles = []; let n = 0;
+    for (const src of srcs) {
+      if (!fs.existsSync(src)) { console.warn('missing board', slug, src); continue; }
+      const m = await sharp(src, { limitInputPixels: false }).metadata();
+      const w = Math.min(BOARD_W, m.width);
+      const scaled = await sharp(src, { limitInputPixels: false }).resize({ width: w }).raw().toBuffer({ resolveWithObject: true });
+      const H = scaled.info.height;
+      for (let top = 0; top < H; top += TILE_H) {
+        const h = Math.min(TILE_H, H - top);
+        const name = `img/work/${slug}/board/${String(++n).padStart(2, '0')}.webp`;
+        await sharp(scaled.data, { raw: scaled.info }).extract({ left: 0, top, width: w, height: h }).webp({ quality: 80 }).toFile(out('public', name));
+        tiles.push({ src: name, w, h });
+      }
+    }
+    meta[slug].board = tiles;
+    console.log('board', slug, tiles.length, 'tiles');
   }
   fs.writeFileSync(out('src/data/images.json'), JSON.stringify(meta, null, 1));
   console.log('images:', Object.keys(meta).length, 'works');

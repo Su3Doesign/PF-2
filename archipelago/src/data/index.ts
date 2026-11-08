@@ -7,7 +7,7 @@ export interface Work {
   live?: string; repo?: string; voyage?: boolean; brief?: string; facts?: [string, string][]; client?: string;
   floor?: string; alt?: number; isNew?: boolean; concept?: boolean; note?: string;
 }
-export interface Images { cover: string | null; thumb: string | null; square?: string; gallery: { src: string; w: number; h: number }[] }
+export interface Images { cover: string | null; thumb: string | null; square?: string; gallery: { src: string; w: number; h: number }[]; board?: { src: string; w: number; h: number }[] }
 
 export const profile = data.profile;
 export const islands = data.islands;

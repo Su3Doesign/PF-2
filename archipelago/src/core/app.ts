@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Effect, EffectComposer, RenderPass, EffectPass, BloomEffect, VignetteEffect, NoiseEffect, ToneMappingEffect, ToneMappingMode, BlendFunction, ChromaticAberrationEffect, SMAAEffect } from 'postprocessing';
+import { Effect, EffectComposer, RenderPass, EffectPass, BloomEffect, VignetteEffect, NoiseEffect, ToneMappingEffect, ToneMappingMode, BlendFunction, ChromaticAberrationEffect } from 'postprocessing';
 import { detectQuality, type Quality } from './quality';
 
 export type FrameFn = (dt: number, t: number) => void;
@@ -33,7 +33,7 @@ export class App {
     this.camera = new THREE.PerspectiveCamera(32, innerWidth / innerHeight, 0.3, 9000);
     this.scene.fog = new THREE.FogExp2(0x0a0f22, 0.00085);
 
-    this.composer = new EffectComposer(this.renderer, { frameBufferType: THREE.HalfFloatType, multisampling: this.quality.tier === 3 ? 4 : 0 });
+    this.composer = new EffectComposer(this.renderer, { frameBufferType: THREE.HalfFloatType, multisampling: this.quality.tier === 3 ? 4 : this.quality.tier === 2 && !this.quality.tablet ? 2 : 0 });
     this.composer.addPass(new RenderPass(this.scene, this.camera));
     // One stray NaN or Inf pixel (a degenerate normal on a grazing clearcoat, say) would be
     // smeared across the whole frame by the bloom's mip chain, so the HDR buffer is
@@ -47,7 +47,8 @@ export class App {
         c = max(c, vec3(0.0));
         outputColor = vec4(min(c, vec3(48.0)), inputColor.a);
       }`)));
-    this.bloom = new BloomEffect({ mipmapBlur: true, luminanceThreshold: 0.62, luminanceSmoothing: 0.22, intensity: 1.15, radius: 0.72 });
+    this.bloom = new BloomEffect({ mipmapBlur: true, luminanceThreshold: 0.62, luminanceSmoothing: 0.22, intensity: 1.15, radius: 0.72, resolutionScale: this.quality.tier === 3 ? 0.5 : 0.35 });
+    if (this.quality.tier < 3) (this.bloom as unknown as { mipmapBlurPass: { levels: number } }).mipmapBlurPass.levels = 6;
     this.vignette = new VignetteEffect({ offset: 0.28, darkness: 0.62 });
     const noise = new NoiseEffect({ blendFunction: BlendFunction.OVERLAY, premultiply: false });
     noise.blendMode.opacity.value = 0.09;
@@ -55,8 +56,8 @@ export class App {
     const tone = new ToneMappingEffect({ mode: ToneMappingMode.ACES_FILMIC });
     // Convolution effects (chromatic aberration, SMAA) each need a pass of their own.
     this.composer.addPass(new EffectPass(this.camera, this.bloom, tone, this.vignette, noise));
-    this.composer.addPass(new EffectPass(this.camera, this.chroma));
-    if (this.quality.tier < 3) this.composer.addPass(new EffectPass(this.camera, new SMAAEffect()));
+    // the extra full-screen passes only where the GPU has room for them
+    if (this.quality.fancyPost) this.composer.addPass(new EffectPass(this.camera, this.chroma));
 
     this.resize();
     addEventListener('resize', () => this.resize());
@@ -90,12 +91,14 @@ export class App {
   }
 
   /** Frame governor: if frames run long for two seconds, step resolution down. */
+  degrade = 0;
+  onDegrade: (level: number) => void = () => {};
   private govern(dt: number) {
     if (dt > 0.024) this.slow += dt; else this.slow = Math.max(0, this.slow - dt * 0.5);
-    if (this.slow > 2 && this.dprScale > 0.6) {
-      this.dprScale = Math.max(0.6, this.dprScale - 0.15);
+    if (this.slow > 1.5) {
       this.slow = 0;
-      this.resize();
+      if (this.dprScale > 0.7) { this.dprScale = Math.max(0.7, this.dprScale - 0.15); this.resize(); }
+      else if (this.degrade < 3) { this.degrade++; this.onDegrade(this.degrade); }
     }
   }
 }

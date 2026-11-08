@@ -18,16 +18,22 @@ export const TOTAL = 2000;
 export const BEATS: Beat[] = [
   { id: 'hero', from: 0, to: 100, island: 'hero', hint: 'Scroll to set sail' },
   { id: 'intro', from: 100, to: 180, island: 'transit', pull: 'Four islands, one night, and every piece of work I have made, from the first render to the newest brand.' },
-  { id: 'worlds', from: 180, to: 260, island: 'worlds', snap: 222 },
-  { id: 'pond', from: 260, to: 340, island: 'worlds', works: ['koi', 'roman', 'caves'] },
-  { id: 'gate', from: 340, to: 420, island: 'worlds', works: ['ringgate', 'rotunda'] },
-  { id: 'shrine', from: 420, to: 490, island: 'worlds', works: ['fudo', 'castle'] },
-  { id: 'archive', from: 490, to: 540, island: 'worlds', works: ['overgrown'] },
+  { id: 'worlds', from: 180, to: 240, island: 'worlds', snap: 215 },
+  { id: 'pond', from: 240, to: 290, island: 'worlds', works: ['koi'] },
+  { id: 'pagoda', from: 290, to: 330, island: 'worlds', works: ['roman'] },
+  { id: 'caves', from: 330, to: 365, island: 'worlds', works: ['caves'] },
+  { id: 'gate', from: 365, to: 405, island: 'worlds', works: ['ringgate'] },
+  { id: 'rotunda', from: 405, to: 440, island: 'worlds', works: ['rotunda'] },
+  { id: 'shrine', from: 440, to: 470, island: 'worlds', works: ['fudo'] },
+  { id: 'castle', from: 470, to: 505, island: 'worlds', works: ['castle'] },
+  { id: 'archive', from: 505, to: 540, island: 'worlds', works: ['overgrown'] },
   { id: 'toMachines', from: 540, to: 580, island: 'transit', pull: 'Machines are worlds that move.' },
   { id: 'machines', from: 580, to: 620, island: 'machines', snap: 604 },
-  { id: 'race', from: 620, to: 700, island: 'machines', works: ['hyperion', 'alpine'] },
-  { id: 'park', from: 700, to: 780, island: 'machines', works: ['hyperion', 'alpine', 'coachwork'] },
-  { id: 'hangar', from: 780, to: 860, island: 'machines', works: ['vanta', 'hyperion-case'] },
+  { id: 'race', from: 620, to: 690, island: 'machines', works: ['hyperion', 'alpine'] },
+  { id: 'turntable', from: 690, to: 735, island: 'machines', works: ['hyperion'] },
+  { id: 'lift', from: 735, to: 760, island: 'machines', works: ['alpine'] },
+  { id: 'frame', from: 760, to: 785, island: 'machines', works: ['coachwork'] },
+  { id: 'hangar', from: 785, to: 860, island: 'machines', works: ['vanta', 'hyperion-case'] },
   { id: 'toMonuments', from: 860, to: 910, island: 'transit', pull: 'Stone remembers.' },
   { id: 'monuments', from: 910, to: 960, island: 'monuments', snap: 936 },
   { id: 'head', from: 960, to: 1030, island: 'monuments', works: ['parian'] },
@@ -44,11 +50,28 @@ export const BEATS: Beat[] = [
   { id: 'clay', from: 1525, to: 1565, island: 'brands', works: ['mitti', 'maruneta'] },
   { id: 'signal', from: 1565, to: 1625, island: 'brands', works: ['bsnl', 'rujuvu', 'kosh', 'lagrange'] },
   { id: 'magma', from: 1625, to: 1665, island: 'brands', works: ['magma'] },
-  { id: 'crown', from: 1665, to: 1710, island: 'brands', works: ['photon'] },
+  { id: 'crown', from: 1665, to: 1710, island: 'brands', works: ['s3', 'photon'] },
   { id: 'map', from: 1710, to: 1830, island: 'map', hint: 'Drag to chart · click to fly', snap: 1772 },
   { id: 'lighthouse', from: 1830, to: 1940, island: 'lighthouse' },
   { id: 'footer', from: 1940, to: 2000, island: 'lighthouse' },
 ];
+
+/**
+ * The story is authored in units (2000 in all); scroll covers more ground where there is
+ * more to look at, so each island gets room to breathe. A piecewise-linear warp maps one
+ * to the other in both directions.
+ */
+const WARP: [number, number][] = [[0, 1], [180, 1.3], [540, 1], [580, 1.6], [860, 1], [910, 1.3], [1210, 1], [1270, 1.35], [1710, 1], [2000, 1]];
+const KNOTS: [number, number][] = (() => { const k: [number, number][] = [[0, 0]]; for (let i = 0; i < WARP.length - 1; i++) { const [a, f] = WARP[i], b = WARP[i + 1][0]; k.push([b, k[k.length - 1][1] + (b - a) * f]); } return k; })();
+export const SCROLL_TOTAL = KNOTS[KNOTS.length - 1][1];
+export function storyFromScroll(sv: number) {
+  for (let i = 0; i < KNOTS.length - 1; i++) { const [a, sa] = KNOTS[i], [b, sb] = KNOTS[i + 1]; if (sv <= sb) return a + (b - a) * Math.max(0, (sv - sa) / (sb - sa)); }
+  return TOTAL + (sv - SCROLL_TOTAL);
+}
+export function scrollFromStory(v: number) {
+  for (let i = 0; i < KNOTS.length - 1; i++) { const [a, sa] = KNOTS[i], [b, sb] = KNOTS[i + 1]; if (v <= b) return sa + (sb - sa) * Math.max(0, (v - a) / (b - a)); }
+  return SCROLL_TOTAL;
+}
 
 export function beatAt(vh: number) {
   for (const b of BEATS) if (vh >= b.from && vh < b.to) return b;
@@ -62,9 +85,11 @@ type Islands = Record<IslandId, { group: THREE.Object3D }>;
  * (the cars, the road) so keys can follow them.
  */
 export function buildKeys(islands: Islands, dyn: {
-  carPos: () => THREE.Vector3; carAhead: () => THREE.Vector3;
+  cragView: (x: number, y: number, z: number) => THREE.Vector3; cragAt: (x: number, y: number, z: number) => THREE.Vector3;
   road: THREE.Curve<THREE.Vector3>; roadParent: THREE.Object3D;
   floors: { slug: string; view: THREE.Vector3; look: THREE.Vector3 }[]; towerRoot: THREE.Object3D;
+  /** A point riding with the Hyperion on the circuit: metres behind, above and outside it. */
+  chase: (back: number, lift: number, side: number) => THREE.Vector3;
 }): Key[] {
   const W = (id: IslandId, x: number, y: number, z: number) => islands[id].group.localToWorld(new THREE.Vector3(x, y, z));
   const T = (v: THREE.Vector3) => dyn.towerRoot.localToWorld(v.clone());
@@ -84,36 +109,50 @@ export function buildKeys(islands: Islands, dyn: {
     { at: 0, pos: new THREE.Vector3(30, 300, 860), look: new THREE.Vector3(50, 92, -10), fov: 34 },
     { at: 60, pos: new THREE.Vector3(10, 280, 800), look: new THREE.Vector3(30, 92, -10), fov: 34 },
     { at: 140, pos: new THREE.Vector3(-150, 210, 640), look: W('worlds', 0, 10, 0), fov: 32 },
-    // Worlds
-    { at: 222, pos: W('worlds', 70, 64, 150), look: W('worlds', 0, 6, 4) },
-    { at: 290, pos: W('worlds', -2, 16, 84), look: W('worlds', -16, 3.5, 22) },
-    { at: 320, pos: W('worlds', -14, 8.5, 60), look: W('worlds', -22, 4.6, 34) },
-    { at: 372, pos: W('worlds', 38, 22, 116), look: W('worlds', 60, 14, 46) },
-    { at: 405, pos: W('worlds', 84, 10, 98), look: W('worlds', 46, 8, 52) },
-    { at: 448, pos: W('worlds', -24, 22, 58), look: W('worlds', -60, 10, 14) },
-    { at: 472, pos: W('worlds', -40, 30, 20), look: W('worlds', -86, 26, -46) },
-    { at: 510, pos: W('worlds', 30, 7, -12), look: W('worlds', 70, 5, -44) },
+    // Worlds: one stop per work, each framed with its plate
+    { at: 215, pos: W('worlds', 70, 64, 150), look: W('worlds', 0, 6, 4) },
+    { at: 258, pos: W('worlds', 4, 19, 71), look: W('worlds', -12, 2.5, 20) },
+    { at: 280, pos: W('worlds', -6, 15, 67), look: W('worlds', -18, 3, 22) },
+    { at: 306, pos: W('worlds', 27, 12.5, 7), look: W('worlds', 2, 8, -30) },
+    { at: 322, pos: W('worlds', 20, 10, -6), look: W('worlds', -2, 8, -32) },
+    { at: 346, pos: W('worlds', -46, 10, 6), look: W('worlds', -80, 4, -9) },
+    { at: 358, pos: W('worlds', -49, 9.5, 3), look: W('worlds', -82, 3.5, -10) },
+    { at: 382, pos: W('worlds', 5, 17, 21), look: W('worlds', 62, 14, 38) },
+    { at: 398, pos: W('worlds', 10, 15, 19), look: W('worlds', 62, 14, 38) },
+    { at: 420, pos: W('worlds', 40, 9, 94), look: W('worlds', 32, 3.5, 64) },
+    { at: 434, pos: W('worlds', 44, 8, 92), look: W('worlds', 32, 3.5, 64) },
+    { at: 452, pos: W('worlds', -30, 8, 31), look: W('worlds', -55, 3.6, 23) },
+    { at: 464, pos: W('worlds', -32, 7.5, 29), look: W('worlds', -56, 3.6, 22) },
+    { at: 485, pos: dyn.cragView(54, 26, 30), look: dyn.cragAt(0, 14, 0) },
+    { at: 499, pos: dyn.cragView(58, 22, 18), look: dyn.cragAt(0, 13, 0) },
+    { at: 520, pos: W('worlds', 30, 9.5, -7), look: W('worlds', 72, 6, -46) },
     // transit along the light-falls to Machines
     { at: 560, pos: new THREE.Vector3(-30, 140, 380), look: W('machines', 0, 0, 0) },
     { at: 604, pos: W('machines', 6, 46, 92), look: W('machines', 0, 0, -4) },
-    // race: chase the Hyperion round the circuit
-    { at: 640, pos: () => dyn.carPos(), look: () => dyn.carAhead() },
-    { at: 680, pos: () => dyn.carPos(), look: () => dyn.carAhead() },
-    // park: turntable, the lift, the Coachwork frame
-    { at: 712, pos: W('machines', -10.5, 3.1, -17.5), look: W('machines', -17.5, 1.0, -25.5) },
-    { at: 740, pos: W('machines', 15, 5.5, -13), look: W('machines', 10, 2.6, -26) },
-    { at: 768, pos: W('machines', -6, 4.6, 10), look: W('machines', -15, 1.4, 0) },
-    // the hangar
-    { at: 800, pos: W('machines', -2, 5, -12), look: W('machines', -2, 3, -40) },
-    { at: 840, pos: W('machines', -2, 3, -31), look: W('machines', -2, 2.4, -42) },
+    // the race: riding with the Hyperion, then a wide shot of both cars, then the pits
+    { at: 630, pos: () => dyn.chase(10, 3.4, 3.5), look: () => dyn.chase(-9, 0.9, 0) },
+    { at: 646, pos: () => dyn.chase(-13, 1.7, -3), look: () => dyn.chase(0, 0.8, 0) },
+    { at: 662, pos: W('machines', 44, 18, 38), look: W('machines', 2, 1, 0) },
+    { at: 690, pos: W('machines', 0, 16, 5), look: W('machines', 0, 1, -21) },
+    { at: 714, pos: W('machines', -9.5, 4.4, -16), look: W('machines', -17, 1.1, -25.5) },
+    { at: 730, pos: W('machines', -10.5, 3.8, -17.5), look: W('machines', -17, 1.0, -25.5) },
+    { at: 746, pos: W('machines', 16.5, 5, -15.5), look: W('machines', 10, 2.2, -26) },
+    { at: 756, pos: W('machines', 17, 4.6, -16.5), look: W('machines', 10, 2.2, -26) },
+    { at: 772, pos: W('machines', -6.5, 4.5, 9), look: W('machines', -15, 1.3, 0) },
+    { at: 782, pos: W('machines', -7, 4.2, 8), look: W('machines', -15, 1.3, 0) },
+    { at: 806, pos: W('machines', -2, 5.5, -12), look: W('machines', -2, 3.2, -45) },
+    { at: 830, pos: W('machines', -2, 3.0, -27), look: W('machines', -2, 2.2, -42) },
+    { at: 852, pos: W('machines', -4.4, 2.8, -26.4), look: W('machines', -7.6, 2.2, -32.2) },
     // up and over to Monuments
     { at: 885, pos: new THREE.Vector3(80, 230, -40), look: W('monuments', 0, 10, 0) },
     { at: 936, pos: W('monuments', 40, 46, 70), look: W('monuments', 0, 10, -4) },
-    { at: 985, pos: W('monuments', 6, 15, 26), look: W('monuments', 0, 13, -4) },
-    { at: 1015, pos: W('monuments', -10, 15, 22), look: W('monuments', 0, 13, -4) },
+    { at: 978, pos: W('monuments', 6, 15, 28), look: W('monuments', 0, 13, -4) },
+    { at: 1004, pos: W('monuments', -10, 15, 24), look: W('monuments', 0, 13, -4) },
+    { at: 1020, pos: W('monuments', -13, 14, 21), look: W('monuments', 0, 13, -4) },
     { at: 1055, pos: W('monuments', 25, 4.4, 25), look: W('monuments', 9, 6.5, 5) },
-    { at: 1100, pos: W('monuments', -6, 6.5, 8), look: W('monuments', -26, 4, 6) },
-    ...roadScrub(0.0, 0.92, 1130, 1195, 3.2, 0.06),
+    { at: 1098, pos: W('monuments', -4, 7.5, 7), look: W('monuments', -27, 5, 6) },
+    { at: 1112, pos: W('monuments', -5, 7, 8), look: W('monuments', -27, 5, 6) },
+    ...roadScrub(0.0, 0.92, 1130, 1195, 7, 0.08),
     { at: 1208, pos: () => road(1, 6)().add(new THREE.Vector3(0, 4, 0)), look: road(1, 10) },
     // the long glide to the tower
     { at: 1245, pos: new THREE.Vector3(260, 170, -110), look: T(new THREE.Vector3(0, 40, 0)) },
@@ -126,8 +165,8 @@ export function buildKeys(islands: Islands, dyn: {
     // into the core and up the molten shaft
     { at: 1630, pos: T(new THREE.Vector3(0, 26, 0)), look: T(new THREE.Vector3(0.6, 60, 0.3)), fov: 52 },
     { at: 1660, pos: T(new THREE.Vector3(0, 118, 0)), look: T(new THREE.Vector3(0.5, 160, 0.2)), fov: 52 },
-    { at: 1680, pos: T(new THREE.Vector3(30, 150, 42)), look: T(new THREE.Vector3(0, 136, 0)), fov: 34 },
-    { at: 1700, pos: T(new THREE.Vector3(-40, 156, 30)), look: T(new THREE.Vector3(0, 134, 0)), fov: 34, orbit: { axis } },
+    { at: 1680, pos: T(new THREE.Vector3(30, 156, 42)), look: T(new THREE.Vector3(0, 147, 0)), fov: 34 },
+    { at: 1700, pos: T(new THREE.Vector3(-40, 158, 30)), look: T(new THREE.Vector3(0, 144, 0)), fov: 34, orbit: { axis } },
     // the map: rise and flatten into an almost orthographic chart
     { at: 1745, pos: new THREE.Vector3(C.x, 4200, C.z + 30), look: new THREE.Vector3(C.x, 0, C.z), fov: 12 },
     { at: 1800, pos: new THREE.Vector3(C.x, 4200, C.z + 30), look: new THREE.Vector3(C.x, 0, C.z), fov: 12 },
@@ -141,7 +180,7 @@ export function buildKeys(islands: Islands, dyn: {
 
 /** Where each island's rail pin sends you. */
 export const RAIL: { id: string; label: string; vh: number }[] = [
-  { id: 'worlds', label: 'Worlds', vh: 222 },
+  { id: 'worlds', label: 'Worlds', vh: 215 },
   { id: 'machines', label: 'Machines', vh: 604 },
   { id: 'monuments', label: 'Monuments', vh: 936 },
   { id: 'brands', label: 'Brands', vh: 1296 },

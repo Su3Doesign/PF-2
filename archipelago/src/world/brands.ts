@@ -1,9 +1,10 @@
 import * as THREE from 'three';
+import { VPoint, VSpot } from './lights';
 import { G, rng } from './shared';
 import { std, glowMaterial, imageMaterial } from './materials';
 import { makeArtefact, textTexture, type Artefact } from './artefact';
 import { loadTexture } from '../core/loaders';
-import { NOISE } from './glsl';
+import { TEXNOISE } from './noise';
 import type { Island } from './island';
 import type { Quality } from '../core/quality';
 import images from '../data/images.json';
@@ -32,26 +33,27 @@ export interface Floor {
 }
 
 function lavaMaterial() {
-  const u = { uTime: G.uTime, uCrack: { value: 0.3 }, uHeat: { value: 1 }, uCursor: { value: new THREE.Vector3(0, -999, 0) }, uChart: G.uChart, uDim: G.uDim };
+  const u = { uTime: G.uTime, uCrack: { value: 0.3 }, uHeat: { value: 1 }, uCursor: { value: new THREE.Vector3(0, -999, 0) }, uChart: G.uChart, uDim: G.uDim, tNoise: G.tNoise };
   const mat = new THREE.ShaderMaterial({
     uniforms: u, side: THREE.DoubleSide,
     vertexShader: 'varying vec3 vO; varying vec3 vW; void main(){ vO=position; vec4 w=modelMatrix*vec4(position,1.0); vW=w.xyz; gl_Position=projectionMatrix*viewMatrix*w; }',
     fragmentShader: /* glsl */ `
       uniform float uTime, uCrack, uHeat, uChart, uDim; uniform vec3 uCursor; varying vec3 vO; varying vec3 vW;
-      ${NOISE}
+      ${TEXNOISE}
       void main(){
-        vec3 p = vO * 0.18;
-        vec3 q = vec3(fbm3(p + vec3(0.0, -uTime*0.12, 0.0)), fbm3(p + vec3(5.2, -uTime*0.1, 1.3)), 0.0);
-        float n = fbm3(p*1.6 + q*1.8 + vec3(0.0, -uTime*0.2, 0.0));
+        // cylinder coordinates: angle round the shaft, height up it (tiles seamlessly round)
+        vec2 c = vec2(atan(vO.z, vO.x) / 6.28318 * 4.0, vO.y * 0.028);
+        vec2 q = texture2D(tNoise, c * 0.5 + vec2(0.0, -uTime * 0.01)).rg - 0.5;
+        float n = tn(c + q * 0.6 + vec2(0.0, -uTime * 0.025)) * 2.0 - 1.0;
         // crust: cells of dark rock, molten veins between them
-        float cells = abs(snoise(p*2.2 + q));
-        float vein = 1.0 - smoothstep(0.0, 0.1 + uCrack*0.28, cells);
+        float cells = abs(tn(c * 1.7 + q * 0.4 + vec2(0.13, -uTime * 0.012)) * 2.0 - 1.0);
+        float vein = 1.0 - smoothstep(0.0, 0.08 + uCrack*0.15, cells);
         float cool = exp(-pow(length(vW - uCursor), 2.0) * 0.02);
         float heat = clamp(vein * (0.85 + n*0.9) * uHeat - cool*0.8, 0.0, 1.0) + 0.06;
         vec3 crust = vec3(0.025,0.018,0.016) * (0.6 + n*0.4);
         vec3 ramp = mix(vec3(0.6,0.03,0.02), vec3(1.0,0.32,0.05), smoothstep(0.2,0.7,heat));
         ramp = mix(ramp, vec3(1.0,0.85,0.55), smoothstep(0.75,1.0,heat));
-        vec3 col = mix(crust, ramp * (2.0 + heat*5.0), smoothstep(0.05, 0.4, heat));
+        vec3 col = mix(crust, ramp * (1.1 + heat*2.6), smoothstep(0.05, 0.4, heat));
         col = mix(col, vec3(0.02,0.026,0.055) + vec3(0.79,0.66,0.42)*vein*0.4, uChart);
         gl_FragColor = vec4(col * (1.0 - uDim*0.6), 1.0);
       }`,
@@ -129,24 +131,53 @@ export function createBrands(island: Island, env: THREE.Texture, q: Quality) {
   const core = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 4.2, 128, 48, 32, true), lava.mat);
   core.position.y = 64; root.add(core);
   const slot = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 110), lava.mat); slot.position.set(-4.3, 62, 9.06); root.add(slot);
-  const coreLight = new THREE.PointLight(0xff4a1a, 160, 26, 1.8); coreLight.position.set(-4.5, 60, 11); root.add(coreLight);
-  // cans set into the shaft wall like fossils, lit from behind
+  const coreLight = new VPoint(0xff4a1a, 160, 26, 1.8); coreLight.position.set(-4.5, 60, 11); root.add(coreLight);
+  // Magma cans: real cans (a lathed body, aluminium ends, the label wrapped round) set into
+  // lit niches spiralling up the shaft, and one hero can turning in the heat halfway up
   const magma = IMG.magma;
-  const canTex = magma?.cover ? loadTexture(magma.gallery[0]?.src ?? magma.cover) : null;
-  const canMat = canTex ? imageMaterial(canTex, 1.6).mat : glowMaterial(0xe2552b, 2);
-  for (let i = 0; i < 18; i++) {
-    const a = i * 2.39; const yy = 20 + i * 5.6;
-    const can = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 2.4, 24, 1, true), canMat);
-    can.position.set(Math.cos(a) * 3.9, yy, Math.sin(a) * 3.9); can.lookAt(0, yy, 0); can.rotateX(Math.PI / 2); root.add(can);
+  const labelCanvas = document.createElement('canvas'); labelCanvas.width = 1024; labelCanvas.height = 512;
+  const lg = labelCanvas.getContext('2d')!;
+  const paintLabel = (img?: HTMLImageElement) => {
+    const grd = lg.createLinearGradient(0, 0, 1024, 0); grd.addColorStop(0, '#5a0d1a'); grd.addColorStop(0.5, '#b3243e'); grd.addColorStop(1, '#5a0d1a');
+    lg.fillStyle = grd; lg.fillRect(0, 0, 1024, 512);
+    if (img) { const sw = img.width * 0.42; lg.drawImage(img, 0, 0, sw, img.height, 256, 0, 512, 512); }
+    lg.fillStyle = '#ffd6dd'; lg.font = '600 40px Antonio, sans-serif'; lg.textAlign = 'center';
+    lg.save(); lg.translate(130, 256); lg.rotate(-Math.PI / 2); lg.fillText('STRAWBERRY · ENERGY', 0, 14); lg.restore();
+    lg.save(); lg.translate(894, 256); lg.rotate(Math.PI / 2); lg.fillText('IGNITE YOUR HEART', 0, 14); lg.restore();
+  };
+  paintLabel();
+  const labelTex = new THREE.CanvasTexture(labelCanvas); labelTex.colorSpace = THREE.SRGBColorSpace; labelTex.wrapS = THREE.RepeatWrapping; labelTex.anisotropy = 4;
+  if (magma?.cover) { const im = new Image(); im.onload = () => { paintLabel(im); labelTex.needsUpdate = true; }; im.src = `${import.meta.env.BASE_URL}${magma.cover}`; }
+  const canBody = new THREE.MeshStandardMaterial({ map: labelTex, metalness: 0.55, roughness: 0.3, envMap: env, envMapIntensity: 1.2, emissive: 0x5a1020, emissiveMap: labelTex, emissiveIntensity: 0.35 });
+  const canEnd = new THREE.MeshStandardMaterial({ color: 0xc9ccd2, metalness: 1, roughness: 0.22, envMap: env });
+  const makeCan = (scale: number) => {
+    const g = new THREE.Group();
+    g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 1.5, 40, 1, true), canBody));
+    const top = new THREE.LatheGeometry([new THREE.Vector2(0.5, 0), new THREE.Vector2(0.47, 0.08), new THREE.Vector2(0.43, 0.1), new THREE.Vector2(0.43, 0.13), new THREE.Vector2(0.0, 0.11)], 40);
+    g.add(new THREE.Mesh(top, canEnd).translateY(0.75));
+    const bot = top.clone(); bot.rotateX(Math.PI); g.add(new THREE.Mesh(bot, canEnd).translateY(-0.75));
+    g.scale.setScalar(scale); return g;
+  };
+  const nicheMat = new THREE.MeshStandardMaterial({ color: 0x120806, roughness: 0.9 });
+  const nicheGlow = glowMaterial(0xff5a2a, 2.6);
+  for (let i = 0; i < 16; i++) {
+    const a = i * 2.39; const yy = 24 + i * 5.8;
+    const niche = new THREE.Group(); niche.position.set(Math.cos(a) * 3.55, yy, Math.sin(a) * 3.55); niche.lookAt(0, yy, 0); root.add(niche);
+    niche.add(new THREE.Mesh(new THREE.BoxGeometry(1.3, 1.9, 0.5), nicheMat).translateZ(-0.35));
+    niche.add(new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.05, 0.05), nicheGlow).translateY(-0.95).translateZ(0.05));
+    const can = makeCan(0.9); can.position.z = 0.1; can.rotation.y = Math.PI; niche.add(can);
   }
+  const heroCan = makeCan(2.4); heroCan.position.set(1.6, 70, 0); root.add(heroCan);
+  const heroLight = new VPoint(0xff8a5a, 260, 14, 1.6); heroLight.position.set(0.2, 70, 0); root.add(heroLight);
+  const magmaCanHit = new THREE.Group(); magmaCanHit.add(new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 4))); (magmaCanHit.children[0] as THREE.Mesh).visible = false; magmaCanHit.position.copy(heroCan.position); root.add(magmaCanHit);
   anchor('coreBottom', 0, 22, 0); anchor('coreTop', 0, 120, 0);
   floors.push({ slug: 'magma', level: 'Core shaft', y: 64, center: new THREE.Vector3(0, 64, 0), face: 0, view: new THREE.Vector3(0, 30, 0), look: new THREE.Vector3(0, 120, 0) });
-  const magmaHit = new THREE.Group(); magmaHit.add(new THREE.Mesh(new THREE.BoxGeometry(4, 100, 1))); magmaHit.position.set(-4.3, 62, 9.1); (magmaHit.children[0] as THREE.Mesh).visible = false; root.add(magmaHit);
-  artefacts.push(makeArtefact('magma', magmaHit, root, 1, 0));
+  artefacts.push(makeArtefact('magma', magmaCanHit, root, 1, 0.4));
 
+  const roomGroups: THREE.Group[] = [];
   // ---- a room builder: a lit box set into the facade, open toward `face`
   const room = (o: { slug: string; level: string; y: number; face: number; w: number; d: number; h: number; out?: number; floor?: THREE.Material; wall?: THREE.Material; accent: number; sign?: string; signFont?: string; panels?: number; glass?: boolean; light?: number; lightColor?: number }) => {
-    const g = new THREE.Group();
+    const g = new THREE.Group(); roomGroups.push(g);
     const dirX = Math.sin(o.face), dirZ = Math.cos(o.face);
     const out = reach(o.face, o.y - 0.6, o.y + o.h + 0.6) + o.d / 2 + 0.25;
     o.out = out;
@@ -161,8 +192,8 @@ export function createBrands(island: Island, env: THREE.Texture, q: Quality) {
     const strip = glowMaterial(o.accent, 2.6);
     g.add(new THREE.Mesh(new THREE.BoxGeometry(o.w, 0.08, 0.08), strip).translateY(o.h + 0.02).translateZ(o.d / 2));
     g.add(new THREE.Mesh(new THREE.BoxGeometry(o.w, 0.08, 0.08), strip).translateY(0.02).translateZ(o.d / 2));
-    const L = new THREE.PointLight(o.lightColor ?? o.accent, (o.light ?? 160) * 0.55, Math.max(o.w, o.d) * 1.6, 1.6); L.position.set(0, o.h * 0.55, o.d * 0.3); g.add(L);
-    const wash = new THREE.SpotLight(0xfff4e6, 90, o.d * 2.5, 0.9, 0.8, 1.4); wash.position.set(0, o.h - 0.4, o.d / 2 - 0.4); wash.target.position.set(0, o.h * 0.5, -o.d / 2); g.add(wash, wash.target);
+    const L = new VPoint(o.lightColor ?? o.accent, (o.light ?? 160) * 0.55, Math.max(o.w, o.d) * 1.6, 1.6); L.position.set(0, o.h * 0.55, o.d * 0.3); g.add(L);
+    const wash = new VSpot(0xfff4e6, 70, o.d * 2.5, 0.9, 0.8, 1.4); wash.position.set(0, o.h - 0.4, o.d / 2 - 0.4); wash.target.position.set(0, o.h * 0.5, -o.d / 2); g.add(wash, wash.target);
     // image panels on the back wall, from the brand's own gallery
     const img = IMG[o.slug];
     const gal = img ? [img.cover, ...img.gallery.slice(1).map((x) => x.src)].filter(Boolean) as string[] : [];
@@ -243,15 +274,15 @@ export function createBrands(island: Island, env: THREE.Texture, q: Quality) {
   }
 
   // L14 CapQ: the glass atrium, gold chart lines etched into the glass
-  const capq = room({ slug: 'capq', level: 'L14 · Atrium', y: 61, face: Math.PI * 1.25, w: 15, d: 12, h: 11, out: 12, floor: std(0x8f8b84, 0.3, 0, { contour: 0 }), wall: std(0xa9a59c, 0.7, 0, { contour: 0 }), accent: 0x22c55e, sign: 'CapQ', signFont: '600 170px Geist, sans-serif', panels: 2, glass: true, light: 150, lightColor: 0xfff6ea });
+  const capq = room({ slug: 'capq', level: 'L14 · Atrium', y: 61, face: Math.PI * 1.25, w: 15, d: 12, h: 11, out: 12, floor: std(0x6d6a64, 0.3, 0, { contour: 0 }), wall: std(0x77736c, 0.7, 0, { contour: 0 }), accent: 0x22c55e, sign: 'CapQ', signFont: '600 170px Geist, sans-serif', panels: 2, glass: true, light: 110, lightColor: 0xfff6ea });
   const chartPts: THREE.Vector3[] = []; for (let i = 0; i <= 30; i++) chartPts.push(new THREE.Vector3(-6.5 + i * 0.43, 2 + Math.pow(i / 30, 1.6) * 7 + Math.sin(i * 1.3) * 0.4, 6.02));
   capq.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(chartPts), new THREE.LineBasicMaterial({ color: new THREE.Color(0xc9a86a).multiplyScalar(2.4), toneMapped: false })));
   for (let i = 0; i < 4; i++) capq.add(new THREE.Mesh(new THREE.BoxGeometry(13.2, 0.03, 0.03), glowMaterial(0xc9a86a, 0.9)).translateY(2 + i * 2.4).translateZ(6.02));
   capq.add(new THREE.Mesh(new THREE.BoxGeometry(6, 0.2, 2.2), std(0x1a1a1a, 0.3, 0.6, { contour: 0 })).translateY(1.2).translateZ(1));
 
   // L17 the clay floor: Mitti in terracotta, Maruneta on the loom wall
-  room({ slug: 'mitti', level: 'L17 · Clay floor', y: 79, face: Math.PI * 0.08, w: 11, d: 8, h: 6, out: 11, floor: std(0x8a4a32, 0.8, 0, { contour: 0 }), wall: std(0xb4613f, 0.85, 0, { contour: 0 }), accent: 0xe8a070, sign: 'MITTI', signFont: '300 160px "Instrument Serif", serif', panels: 3, light: 200, lightColor: 0xffd2a8 });
-  room({ slug: 'maruneta', level: 'L17 · Loom wall', y: 79, face: Math.PI * 0.62, w: 11, d: 8, h: 6, out: 11, floor: std(0x2a2f45, 0.8, 0, { contour: 0 }), wall: std(0xd9d2c3, 0.85, 0, { contour: 0 }), accent: 0x3a4fb0, sign: 'maruneta', signFont: '600 150px Geist, sans-serif', panels: 3, light: 200, lightColor: 0xf3ecdf });
+  room({ slug: 'mitti', level: 'L17 · Clay floor', y: 79, face: Math.PI * 0.08, w: 11, d: 8, h: 6, out: 11, floor: std(0x6e3a27, 0.8, 0, { contour: 0 }), wall: std(0x8f4e33, 0.85, 0, { contour: 0 }), accent: 0xe8a070, sign: 'MITTI', signFont: '300 160px "Instrument Serif", serif', panels: 3, light: 200, lightColor: 0xffd2a8 });
+  room({ slug: 'maruneta', level: 'L17 · Loom wall', y: 79, face: Math.PI * 0.62, w: 11, d: 8, h: 6, out: 11, floor: std(0x2a2f45, 0.8, 0, { contour: 0 }), wall: std(0x8d887e, 0.85, 0, { contour: 0 }), accent: 0x3a4fb0, sign: 'maruneta', signFont: '600 150px Geist, sans-serif', panels: 3, light: 200, lightColor: 0xf3ecdf });
 
   // L20 the signal floor: four new identities, one per face
   room({ slug: 'bsnl', level: 'L20 · Signal floor', y: 90, face: Math.PI * 1.55, w: 11, d: 7, h: 6, out: 10.5, wall: std(0x1a2fe0, 0.6, 0, { contour: 0 }), accent: 0xd8ff3a, sign: 'bsnl', signFont: '600 170px Geist, sans-serif', panels: 2, light: 200, lightColor: 0xdfe6ff });
@@ -279,14 +310,40 @@ export function createBrands(island: Island, env: THREE.Texture, q: Quality) {
     const pic = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 4), mat); pic.position.set(0, 4.2, 6.2); crown.add(pic); hovers.push({ slug: 'photon', u });
   }
   artefacts.push(makeArtefact('photon', crownHit, root, 1, 0.8));
+  // S—3, the studio mark: an impossible triangle in gold. Three bars along x, y and z whose
+  // open ends line up only from the arrival view, where the shape closes and looks real.
+  const pen = new THREE.Group(); pen.name = 'penrose'; crown.add(pen);
+  const L = 7, w = 1.0;
+  const penMat = new THREE.MeshStandardMaterial({ color: 0xd8b878, metalness: 0.85, roughness: 0.32, envMap: env, envMapIntensity: 1.8, emissive: 0x6a4e24, emissiveIntensity: 0.95 });
+  const bar = (len: number) => new THREE.Mesh(new THREE.BoxGeometry(len, w, w), penMat);
+  const bx = bar(L + w); bx.position.set(L / 2, 0, 0); pen.add(bx);
+  const by = bar(L + w); by.rotation.z = Math.PI / 2; by.position.set(L, L / 2, 0); pen.add(by);
+  const bz = bar(L - w * 0.5); bz.rotation.y = Math.PI / 2; bz.position.set(L, L, (L - w * 0.5) / 2 + w * 0.25); pen.add(bz);
+  const edgeMat = new THREE.LineBasicMaterial({ color: new THREE.Color(0xffe0a0).multiplyScalar(1.6), toneMapped: false });
+  for (const b of [bx, by, bz]) { const e = new THREE.LineSegments(new THREE.EdgesGeometry(b.geometry), edgeMat); e.position.copy(b.position); e.rotation.copy(b.rotation); pen.add(e); }
+  pen.position.sub(new THREE.Vector3(L / 2, L / 2 - 1, L / 2));
+  // turned so its (1,1,1) diagonal points at the crown's arrival camera
+  // it floats above the fins, centred on the holder (the centroid of the closed triangle as seen).
+  // The diagonal through the bars' first corner must pass through the camera, so solve a few rounds.
+  const penHolder = new THREE.Group(); penHolder.position.set(0, 25, 0); crown.add(penHolder); penHolder.add(pen);
+  const penCam = new THREE.Vector3(30, 156 - 128 - 25, 42), diag = new THREE.Vector3(1, 1, 1).normalize(), centroid = new THREE.Vector3(5 * L / 6, L / 2, L / 6);
+  for (let i = 0; i < 6; i++) {
+    pen.quaternion.setFromUnitVectors(diag, penCam.clone().sub(pen.position).normalize());
+    pen.position.copy(centroid).applyQuaternion(pen.quaternion).negate();
+  }
+  const penGlow = new VPoint(0xffd9a0, 180, 22, 1.6); penGlow.position.set(6, 2, 8); penHolder.add(penGlow);
+  const penRing = new THREE.Mesh(new THREE.TorusGeometry(7.2, 0.06, 6, 96), glowMaterial(0xe6cc93, 2.2)); penRing.rotation.x = Math.PI / 2; penRing.position.y = -6.5; penHolder.add(penRing);
+  const s3img = IMG.s3;
+  if (s3img?.cover) { const { mat, u } = imageMaterial(loadTexture(s3img.cover), 1.2); const pic = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 3.6), mat); pic.position.set(4.6, 3.2, 5.2); pic.rotation.y = 0.6; crown.add(pic); hovers.push({ slug: 's3', u }); }
+  artefacts.push(makeArtefact('s3', penHolder, root, 1.1, 0.8));
   floors.push({ slug: 'photon', level: 'Crown · Beacon', y: 128, center: new THREE.Vector3(0, 133, 0), face: 0, view: new THREE.Vector3(0, 137, 26), look: new THREE.Vector3(0, 132, 0) });
   anchor('crown', 0, 134, 0);
-  const crownLight = new THREE.PointLight(0xfff0dc, 260, 30, 1.6); crownLight.position.set(0, 140, 4); root.add(crownLight);
+  const crownLight = new VPoint(0xfff0dc, 260, 30, 1.6); crownLight.position.set(0, 140, 4); root.add(crownLight);
 
   // plaza paving
   const plaza = new THREE.Mesh(new THREE.CircleGeometry(30, 48).rotateX(-Math.PI / 2), std(0x2d2c2f, 0.6, 0.1, { contour: 0, bump: 0.1, bumpScale: 2 }));
   plaza.position.y = 0.06; root.add(plaza);
-  const streetLight = new THREE.PointLight(0xffd0a0, 380, 44, 1.5); streetLight.position.set(0, 9, 18); root.add(streetLight);
+  const streetLight = new VPoint(0xffd0a0, 380, 44, 1.5); streetLight.position.set(0, 9, 18); root.add(streetLight);
 
   // order the climb bottom to top
   const order = ['gcburger', 'kerb', 'deccan', 'lotus', 'rem', 'capq', 'mitti', 'maruneta', 'bsnl', 'rujuvu', 'kosh', 'lagrange', 'magma', 'photon'];
@@ -306,6 +363,7 @@ export function createBrands(island: Island, env: THREE.Texture, q: Quality) {
     p.needsUpdate = true;
     jib.rotation.y = Math.sin(s.t * 0.05) * 0.4;
     drum.rotation.x = s.t * 1.5;
+    heroCan.rotation.y = s.t * 0.6; heroCan.position.y = 70 + Math.sin(s.t * 0.8) * 0.4;
   }
-  return { root, anchors, artefacts, floors, update, hovers, lava, ready: Promise.resolve() };
+  return { root, anchors, artefacts, floors, update, hovers, lava, ready: Promise.resolve(), exterior: [shell, ...roomGroups, crane], heroCan };
 }

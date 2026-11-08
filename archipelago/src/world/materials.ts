@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { NOISE } from './glsl';
+import { TEXNOISE } from './noise';
 import { G, patchMaterial } from './shared';
 
 /**
@@ -11,22 +11,22 @@ export function marbleMaterial(opts: { scale?: number; gold?: { value: number };
   const gold = opts.gold ?? { value: 0.15 };
   const sc = (opts.scale ?? 1).toFixed(4), cs = (opts.crackScale ?? 1).toFixed(4);
   mat.onBeforeCompile = (s) => {
-    s.uniforms.uGold = gold; s.uniforms.uChart = G.uChart; s.uniforms.uTime = G.uTime; s.uniforms.uDim = G.uDim;
+    s.uniforms.uGold = gold; s.uniforms.uChart = G.uChart; s.uniforms.uTime = G.uTime; s.uniforms.uDim = G.uDim; s.uniforms.tNoise = G.tNoise;
     s.vertexShader = s.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vObj; varying vec3 vWPos2;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvObj = position;')
       .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvWPos2 = (modelMatrix * vec4(transformed,1.0)).xyz;');
     s.fragmentShader = s.fragmentShader.replace('#include <common>', `#include <common>
       varying vec3 vObj; varying vec3 vWPos2; uniform float uGold, uChart, uTime, uDim;
-      ${NOISE}
-      float veins(vec3 p){ float n = fbm3(p*0.7) ; return abs(sin(p.x*1.3 + p.y*0.6 + n*5.5)); }
-      float crack(vec3 p){ float n = snoise(p*0.9)*0.5 + snoise(p*2.3)*0.25; return 1.0 - smoothstep(0.0, 0.035, abs(n)); }`)
+      ${TEXNOISE}
+      float veins(vec3 p){ float n = tri(p * 0.06, normalize(p + 0.001)) * 2.0 - 1.0; return abs(sin(p.x*1.3 + p.y*0.6 + n*5.5)); }
+      float crack(vec3 p){ float n = tri(p * 0.09, normalize(p + 0.001)) * 2.0 - 1.0; return 1.0 - smoothstep(0.0, 0.03, abs(n)); }`)
       .replace('#include <color_fragment>', `#include <color_fragment>
       vec3 P = vObj * ${sc};
       float v = veins(P);
       float vein = 1.0 - smoothstep(0.0, 0.08, v);
-      float vein2 = 1.0 - smoothstep(0.0, 0.25, abs(sin(P.z*0.9 + fbm3(P*1.3+4.0)*4.0)));
+      float vein2 = 1.0 - smoothstep(0.0, 0.25, abs(sin(P.z*0.9 + tri(P*0.1 + 0.4, normalize(P + 0.001))*8.0)));
       diffuseColor.rgb *= 1.0 - vein*0.33 - vein2*0.08;
-      diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb*vec3(0.96,0.94,0.9), fbm3(P*0.3)*0.5+0.5);
+      diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb*vec3(0.96,0.94,0.9), tri(P*0.03, normalize(P + 0.001)));
       float kc = crack(vObj * ${cs});`)
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
       totalEmissiveRadiance += vec3(1.0,0.72,0.32) * kc * (${(opts.crackBase ?? 0.25).toFixed(3)} + uGold*4.0);

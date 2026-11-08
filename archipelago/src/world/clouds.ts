@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { NOISE2 } from './glsl';
+import { TEXNOISE } from './noise';
+import { G } from './shared';
 
 /**
  * The sea of cloud the islands hang over. Stacked alpha layers share one domain-warped
@@ -20,6 +21,7 @@ export function createClouds(layers: number) {
     uStorm: { value: 0 },
     uChart: { value: 0 },
     uGlow: { value: new THREE.Vector4(0, 0, 0, 0) }, // xyz glow source (e.g. a light-fall), w strength
+    tNoise: G.tNoise,
   };
   const geo = new THREE.PlaneGeometry(9000, 9000, 1, 1).rotateX(-Math.PI / 2);
   for (let i = 0; i < layers; i++) {
@@ -43,10 +45,11 @@ export function createClouds(layers: number) {
         uniform vec3 uMoonDir, uSunDir, uFogColor, uCamPos;
         uniform vec4 uGlow;
         varying vec3 vWorld;
-        ${NOISE2}
+        ${TEXNOISE}
+        // domain-warped fbm from three texture fetches (was ~30 procedural noise evaluations)
         float field(vec2 p){
-          vec2 q = vec2(fbm2(p + vec2(0.0, uTime*0.004)), fbm2(p + vec2(5.2, 1.3) - uTime*0.003));
-          return fbm2(p + 1.6*q + vec2(uTime*0.006, 0.0));
+          vec2 q = texture2D(tNoise, p * 0.23 + vec2(uTime * 0.0012, 0.0)).rg - 0.5;
+          return tn(p * 0.5 + q * 0.55 + vec2(uTime * 0.0016, uTime * 0.0007));
         }
         void main(){
           vec2 p = vWorld.xz * 0.0024 + vec2(uLayer * 3.1, uLayer * 1.7);
@@ -54,13 +57,13 @@ export function createClouds(layers: number) {
           // camera wake: a soft dent under the camera when it skims the cloud
           float wd = length(vWorld.xz - uCamPos.xz);
           n -= uWake * 0.22 * exp(-wd*wd / 900.0);
-          float thr = mix(0.38, 0.6, uLayer) + (1.0 - uDensity) * 0.5;
-          float a = smoothstep(thr, thr + 0.22, n);
+          float thr = mix(0.44, 0.58, uLayer) + (1.0 - uDensity) * 0.5;
+          float a = smoothstep(thr, thr + 0.16, n);
           if (a < 0.003) discard;
           // light: sample the field toward the light, brighter where it rises toward it
           vec3 L = normalize(mix(uMoonDir, uSunDir, smoothstep(0.55, 0.95, uTod)));
           float n2 = field(p + L.xz * 0.06);
-          float lit = clamp(0.5 + (n - n2) * 4.0, 0.0, 1.0);
+          float lit = clamp(0.5 + (n - n2) * 7.0, 0.0, 1.0);
           vec3 shadow = mix(vec3(0.010,0.014,0.032), vec3(0.16,0.11,0.16), smoothstep(0.55,1.0,uTod));
           vec3 light  = mix(vec3(0.105,0.13,0.215), vec3(0.95,0.6,0.42), smoothstep(0.55,1.0,uTod));
           vec3 col = mix(shadow, light, lit * mix(0.45, 1.0, uLayer));

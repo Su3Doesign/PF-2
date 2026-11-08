@@ -38,7 +38,7 @@ const hud = (rel, active = '') => `
 <div class="hud">
   <a class="wordmark" href="${rel}">SUMANTH</a>
   <div class="top-right" style="right: var(--inset)">
-    <a class="mono" href="${rel}"${active === 'voyage' ? ' aria-current="page"' : ''}>The voyage</a>
+    <a class="mono hide-m" href="${rel}"${active === 'voyage' ? ' aria-current="page"' : ''}>The voyage</a>
     <a class="mono" href="${rel}work/"${active === 'work' ? ' aria-current="page"' : ''}>Work</a>
     <a class="mono" href="${rel}about/"${active === 'about' ? ' aria-current="page"' : ''}>About</a>
     <a class="mono" href="${rel}contact/"${active === 'contact' ? ' aria-current="page"' : ''}>Contact</a>
@@ -103,6 +103,7 @@ ${hud(rel, 'work')}
   </section>
   <div class="cs-bar">
     ${w.live ? `<a class="btn" href="${esc(w.live)}" target="_blank" rel="noopener">Launch live site ↗<span class="sr-only"> (opens in a new tab)</span></a>` : w.repo ? `<a class="btn" href="${esc(w.repo)}" target="_blank" rel="noopener">View on GitHub ↗</a>` : '<span class="btn locked">🔒 Live site coming soon</span>'}
+    ${im.board?.length ? '<a class="btn ghost" href="#board">The full presentation ↓</a>' : ''}
     <a class="btn ghost" href="${rel}?to=${w.slug}">See it on the voyage</a>
     <a class="btn ghost" href="../">All work</a>
   </div>
@@ -110,6 +111,7 @@ ${hud(rel, 'work')}
     <p class="serif">${esc(w.line)}</p>
     <div>${w.brief ? `<p>${esc(w.brief)}</p>` : `<p>${esc(w.line)}</p>`}${w.note ? `<p class="mono" style="color:var(--gold)">${esc(w.note)}</p>` : ''}${w.client ? `<p class="mono">Made at ${esc(w.client)}</p>` : ''}${w.concept ? '<p class="mono" style="color:var(--bone-500)">Concept project. Fictional brand, no affiliation.</p>' : ''}</div>
   </section>
+  ${im.board?.length ? `<section class="cs-board" id="board" aria-label="The full presentation"><div class="cs-board-head"><p class="mono kick">The full presentation</p><p class="mono">${im.board.length} ${im.board.length === 1 ? 'board' : 'panels'} · scroll through</p></div><div class="cs-board-col">${im.board.map((t, k) => `<img ${k > 1 ? 'loading="lazy" ' : ''}decoding="async" src="${rel}${t.src}" width="${t.w}" height="${t.h}" alt="${esc(w.title)}, presentation part ${k + 1}" />`).join('')}</div></section>` : ''}
   ${rest.length ? `<section aria-label="The build"><p class="mono kick">The build</p><div class="cs-strip">${rest.map((g, k) => `<figure><img loading="lazy" src="${rel}${g.src}" width="${g.w}" height="${g.h}" alt="${esc(w.title)}, plate ${k + 2}" /><figcaption class="mono">${String(k + 2).padStart(2, '0')}</figcaption></figure>`).join('')}</div></section>` : ''}
   ${w.live ? `<section class="cs-live"><p class="mono kick">Live in the browser</p><div class="frame" data-src="${esc(w.live)}"></div><p class="mono url">${esc(w.live.replace(/^https?:\/\//, ''))}</p></section>` : ''}
   ${w.facts?.length ? `<section class="cs-facts" aria-label="The numbers">${w.facts.map(([k, v]) => `<div><b>${esc(v)}</b><span class="mono">${esc(k)}</span></div>`).join('')}</section>` : ''}

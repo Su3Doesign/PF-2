@@ -735,7 +735,7 @@
    "alt": 172,
    "isNew": true,
    "concept": true,
-   "brief": "A palette mixed from the ingredients themselves: fired clay, ground sandalwood, fresh haldi. Devanagari and Latin share one quiet voice, jars are thrown like pots, and the shop is a clay niche.",
+   "brief": "A palette mixed from the ingredients themselves: fired clay, ground sandalwood, fresh haldi. Devanagari and Latin share one quiet voice, the jars are thrown like pots, and the shop is a clay niche. Rituals from the earth.",
    "facts": [
     [
      "Scripts",
@@ -900,6 +900,33 @@
     [
      "Flavour",
      "Strawberry"
+    ]
+   ]
+  },
+  {
+   "slug": "s3",
+   "island": "brands",
+   "title": "S—3 · The Impossible Three",
+   "line": "My studio mark: world, web and brand. Three things that shouldn't connect, made to hold.",
+   "year": 2026,
+   "role": "Studio identity, social system",
+   "tools": [
+    "Illustrator",
+    "Photoshop",
+    "Figma"
+   ],
+   "voyage": true,
+   "floor": "Crown · Studio",
+   "isNew": true,
+   "brief": "S—3 is the mark I work under: an impossible triangle whose three bars are world, web and brand. They shouldn't connect, and the job is making them hold, drawn so it looks real. The social system runs on one line, Built in the dark. Lit with intent.: chapter cards, signals, teardowns and an archive, all on a near-black grid with one acid accent.",
+   "facts": [
+    [
+     "Bars",
+     "World · Web · Brand"
+    ],
+    [
+     "Line",
+     "Built in the dark."
     ]
    ]
   },

@@ -223,6 +223,7 @@ export class UI {
       ${w.brief ? `<p class="brief">${esc(w.brief)}</p>` : ''}
       ${w.facts?.length ? `<div class="facts">${w.facts.map(([k, v]) => `<div><b>${esc(v)}</b><small>${esc(k)}</small></div>`).join('')}</div>` : ''}
       ${w.note ? `<p class="mono note">${esc(w.note)}</p>` : ''}
+      ${im?.board?.length ? `<button class="board-cta" id="pBoard"><span class="mono">Know more about it</span><b>The full presentation</b><small class="mono">${im.board.length > 1 ? `${Math.round(im.board.reduce((a, t) => a + t.h, 0) / 100) / 10}k px · scroll it whole` : 'the full board'}</small><img src="${asset(im.board[0].src)}" alt="" loading="lazy" /></button>` : ''}
       <div class="actions">${live}<a class="btn ghost" href="work/${w.slug}/">Read the case study →</a></div>
       ${gallery.slice(1).map((g) => `<figure><img loading="lazy" src="${asset(g.src)}" width="${g.w}" height="${g.h}" alt="${esc(w.title)}" /></figure>`).join('')}
       <nav><button class="mono" id="pPrev">← ${esc(prev.title)}</button><button class="mono" id="pNext">${esc(next.title)} →</button></nav>`;
@@ -232,10 +233,31 @@ export class UI {
     $('#pClose').addEventListener('click', () => this.hooks.close());
     $('#pPrev').addEventListener('click', () => this.hooks.open(prev.slug));
     $('#pNext').addEventListener('click', () => this.hooks.open(next.slug));
+    document.getElementById('pBoard')?.addEventListener('click', () => this.openBoard(slug));
     const launch = panel.querySelector('.launch');
     launch?.addEventListener('click', () => { launch.classList.remove('launch'); void (launch as HTMLElement).offsetWidth; launch.classList.add('launch'); this.hooks.sfx('open'); this.toast('Opened in a new tab'); });
     setTimeout(() => ($('#pClose') as HTMLElement).focus({ preventScroll: true }), 50);
     this.hover(null);
+  }
+  /** The stitched presentation, whole, in a scrolling column over everything. */
+  openBoard(slug: string) {
+    const w = bySlug[slug]; const tiles = images[slug]?.board; if (!w || !tiles?.length) return;
+    const b = $('#board'); const col = $('#bCol');
+    $('#bTitle').textContent = w.title;
+    $('#bCount').textContent = `${tiles.length} ${tiles.length === 1 ? 'board' : 'panels'}`;
+    col.innerHTML = tiles.map((t, i) => `<img src="${asset(t.src)}" width="${t.w}" height="${t.h}" alt="${esc(w.title)}, part ${i + 1}" ${i > 1 ? 'loading="lazy"' : ''} decoding="async" />`).join('');
+    b.hidden = false; requestAnimationFrame(() => b.classList.add('open'));
+    const sc = $('#bScroll'); sc.scrollTop = 0;
+    const prog = $('#bProg');
+    sc.onscroll = () => { prog.style.transform = `scaleX(${sc.scrollTop / Math.max(1, sc.scrollHeight - sc.clientHeight)})`; };
+    ($('#bClose') as HTMLElement).onclick = () => this.closeBoard();
+    ($('#bClose') as HTMLElement).focus({ preventScroll: true });
+    this.hooks.sfx('open');
+  }
+  closeBoard() {
+    const b = $('#board'); if (b.hidden) return false;
+    b.classList.remove('open'); setTimeout(() => { b.hidden = true; $('#bCol').innerHTML = ''; }, 450);
+    return true;
   }
   closePanel() {
     this.current = null;
@@ -338,7 +360,9 @@ export class UI {
   }
   setAlt(metres: number, slug: string, level: string) {
     $('#altM').textContent = `${level} · ${String(Math.round(metres)).padStart(3, '0')} M`;
-    for (const li of Array.from($('#altList').children)) li.classList.toggle('on', (li as HTMLElement).dataset.slug === slug);
+    const items = Array.from($('#altList').children) as HTMLElement[];
+    const at = Math.max(0, items.findIndex((li) => li.dataset.slug === slug));
+    items.forEach((li, i) => { li.classList.toggle('on', i === at); li.classList.toggle('near', Math.abs(i - at) <= 2); });
   }
 
   // ------------------------------------------------------------------ misc
@@ -358,7 +382,7 @@ export class UI {
   private bindKeys() {
     addEventListener('keydown', (e) => {
       if ((e.target as HTMLElement).closest('input, textarea')) return;
-      if (e.key === 'Escape') { if (this.current) this.hooks.close(); else if (document.body.classList.contains('list-open')) this.toggleList(false); else if (document.body.classList.contains('menu-open')) this.toggleMenu(false); }
+      if (e.key === 'Escape') { if (this.closeBoard()) return; if (this.current) this.hooks.close(); else if (document.body.classList.contains('list-open')) this.toggleList(false); else if (document.body.classList.contains('menu-open')) this.toggleMenu(false); }
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const k = e.key.toLowerCase();
       if (k === 'l') this.toggleList(!document.body.classList.contains('list-open'));

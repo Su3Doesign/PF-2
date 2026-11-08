@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { NOISE } from './glsl';
+import { TEXNOISE } from './noise';
+import { G } from './shared';
 
 /**
  * The sky dome. One uniform, uTod, carries the voyage from deep night (0) through
@@ -15,6 +16,7 @@ export function createSky() {
     uSunDir: { value: new THREE.Vector3(0.0, -0.05, -1).normalize() },
     uMeteor: { value: 0 },
     uChart: { value: 0 },
+    tNoise: G.tNoise,
   };
   const mat = new THREE.ShaderMaterial({
     uniforms,
@@ -33,12 +35,13 @@ export function createSky() {
       uniform float uTime, uTod, uStorm, uMeteor, uChart;
       uniform vec3 uMoonDir, uSunDir;
       varying vec3 vDir;
-      ${NOISE}
+      ${TEXNOISE}
+      float hash13(vec3 p3){ p3 = fract(p3 * 0.1031); p3 += dot(p3, p3.zyx + 31.32); return fract((p3.x + p3.y) * p3.z); }
       vec3 skyRamp(float h, float tod){
         // night palette (ink tokens) and dawn palette, blended by time of day
         vec3 zN = vec3(0.006,0.008,0.022), mN = vec3(0.016,0.022,0.055), hN = vec3(0.040,0.054,0.115);
-        vec3 zP = vec3(0.030,0.040,0.090), mP = vec3(0.110,0.120,0.210), hP = vec3(0.420,0.300,0.300);
-        vec3 zD = vec3(0.040,0.060,0.140), mD = vec3(0.170,0.170,0.270), hD = vec3(0.640,0.330,0.200);
+        vec3 zP = vec3(0.022,0.030,0.072), mP = vec3(0.080,0.088,0.165), hP = vec3(0.300,0.200,0.215);
+        vec3 zD = vec3(0.022,0.034,0.090), mD = vec3(0.105,0.100,0.190), hD = vec3(0.470,0.215,0.140);
         float a = smoothstep(0.35, 0.7, tod), b = smoothstep(0.62, 1.0, tod);
         vec3 z = mix(mix(zN,zP,a),zD,b), m = mix(mix(mN,mP,a),mD,b), hz = mix(mix(hN,hP,a),hD,b);
         float t = clamp(h,0.0,1.0);
@@ -76,15 +79,15 @@ export function createSky() {
         vec3 axis = normalize(vec3(0.38, 0.86, 0.34));
         float band = 1.0 - abs(dot(d, axis));
         float mw = smoothstep(0.82, 1.0, band);
-        float cl = fbm3(d * 3.2 + 4.0) * 0.5 + 0.5;
-        float dust = smoothstep(0.35, 0.8, fbm3(d * 7.0 - 3.0) * 0.5 + 0.5);
+        float cl = tri(d * 0.9 + 0.3, d);
+        float dust = smoothstep(0.45, 0.7, tri(d * 2.1 - 0.7, d));
         col += vec3(0.32,0.34,0.52) * mw * cl * (1.0 - dust * 0.7) * 0.22 * night * smoothstep(-0.05, 0.25, h);
 
         // the moon
         float md = dot(d, normalize(uMoonDir));
         float moonUp = (1.0 - smoothstep(0.6, 0.95, uTod));
         float mdisc = smoothstep(0.99955, 0.9997, md);
-        float crater = 0.85 + 0.15 * snoise(d * 900.0);
+        float crater = 0.8 + 0.3 * tn(d.xy * 60.0);
         col = mix(col, vec3(1.25,1.22,1.12) * crater, mdisc * moonUp);
         col += vec3(0.55,0.6,0.8) * pow(max(md,0.0), 180.0) * 0.5 * moonUp;
         col += vec3(0.25,0.3,0.45) * pow(max(md,0.0), 16.0) * 0.12 * moonUp;

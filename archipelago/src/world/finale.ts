@@ -1,7 +1,8 @@
 import * as THREE from 'three';
+import { VPoint, VSpot } from './lights';
 import { G, makeNoise3 } from './shared';
 import { std, glowMaterial } from './materials';
-import { NOISE2 } from './glsl';
+import { TEXNOISE } from './noise';
 
 /**
  * The end of the map: below the cloud sea, a calm sea at dawn, a rock with a lighthouse
@@ -17,7 +18,7 @@ export function createFinale(scene: THREE.Scene) {
   // ---- the sea: Gerstner swell in the vertex shader, sky-ramp reflection and a sun glitter path
   const uniforms = {
     uTime: G.uTime, uTod: { value: 0.6 }, uSunDir: { value: new THREE.Vector3(0, 0.05, -1).normalize() }, uCam: { value: new THREE.Vector3() },
-    uCalm: { value: 1 }, uChart: G.uChart,
+    uCalm: { value: 1 }, uChart: G.uChart, tNoise: G.tNoise,
   };
   const seaGeo = new THREE.PlaneGeometry(9000, 9000, 320, 320).rotateX(-Math.PI / 2);
   const sea = new THREE.Mesh(seaGeo, new THREE.ShaderMaterial({
@@ -43,21 +44,22 @@ export function createFinale(scene: THREE.Scene) {
       }`,
     fragmentShader: /* glsl */ `
       uniform float uTime, uTod, uChart; uniform vec3 uSunDir, uCam; varying vec3 vW; varying vec3 vN;
-      ${NOISE2}
+      ${TEXNOISE}
       void main(){
-        vec3 n = normalize(vN + vec3(fbm2(vW.xz*0.08 + uTime*0.05)-0.5, 0.0, fbm2(vW.xz*0.08 - uTime*0.04 + 7.0)-0.5) * 0.22);
+        vec2 rip = texture2D(tNoise, vW.xz * 0.004 + uTime * 0.004).ba + texture2D(tNoise, vW.xz * 0.011 - uTime * 0.006).ba - 1.0;
+        vec3 n = normalize(vN + vec3(rip.x, 0.0, rip.y) * 0.3);
         vec3 v = normalize(uCam - vW); vec3 r = reflect(-v, n);
         float fres = 0.02 + 0.98 * pow(1.0 - max(dot(n, v), 0.0), 5.0);
         float h = clamp(r.y, 0.0, 1.0);
         float dawn = smoothstep(0.55, 1.0, uTod);
-        vec3 skyLo = mix(vec3(0.04,0.05,0.11), vec3(0.6,0.33,0.2), dawn), skyHi = mix(vec3(0.01,0.015,0.04), vec3(0.1,0.12,0.22), dawn);
+        vec3 skyLo = mix(vec3(0.04,0.05,0.11), vec3(0.36,0.17,0.115), dawn), skyHi = mix(vec3(0.01,0.015,0.04), vec3(0.06,0.075,0.15), dawn);
         vec3 refl = mix(skyLo, skyHi, smoothstep(0.0, 0.4, h));
         float sd = max(dot(r, normalize(uSunDir)), 0.0);
         refl += vec3(1.0,0.7,0.4) * (pow(sd, 380.0) * 10.0 + pow(sd, 40.0) * 0.45) * dawn;
-        vec3 deep = mix(vec3(0.004,0.01,0.02), vec3(0.03,0.05,0.08), dawn);
+        vec3 deep = mix(vec3(0.004,0.01,0.02), vec3(0.006,0.018,0.036), dawn);
         vec3 col = mix(deep, refl, fres);
         float dist = length(uCam - vW);
-        col = mix(col, skyLo, 1.0 - exp(-dist*0.0007));
+        col = mix(col, skyLo * 0.85, 1.0 - exp(-dist*0.00042));
         col = mix(col, vec3(0.02,0.026,0.055), uChart);
         gl_FragColor = vec4(col, 1.0);
       }`,
@@ -78,7 +80,7 @@ export function createFinale(scene: THREE.Scene) {
   const gallery = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 0.4, 24), std(0x1a1a1e, 0.5, 0.6, { contour: 0 })); gallery.position.y = 31.2; lh.add(gallery);
   const lampRoom = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.8, 3.2, 16), glowMaterial(0xffe3a8, 5)); lampRoom.position.y = 33; lh.add(lampRoom);
   const cap = new THREE.Mesh(new THREE.ConeGeometry(2.4, 2.4, 16), std(0x2a1a14, 0.5, 0.3, { contour: 0 })); cap.position.y = 35.8; lh.add(cap);
-  const lhLight = new THREE.PointLight(0xffe0a8, 1200, 120, 1.4); lhLight.position.y = 33; lh.add(lhLight);
+  const lhLight = new VPoint(0xffe0a8, 1200, 120, 1.4); lhLight.position.y = 33; lh.add(lhLight);
   // the beam: a long additive cone with a falloff along its length and edges
   const beamGeo = new THREE.ConeGeometry(16, 600, 48, 1, true); beamGeo.translate(0, -300, 0); beamGeo.rotateZ(Math.PI / 2);
   const beamU = { uI: { value: 1 } };
