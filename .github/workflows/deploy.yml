@@ -23,8 +23,17 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            archipelago/package-lock.json
       - run: npm ci
       - run: npm run build
+      - name: Build The Archipelago (the new portfolio) into dist/archipelago
+        working-directory: archipelago
+        run: |
+          npm ci
+          SITE_BASE=/archipelago/ SITE_URL=https://www.thesumanth.com/archipelago/ npm run build
+      - run: cp -r archipelago/dist dist/archipelago
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

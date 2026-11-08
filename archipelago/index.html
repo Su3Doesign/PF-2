@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Sumanth Richie — Designer, 3D Artist, Creative Developer · Hyderabad</title>
+<meta name="description" content="The Archipelago: the portfolio of Sumanth Richie. Four floating islands of work in a midnight sky, a tower of brands to climb, and a lighthouse at dawn." />
+<meta name="theme-color" content="#05060d" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Sumanth Richie — The Archipelago" />
+<meta property="og:description" content="Four islands of work in a midnight sky: Worlds, Machines, Monuments and a tower of Brands." />
+<meta property="og:image" content="og.jpg" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="preload" href="/fonts/antonio-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Sumanth Richie","alternateName":"Amidyala Sai Sumanth","jobTitle":"Designer, 3D artist and creative developer","address":{"@type":"PostalAddress","addressLocality":"Hyderabad","addressCountry":"IN"},"url":"https://www.thesumanth.com/","sameAs":["https://www.behance.net/sumanthrichie","https://github.com/Su3Doesign"]}</script>
+<script>
+  // pick the experience before first paint: no WebGL2, reduced data or ?static gets the page version
+  (function () {
+    var d = document.documentElement, ok = false;
+    try { var c = document.createElement('canvas'); ok = !!c.getContext('webgl2'); } catch (e) {}
+    var save = navigator.connection && navigator.connection.saveData;
+    if (!ok || save || /[?&]static/.test(location.search)) d.classList.add('no-webgl');
+  })();
+</script>
+</head>
+<body>
+<a class="sr-only" href="#static">Skip to the list of work</a>
+<canvas id="gl" aria-hidden="true"></canvas>
+
+<div class="loader" id="loader" role="status" aria-live="polite">
+  <div>
+    <svg viewBox="0 0 560 300" aria-hidden="true">
+      <path class="coast" d="M40 220 C 90 190, 120 230, 170 210 S 260 160, 300 190 S 400 240, 450 200 S 520 150, 540 170" />
+      <path class="route" id="ldRoute" d="M80 200 C 150 120, 200 110, 250 150 S 330 230, 380 170 S 450 70, 500 120" />
+      <g class="isl"><circle cx="80" cy="200" r="5"/><text x="68" y="226">WORLDS</text></g>
+      <g class="isl"><circle cx="250" cy="150" r="5"/><text x="226" y="132">MACHINES</text></g>
+      <g class="isl"><circle cx="380" cy="170" r="5"/><text x="346" y="196">MONUMENTS</text></g>
+      <g class="isl"><circle cx="500" cy="120" r="5"/><text x="480" y="100">BRANDS</text></g>
+    </svg>
+    <div class="wm"><b>SUMANTH</b><span class="mono count" id="ldCount">Charting 000</span></div>
+    <div class="enter"><button class="btn" id="enterSound">Enter with sound</button><button class="btn ghost" id="enterQuiet">Enter quietly</button></div>
+    <p class="mono slow" id="ldSlow">Slow connection? <a href="?static">Enter the light version →</a></p>
+  </div>
+</div>
+
+<div class="hero" id="hero" aria-hidden="true">
+  <div class="stack">
+    <p class="mono kicker">Designer · 3D artist · Creative developer — Hyderabad</p>
+    <h1 id="heroTitle">Sumanth</h1>
+    <p class="tag" id="heroTag">I design brands, build worlds and code them into the web.</p>
+  </div>
+  <p class="mono side">17.3850° N · 78.4867° E — The Archipelago</p>
+</div>
+<div id="islandLabels" aria-hidden="true"></div>
+<div id="tags"></div>
+<div id="pins"></div>
+<div class="pull" id="pull" aria-live="polite"></div>
+<div class="flash" id="flash"></div>
+
+<div class="hud" id="hud">
+  <a class="wordmark" href="./" aria-label="Sumanth Richie, back to the start">SUMANTH</a>
+  <div class="top-right">
+    <button class="mono hide-m" id="listBtn" aria-keyshortcuts="L">List view</button>
+    <a class="mono hide-m" href="work/">Work</a>
+    <a class="mono hide-m" href="about/">About</a>
+  </div>
+  <button class="menu-btn" id="menuBtn" aria-label="Open the menu" aria-expanded="false" aria-controls="menu"><span class="lines"><i></i><i></i></span></button>
+  <nav class="rail" id="rail" aria-label="Islands"><span class="fill" id="railFill"></span></nav>
+  <div class="chapter" id="chapter" aria-live="polite"><h2 id="chTitle"></h2><p class="mono sub" id="chSub"></p></div>
+  <div class="works" id="works" aria-label="Works on this stop"></div>
+  <div class="hint mono" id="hint"><span id="hintText">Scroll to set sail</span><span class="ruler"></span></div>
+  <button class="sound-btn mono" id="soundBtn" aria-pressed="false" aria-keyshortcuts="S"><span class="bars"><i></i><i></i><i></i><i></i></span><span id="soundLbl">Sound off</span></button>
+</div>
+
+<div class="readout lap" id="lap"><svg width="180" height="54" viewBox="0 0 180 54"><path d="M10 50 A 80 80 0 0 1 170 50" fill="none" stroke="#8e713f" stroke-width="1" stroke-dasharray="1 5"/><path id="lapArc" d="M10 50 A 80 80 0 0 1 170 50" fill="none" stroke="#e3cc97" stroke-width="2" stroke-dasharray="0 400"/></svg><div class="mono">Lap timer</div><div class="t" id="lapT">00:00:00</div></div>
+<div class="readout counter" id="counter"><div class="mono" id="counterK">Lamps</div><div class="n" id="counterN">0000</div></div>
+<div class="readout alt" id="alt"><div class="m" id="altM">L0 · 004 M</div><ol id="altList"></ol></div>
+
+<div class="chart" id="chart" aria-hidden="true">
+  <div class="grid"></div>
+  <div class="title"><h2>THE MAP</h2><p class="mono" style="color:var(--gold)">Drag to chart · click to fly · M opens it anywhere</p></div>
+  <svg class="compass" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="none" stroke="#8e713f"/><circle cx="50" cy="50" r="30" fill="none" stroke="#8e713f" stroke-dasharray="1 3"/><path d="M50 4 L56 50 L50 96 L44 50 Z" fill="none" stroke="#c9a86a"/><path d="M50 4 L56 50 L44 50 Z" fill="#c9a86a"/><text x="46" y="-2" fill="#c9a86a" font-family="monospace" font-size="9">N</text></svg>
+  <aside class="legend" id="legend" aria-label="Every work, by island"></aside>
+</div>
+
+<section class="footer" id="footer" aria-labelledby="footerTitle">
+  <div>
+    <p class="mono eom">End of the map</p>
+    <h2 id="footerTitle">LET'S CHART THE NEXT ONE.</h2>
+    <a class="email" id="email" href="mailto:hello@thesumanth.com">hello@thesumanth.com</a>
+    <div class="socials mono" id="socials"></div>
+  </div>
+  <div class="bar mono"><span>© 2026 Sumanth Richie · Built by hand in Hyderabad · Three.js · GLSL</span><button id="backTop">Back to the hero ↑</button></div>
+</section>
+
+<aside class="panel" id="panel" aria-hidden="true" aria-labelledby="pTitle" role="dialog"><div class="in" id="panelIn"></div></aside>
+
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+  <ol>
+    <li><a href="work/"><small>01</small>Work</a></li>
+    <li><a href="about/"><small>02</small>About</a></li>
+    <li><a href="contact/"><small>03</small>Contact</a></li>
+    <li><a href="#" id="menuMap"><small>04</small>The map</a></li>
+  </ol>
+  <aside>
+    <div><p class="mono k">Islands</p><ul id="menuIslands"></ul></div>
+    <div><p class="mono k">Say hello</p><ul id="menuLinks"></ul></div>
+    <div><button class="toggle mono" id="calmBtn" aria-pressed="false"><i></i>Calm mode</button></div>
+  </aside>
+</div>
+
+<div class="list" id="list" role="dialog" aria-modal="true" aria-label="All work" hidden>
+  <header><h2>ALL WORK</h2><button class="mono" id="listClose">Close · Esc</button></header>
+  <table id="listTable"></table>
+</div>
+
+<div class="preview" id="preview" aria-hidden="true"><img alt="" /><div><b></b><small></small></div></div>
+<div class="cursor" id="cursor" aria-hidden="true"><span class="ring"></span><span class="dot"></span><span class="lbl"></span></div>
+<div class="toast mono" id="toast" role="status" aria-live="polite"></div>
+<div class="fog-card mono" id="fog">The sea is rough, reloading the chart…</div>
+
+<main id="voyage" aria-label="The voyage">
+  <!-- works:start -->
+  <div class="static" id="static">
+    <h1 class="sr-only">Sumanth Richie — designer, 3D artist and creative developer</h1>
+    <p>I design brands, build worlds and code them into the web. <a href="work/">Every work as a list</a> · <a href="about/">About</a> · <a href="contact/">Contact</a> · <a href="mailto:hello@thesumanth.com">hello@thesumanth.com</a></p>
+    <section aria-labelledby="s-worlds"><h2 id="s-worlds">Worlds</h2><article><img loading="lazy" src="img/work/ringgate/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/ringgate/">The Ring Gate</a></h3><p>A 156-metre stone ring in the sea and the drowned city below it, as a scrolling art book.</p><p class="mono">Blender · Unreal Engine 5 · Three.js · rough.js · <a href="https://su3doesign.github.io/Tirthavel/" target="_blank" rel="noopener">Live site ↗<span class="sr-only"> (opens in a new tab)</span></a></p></div></article><article><img loading="lazy" src="img/work/rotunda/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/rotunda/">The Flooded Rotunda</a></h3><p>Twelve flooded arches and a marble keeper who turns to face you as the world loads.</p><p class="mono">Unreal Engine 5 · Nanite · Blender · Three.js · <a href="https://su3doesign.github.io/flooded-rotunda-site/" target="_blank" rel="noopener">Live site ↗<span class="sr-only"> (opens in a new tab)</span></a></p></div></article><article><img loading="lazy" src="img/work/overgrown/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/overgrown/">The Overgrown Archive</a></h3><p>A portfolio you walk: a neon forest at night that ends at the sea at sunrise.</p><p class="mono">Three.js · Blender (headless) · Lenis · <a href="https://su3doesign.github.io/PF-1/" target="_blank" rel="noopener">Live site ↗<span class="sr-only"> (opens in a new tab)</span></a></p></div></article><article><img loading="lazy" src="img/work/castle/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/castle/">The Castle on the Crag</a></h3><p>Forty-five towers on two granite crags above a Highland loch, as one 3D world.</p><p class="mono">Blender · Cycles · Unreal Engine 5.6</p></div></article><article><img loading="lazy" src="img/work/koi/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/koi/">Koi Pond</a></h3><p>A garden pond where the water is the light source, in summer and in autumn.</p><p class="mono">Unreal Engine · Maya · Substance</p></div></article><article><img loading="lazy" src="img/work/fudo/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/fudo/">Fudō Myō-ō</a></h3><p>A ruined temple around the immovable one: a ficus through the roof, rain around the statue.</p><p class="mono">Unreal Engine · Maya · ZBrush · DaVinci Resolve</p></div></article><article><img loading="lazy" src="img/work/roman/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/roman/">Rōman no Yoake</a></h3><p>A pagoda at first light, lit again for pink hour, a crescent moon, a full moon and an eclipse.</p><p class="mono">Unreal Engine · Maya · Premiere Pro</p></div></article><article><img loading="lazy" src="img/work/caves/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/caves/">Caves</a></h3><p>One walk from daylight to a red chamber where flowers grow under a crack of sky.</p><p class="mono">Unreal Engine</p></div></article></section>
+    <section aria-labelledby="s-machines"><h2 id="s-machines">Machines</h2><article><img loading="lazy" src="img/work/hyperion/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/hyperion/">Hyperion GEN.2</a></h3><p>A hypercar I designed and modelled from scratch, with a live 3D site.</p><p class="mono">Blender · Cycles · Three.js · React · GSAP · <a href="https://su3doesign.github.io/hyperion-site/" target="_blank" rel="noopener">Live site ↗<span class="sr-only"> (opens in a new tab)</span></a></p></div></article><article><img loading="lazy" src="img/work/hyperion-case/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/hyperion-case/">Hyperion: Case Study</a></h3><p>A long-read engineering report on how Hyperion was made, with a UX review of version one.</p><p class="mono">React · Vite · Tailwind · Three.js · GSAP · Lenis · <a href="https://su3doesign.github.io/hyperion-site/teardown/" target="_blank" rel="noopener">Live site ↗<span class="sr-only"> (opens in a new tab)</span></a></p></div></article><article><img loading="lazy" src="img/work/alpine/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/alpine/">Alpine F1 Study</a></h3><p>My own F1 car in Alpine livery: 23 rigged assemblies, a wind tunnel and an exploded view.</p><p class="mono">Blender · Cycles · Three.js · WebGL · <a href="https://su3doesign.github.io/hyperion-site/f1.html" target="_blank" rel="noopener">Live site ↗<span class="sr-only"> (opens in a new tab)</span></a></p></div></article><article><img loading="lazy" src="img/work/coachwork/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/coachwork/">Coachwork</a></h3><p>A car magazine you read by scrolling: five issues, five cars in real-time 3D.</p><p class="mono">Three.js · WebGL · Web Audio · Blender · <a href="https://su3doesign.github.io/Coachwork/" target="_blank" rel="noopener">Live site ↗<span class="sr-only"> (opens in a new tab)</span></a></p></div></article><article><img loading="lazy" src="img/work/vanta/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/vanta/">Vanta Flightworks</a></h3><p>A flight-helmet maker's site: the helmet turns to a new side for every section.</p><p class="mono">Three.js · HTML · CSS · JavaScript · <a href="https://su3doesign.github.io/vanta-flightworks/" target="_blank" rel="noopener">Live site ↗<span class="sr-only"> (opens in a new tab)</span></a></p></div></article></section>
+    <section aria-labelledby="s-monuments"><h2 id="s-monuments">Monuments</h2><article><img loading="lazy" src="img/work/parian/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/parian/">Parian Atelier</a></h3><p>A stone-carving studio in Athens: the marble head turns, then gold runs through the stone.</p><p class="mono">Three.js · GLSL · <a href="https://su3doesign.github.io/parian-atelie/" target="_blank" rel="noopener">Live site ↗<span class="sr-only"> (opens in a new tab)</span></a></p></div></article><article><img loading="lazy" src="img/work/halden/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/halden/">Halden Portrait Studio</a></h3><p>A wet-plate portrait studio: you walk all the way round an antique field camera.</p><p class="mono">Three.js · HTML · CSS · JavaScript · <a href="https://su3doesign.github.io/halden-portrait-studio/" target="_blank" rel="noopener">Live site ↗<span class="sr-only"> (opens in a new tab)</span></a></p></div></article><article><img loading="lazy" src="img/work/altair/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/altair/">Altair Estates</a></h3><p>A cliff estate you drive through: 808 trees, 2,141 lamps, 52 cameras.</p><p class="mono">Blender · Cycles · Three.js · GSAP · Lenis · <a href="https://su3doesign.github.io/Altair-Estates-The-Aether-Monolith/" target="_blank" rel="noopener">Live site ↗<span class="sr-only"> (opens in a new tab)</span></a></p></div></article><article><img loading="lazy" src="img/work/sculpting/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/sculpting/">Digital Sculpting</a></h3><p>A human hand in ZBrush and a hard-surface gun, as clay renders.</p><p class="mono">ZBrush · Maya</p></div></article><article><img loading="lazy" src="img/work/clock/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/clock/">Pendulum Clock</a></h3><p>An octagonal wall clock with Roman numerals and a gold pendulum, wireframe to render.</p><p class="mono">Maya</p></div></article><article><img loading="lazy" src="img/work/extinguisher/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/extinguisher/">Fire Extinguisher</a></h3><p>Worn red paint, a scuffed caution label and a weathered hose, textured in Substance.</p><p class="mono">Maya · Substance Painter</p></div></article><article><img loading="lazy" src="img/work/interiors/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/interiors/">Modelling, Lighting, Texturing</a></h3><p>Interior and product pieces, UV-mapped, textured and lit for final renders.</p><p class="mono">Maya · Substance Painter</p></div></article></section>
+    <section aria-labelledby="s-brands"><h2 id="s-brands">Brands</h2><article><img loading="lazy" src="img/work/gcburger/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/gcburger/">GC Burger</a></h3><p>One campaign system, five locations, all in one bold red layout.</p><p class="mono">Photoshop · Illustrator</p></div></article><article><img loading="lazy" src="img/work/kerb/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/kerb/">KERB</a></h3><p>A motorsport coffee roaster: every cup is a lap, every blend a corner.</p><p class="mono">Illustrator · Barlow Condensed · JetBrains Mono</p></div></article><article><img loading="lazy" src="img/work/deccan/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/deccan/">Deccan Night Run</a></h3><p>A city night run where the arches keep time: arch, minaret, lamp.</p><p class="mono">Illustrator · Figma</p></div></article><article><img loading="lazy" src="img/work/lotus/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/lotus/">Lotus Constructions</a></h3><p>A Hyderabad builder's brand and site: a house rises from bare ground as you scroll.</p><p class="mono">Illustrator · Three.js · Blender · <a href="https://lotusconstructions.in" target="_blank" rel="noopener">Live site ↗<span class="sr-only"> (opens in a new tab)</span></a></p></div></article><article><img loading="lazy" src="img/work/rem/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/rem/">REM</a></h3><p>After-hours food and dreamwear, drawn from one hypnogram. Open 19:00 to 04:00.</p><p class="mono">Syne · IBM Plex Mono · Instrument Serif</p></div></article><article><img loading="lazy" src="img/work/capq/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/capq/">CapQ</a></h3><p>Brand and pre-launch site for a Hyderabad business-finance advisory.</p><p class="mono">Astro · Tailwind CSS · GSAP · <a href="https://su3doesign.github.io/CapQ/" target="_blank" rel="noopener">Live site ↗<span class="sr-only"> (opens in a new tab)</span></a></p></div></article><article><img loading="lazy" src="img/work/mitti/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/mitti/">Mitti</a></h3><p>Skincare made like pottery: rituals from the earth.</p><p class="mono">Illustrator · Photoshop</p></div></article><article><img loading="lazy" src="img/work/maruneta/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/maruneta/">Maruneta</a></h3><p>Colour that comes back: recycled yarn, sorted by colour so nobody re-dyes it.</p><p class="mono">Illustrator · Figma</p></div></article><article><img loading="lazy" src="img/work/bsnl/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/bsnl/">BSNL</a></h3><p>Signal for all of us: a rebrand concept for a network that reaches 1.4 billion.</p><p class="mono">Illustrator · Figma</p></div></article><article><img loading="lazy" src="img/work/rujuvu/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/rujuvu/">Rujuvu</a></h3><p>A cold-chain courier for medicine: delivered, with proof.</p><p class="mono">Illustrator · Figma</p></div></article><article><img loading="lazy" src="img/work/kosh/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/kosh/">Kosh</a></h3><p>Investing that feels like a game, not a lecture. Meet Gullu.</p><p class="mono">Illustrator · Figma · 3D</p></div></article><article><img loading="lazy" src="img/work/lagrange/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/lagrange/">LAGRANGE</a></h3><p>Where systems hold still: a night watchman for your apps.</p><p class="mono">Illustrator · Figma</p></div></article><article><img loading="lazy" src="img/work/magma/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/magma/">Magma</a></h3><p>A strawberry energy drink: flame logo, can, poster and tee.</p><p class="mono">Photoshop · Illustrator · Maya</p></div></article><article><img loading="lazy" src="img/work/photon/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/photon/">Photon Yard</a></h3><p>Where light gets computed: a render yard for studios.</p><p class="mono">Illustrator · Figma</p></div></article><article><img loading="lazy" src="img/work/three-houses/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/three-houses/">Three Houses</a></h3><p>AEVUM, VOLTA® and VESPERA: three concept brands, three moods, three sites.</p><p class="mono">GSAP · <a href="https://su3doesign.github.io/Aevum/" target="_blank" rel="noopener">Live site ↗<span class="sr-only"> (opens in a new tab)</span></a></p></div></article><article><img loading="lazy" src="img/work/midea/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/midea/">Midea Canada</a></h3><p>Social, retail and seasonal ads for Midea, Eureka, Comfee and Home Depot.</p><p class="mono">Photoshop · Illustrator</p></div></article><article><img loading="lazy" src="img/work/investohome/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/investohome/">Investohome</a></h3><p>Luxury real estate ads for Miami and Puerto Rico: one place, one claim, three proofs.</p><p class="mono">Photoshop · Illustrator</p></div></article><article><img loading="lazy" src="img/work/brand-systems/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/brand-systems/">Brand Systems</a></h3><p>TCP, VS Design Studio, Lakshmi Bakers and nxtwave.</p><p class="mono">Illustrator · Photoshop · Figma</p></div></article><article><img loading="lazy" src="img/work/shelf-table/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/shelf-table/">Shelf &amp; Table</a></h3><p>Retail-display stories for KD Displays and an appetite-first calendar for Amaya.</p><p class="mono">Photoshop · Illustrator</p></div></article></section>
+    <section aria-labelledby="s-archive"><h2 id="s-archive">Archive</h2><article><img loading="lazy" src="img/work/front-doors/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/front-doors/">Front Doors</a></h3><p>My last portfolio: one 3D door that opens onto thirteen websites.</p><p class="mono">React · Three.js · Tailwind</p></div></article><article><img loading="lazy" src="img/work/photo-manipulation/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/photo-manipulation/">Photo Manipulation</a></h3><p>Photo manipulation and retouching.</p><p class="mono">Photoshop</p></div></article><article><img loading="lazy" src="img/work/digital-art/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/digital-art/">Digital Art</a></h3><p>Digital paintings and illustration.</p><p class="mono">Illustrator · Photoshop</p></div></article><article><img loading="lazy" src="img/work/illustrations/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/illustrations/">Illustrations</a></h3><p>A collection of illustrations.</p><p class="mono">Illustrator · Photoshop</p></div></article><article><img loading="lazy" src="img/work/magazine/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/magazine/">Magazine Cover</a></h3><p>Artificial Relationships: a magazine cover.</p><p class="mono">Illustrator · Photoshop</p></div></article><article><img loading="lazy" src="img/work/advertisements/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/advertisements/">Advertisements</a></h3><p>Print and digital advertisements.</p><p class="mono">Photoshop · Illustrator</p></div></article><article><img loading="lazy" src="img/work/graphic-designs/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/graphic-designs/">Graphic Designs</a></h3><p>Logos, banners and social carousels.</p><p class="mono">Illustrator · Photoshop</p></div></article><article><img loading="lazy" src="img/work/ebook/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/ebook/">Ebook</a></h3><p>Cover, layout and illustrated pages.</p><p class="mono">Illustrator</p></div></article><article><img loading="lazy" src="img/work/compositing/thumb.webp" alt="" width="200" height="125" /><div><h3><a href="work/compositing/">Compositing &amp; Shadow Matte</a></h3><p>Shadow mattes and 2D/3D compositing in Nuke, tracked in 3DEqualizer.</p><p class="mono">Nuke · 3DEqualizer</p></div></article></section>
+  </div>
+  <!-- works:end -->
+</main>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

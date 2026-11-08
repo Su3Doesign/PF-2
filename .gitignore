@@ -3,4 +3,4 @@ dist
 .DS_Store
 *.local
 # Fontshare fonts are fetched at build time (tools/fonts.mjs) and must not be redistributed.
-public/fonts/
+/public/fonts/

@@ -1,0 +1,1091 @@
+{
+ "profile": {
+  "name": "Sumanth Richie",
+  "legal": "Amidyala Sai Sumanth",
+  "role": "Designer, 3D artist and creative developer",
+  "city": "Hyderabad",
+  "coords": "17.3850° N · 78.4867° E",
+  "tagline": "I design brands, build worlds and code them into the web.",
+  "email": "hello@thesumanth.com",
+  "emailPlaceholder": true,
+  "links": [
+   {
+    "label": "Behance",
+    "href": "https://www.behance.net/sumanthrichie"
+   },
+   {
+    "label": "GitHub",
+    "href": "https://github.com/Su3Doesign"
+   },
+   {
+    "label": "Instagram",
+    "href": "https://www.instagram.com/",
+    "placeholder": true
+   },
+   {
+    "label": "LinkedIn",
+    "href": "https://www.linkedin.com/",
+    "placeholder": true
+   }
+  ],
+  "resume": "https://www.thesumanth.com/resume/Sumanth-Resume-2026.pdf",
+  "day": "Head of Marketing at CapQ, Hyderabad"
+ },
+ "islands": [
+  {
+   "id": "worlds",
+   "n": "01",
+   "title": "Worlds",
+   "tools": "Unreal Engine 5 · Blender · Maya · Three.js",
+   "bearing": "201°",
+   "line": "Places I build whole, then light for one hour of the day."
+  },
+  {
+   "id": "machines",
+   "n": "02",
+   "title": "Machines",
+   "tools": "Blender · Cycles · Three.js · GSAP",
+   "bearing": "042°",
+   "line": "Cars and machines I model to the bolt, then put on the web."
+  },
+  {
+   "id": "monuments",
+   "n": "03",
+   "title": "Monuments",
+   "tools": "Blender · ZBrush · GLSL · Three.js",
+   "bearing": "118°",
+   "line": "Stone, studios and estates: objects that hold still and get looked at."
+  },
+  {
+   "id": "brands",
+   "n": "04",
+   "title": "Brands",
+   "tools": "Identity · Campaign · Packaging · Web",
+   "bearing": "312°",
+   "line": "Brands are buildings. You climb them one floor at a time."
+  }
+ ],
+ "works": [
+  {
+   "slug": "hyperion",
+   "island": "machines",
+   "title": "Hyperion GEN.2",
+   "line": "A hypercar I designed and modelled from scratch, with a live 3D site.",
+   "year": 2026,
+   "role": "Design, 3D, code",
+   "tools": [
+    "Blender",
+    "Cycles",
+    "Three.js",
+    "React",
+    "GSAP"
+   ],
+   "live": "https://su3doesign.github.io/hyperion-site/",
+   "voyage": true,
+   "brief": "I wanted Hyperion to feel like a real car, so it has 20 rigged assemblies with working hinges, doors that swing up 100° and a 22-part V8. I designed the logo and carried it onto the tyres, brakes, cabin labels and dashboard screen. On the site you sweep a light over the car, spin it 360°, take it apart, and end on a meadow of 72,000 moving blades of grass.",
+   "facts": [
+    [
+     "Assemblies",
+     "20"
+    ],
+    [
+     "Engine parts",
+     "22"
+    ],
+    [
+     "Cycles stills",
+     "12"
+    ],
+    [
+     "Grass blades",
+     "72,000"
+    ]
+   ]
+  },
+  {
+   "slug": "hyperion-case",
+   "island": "machines",
+   "title": "Hyperion: Case Study",
+   "line": "A long-read engineering report on how Hyperion was made, with a UX review of version one.",
+   "year": 2026,
+   "role": "Design, writing, code",
+   "tools": [
+    "React",
+    "Vite",
+    "Tailwind",
+    "Three.js",
+    "GSAP",
+    "Lenis"
+   ],
+   "live": "https://su3doesign.github.io/hyperion-site/teardown/",
+   "brief": "One easy reading column, notes in the margin and numbered figures: 20 rigged assemblies, 292 meshes, a 22-part twin-turbo V8. It ends with five problems I found in my first version, from a slow 56 MB first load to contact links that did not work, and how I fixed each one.",
+   "facts": [
+    [
+     "Meshes",
+     "292"
+    ],
+    [
+     "First load, v1",
+     "56 MB"
+    ],
+    [
+     "Problems fixed",
+     "5"
+    ]
+   ]
+  },
+  {
+   "slug": "alpine",
+   "island": "machines",
+   "title": "Alpine F1 Study",
+   "line": "My own F1 car in Alpine livery: 23 rigged assemblies, a wind tunnel and an exploded view.",
+   "year": 2026,
+   "role": "3D, rig, code",
+   "tools": [
+    "Blender",
+    "Cycles",
+    "Three.js",
+    "WebGL"
+   ],
+   "live": "https://su3doesign.github.io/hyperion-site/f1.html",
+   "voyage": true,
+   "brief": "I set the car up in Blender as 23 rigged assemblies with steering and DRS hinges, baked the livery into 4K textures, designed Pirelli P Zero sidewalls and modelled a 1.6 L V6 hybrid power unit in 21 labelled parts. On the site smoke flows over the car in a wind tunnel, it comes apart in an exploded view, and the night ends in a pit lane.",
+   "facts": [
+    [
+     "Assemblies",
+     "23"
+    ],
+    [
+     "Power unit parts",
+     "21"
+    ],
+    [
+     "Renders",
+     "11"
+    ]
+   ]
+  },
+  {
+   "slug": "coachwork",
+   "island": "machines",
+   "title": "Coachwork",
+   "line": "A car magazine you read by scrolling: five issues, five cars in real-time 3D.",
+   "year": 2026,
+   "role": "Design, 3D, sound, code",
+   "tools": [
+    "Three.js",
+    "WebGL",
+    "Web Audio",
+    "Blender"
+   ],
+   "live": "https://su3doesign.github.io/Coachwork/",
+   "voyage": true,
+   "brief": "Ferrari 812 Superfast, Koenigsegg Agera, Bugatti Chiron, Koenigsegg One:1 and Mercedes-AMG Project One, each painted, lit and set up in Blender. Press start on the rev counter and the engine fires with a sound I designed from scratch, with no recordings. Turn on the headlights, pick new rims, and drive a rolling road until the brakes glow.",
+   "facts": [
+    [
+     "Issues",
+     "5"
+    ],
+    [
+     "Forged rims",
+     "4"
+    ],
+    [
+     "Engine recordings",
+     "0"
+    ]
+   ]
+  },
+  {
+   "slug": "vanta",
+   "island": "machines",
+   "title": "Vanta Flightworks",
+   "line": "A flight-helmet maker's site: the helmet turns to a new side for every section.",
+   "year": 2026,
+   "role": "Design, code",
+   "tools": [
+    "Three.js",
+    "HTML",
+    "CSS",
+    "JavaScript"
+   ],
+   "live": "https://su3doesign.github.io/vanta-flightworks/",
+   "voyage": true,
+   "brief": "A worn pilot's helmet hangs in front of the text and turns as you scroll, with a live heading, pitch and range readout that follows it. Every section and every phone layout has its own camera view.",
+   "facts": [
+    [
+     "Readouts",
+     "Heading · Pitch · Range"
+    ]
+   ]
+  },
+  {
+   "slug": "parian",
+   "island": "monuments",
+   "title": "Parian Atelier",
+   "line": "A stone-carving studio in Athens: the marble head turns, then gold runs through the stone.",
+   "year": 2026,
+   "role": "Design, shaders, code",
+   "tools": [
+    "Three.js",
+    "GLSL"
+   ],
+   "live": "https://su3doesign.github.io/parian-atelie/",
+   "voyage": true,
+   "brief": "A marble head sits in front of the text and turns as you scroll. At the very end the page goes dark, the eyes light up and gold runs through the stone. I wrote the marble, vein and gold shaders myself.",
+   "facts": [
+    [
+     "Shaders",
+     "Marble · Vein · Gold"
+    ]
+   ]
+  },
+  {
+   "slug": "halden",
+   "island": "monuments",
+   "title": "Halden Portrait Studio",
+   "line": "A wet-plate portrait studio: you walk all the way round an antique field camera.",
+   "year": 2026,
+   "role": "Design, code",
+   "tools": [
+    "Three.js",
+    "HTML",
+    "CSS",
+    "JavaScript"
+   ],
+   "live": "https://su3doesign.github.io/halden-portrait-studio/",
+   "voyage": true,
+   "brief": "An antique field camera stands in front of the text, and as you scroll you circle it: the studio name, the sitting, the lens, the ground glass, the process and the prices. Every section, and every phone layout, has its own camera view.",
+   "facts": [
+    [
+     "Sections",
+     "6"
+    ]
+   ]
+  },
+  {
+   "slug": "altair",
+   "island": "monuments",
+   "title": "Altair Estates",
+   "line": "A cliff estate you drive through: 808 trees, 2,141 lamps, 52 cameras.",
+   "year": 2026,
+   "role": "Concept, architecture, 3D, code",
+   "tools": [
+    "Blender",
+    "Cycles",
+    "Three.js",
+    "GSAP",
+    "Lenis"
+   ],
+   "live": "https://su3doesign.github.io/Altair-Estates-The-Aether-Monolith/",
+   "voyage": true,
+   "brief": "I drew the plans first: a gate, a maple avenue between a lake and a lavender field, a glass-block bridge, a gallery street, a palm canal and a house cut into a sea cliff. The site arrives as a pencil drawing and turns into the white model, then the real render develops over it as you drive.",
+   "facts": [
+    [
+     "Trees",
+     "808"
+    ],
+    [
+     "Lamps",
+     "2,141"
+    ],
+    [
+     "Cameras",
+     "52"
+    ]
+   ]
+  },
+  {
+   "slug": "sculpting",
+   "island": "monuments",
+   "title": "Digital Sculpting",
+   "line": "A human hand in ZBrush and a hard-surface gun, as clay renders.",
+   "role": "Sculpt, model",
+   "tools": [
+    "ZBrush",
+    "Maya"
+   ]
+  },
+  {
+   "slug": "clock",
+   "island": "monuments",
+   "title": "Pendulum Clock",
+   "line": "An octagonal wall clock with Roman numerals and a gold pendulum, wireframe to render.",
+   "role": "Model, render",
+   "tools": [
+    "Maya"
+   ]
+  },
+  {
+   "slug": "extinguisher",
+   "island": "monuments",
+   "title": "Fire Extinguisher",
+   "line": "Worn red paint, a scuffed caution label and a weathered hose, textured in Substance.",
+   "role": "Model, texture",
+   "tools": [
+    "Maya",
+    "Substance Painter"
+   ]
+  },
+  {
+   "slug": "interiors",
+   "island": "monuments",
+   "title": "Modelling, Lighting, Texturing",
+   "line": "Interior and product pieces, UV-mapped, textured and lit for final renders.",
+   "role": "Model, light, texture",
+   "tools": [
+    "Maya",
+    "Substance Painter"
+   ]
+  },
+  {
+   "slug": "ringgate",
+   "island": "worlds",
+   "title": "The Ring Gate",
+   "line": "A 156-metre stone ring in the sea and the drowned city below it, as a scrolling art book.",
+   "year": 2026,
+   "role": "World-building, 3D, writing, code",
+   "tools": [
+    "Blender",
+    "Unreal Engine 5",
+    "Three.js",
+    "rough.js"
+   ],
+   "live": "https://su3doesign.github.io/Tirthavel/",
+   "voyage": true,
+   "brief": "Kaalavalaya is a carved stone ring with a door that shows you what you want most and takes your shadow in return. Tirthavel is the drowned city climbing toward it. I designed the world, wrote its story, modelled it in Blender, rendered it in Unreal and built the book on the real gate mesh. One day passes over the Ring while you read.",
+   "facts": [
+    [
+     "Ring",
+     "156 m"
+    ],
+    [
+     "Looks",
+     "Clay · Ink · Stone · Overgrown"
+    ],
+    [
+     "External requests",
+     "0"
+    ]
+   ]
+  },
+  {
+   "slug": "rotunda",
+   "island": "worlds",
+   "title": "The Flooded Rotunda",
+   "line": "Twelve flooded arches and a marble keeper who turns to face you as the world loads.",
+   "year": 2026,
+   "role": "World-building, 3D, writing, code",
+   "tools": [
+    "Unreal Engine 5",
+    "Nanite",
+    "Blender",
+    "Three.js"
+   ],
+   "live": "https://su3doesign.github.io/flooded-rotunda-site/",
+   "voyage": true,
+   "brief": "A drowned Romanesque ring of twelve bays, 7.9 million triangles of unique geometry plus 1.56 billion instanced through Nanite. The place has one rule: she turns to face whoever comes in. While the world downloads she is the loading screen, drawn in chalk, looking for you.",
+   "facts": [
+    [
+     "Arches",
+     "12"
+    ],
+    [
+     "Unique triangles",
+     "7.9 M"
+    ],
+    [
+     "Instanced",
+     "1.56 B"
+    ]
+   ]
+  },
+  {
+   "slug": "overgrown",
+   "island": "worlds",
+   "title": "The Overgrown Archive",
+   "line": "A portfolio you walk: a neon forest at night that ends at the sea at sunrise.",
+   "year": 2026,
+   "role": "Design, 3D, code",
+   "tools": [
+    "Three.js",
+    "Blender (headless)",
+    "Lenis"
+   ],
+   "repo": "https://github.com/Su3Doesign/PF-1",
+   "live": "https://su3doesign.github.io/PF-1/",
+   "voyage": true,
+   "brief": "Every section of a portfolio became a stop on a walk: monoliths for the worlds, stone lanterns for the method, a rack of CRTs for the clients, a flooded cave, a baroque hall, the sea for contact. Every asset comes from a script.",
+   "facts": [
+    [
+     "Stops",
+     "9"
+    ],
+    [
+     "Point lights",
+     "6"
+    ],
+    [
+     "JS, gzipped",
+     "345 KB"
+    ]
+   ]
+  },
+  {
+   "slug": "castle",
+   "island": "worlds",
+   "title": "The Castle on the Crag",
+   "line": "Forty-five towers on two granite crags above a Highland loch, as one 3D world.",
+   "year": 2026,
+   "role": "Design, 3D, lighting",
+   "tools": [
+    "Blender",
+    "Cycles",
+    "Unreal Engine 5.6"
+   ],
+   "voyage": true,
+   "brief": "A viaduct, the boathouse stairs, a stadium and 644,000 trees, moss cushions and boulders. I modelled 120 meshes myself, planned 17 cameras and lit the world five ways: night, day, sunset, dusk and mist.",
+   "facts": [
+    [
+     "Towers",
+     "45"
+    ],
+    [
+     "Trees and boulders",
+     "644,000"
+    ],
+    [
+     "Meshes",
+     "120"
+    ],
+    [
+     "Cameras",
+     "17"
+    ]
+   ]
+  },
+  {
+   "slug": "koi",
+   "island": "worlds",
+   "title": "Koi Pond",
+   "line": "A garden pond where the water is the light source, in summer and in autumn.",
+   "year": 2024,
+   "role": "Environment design",
+   "tools": [
+    "Unreal Engine",
+    "Maya",
+    "Substance"
+   ],
+   "voyage": true,
+   "brief": "The rule for this one: no light from above. Everything is lit from inside the water, so the caustics run the wrong way up the rocks and the leaves get their colour from below.",
+   "facts": [
+    [
+     "Seasons",
+     "2"
+    ],
+    [
+     "Light from above",
+     "None"
+    ]
+   ]
+  },
+  {
+   "slug": "fudo",
+   "island": "worlds",
+   "title": "Fudō Myō-ō",
+   "line": "A ruined temple around the immovable one: a ficus through the roof, rain around the statue.",
+   "year": 2025,
+   "role": "Environment design, film",
+   "tools": [
+    "Unreal Engine",
+    "Maya",
+    "ZBrush",
+    "DaVinci Resolve"
+   ],
+   "voyage": true,
+   "brief": "A ficus has broken through the roof, rain has pooled around the moss-covered statue, and plants have followed the water. Built around a single practical light: everything else is either reflecting that candle or hiding from it.",
+   "facts": [
+    [
+     "Light sources",
+     "1"
+    ]
+   ]
+  },
+  {
+   "slug": "roman",
+   "island": "worlds",
+   "title": "Rōman no Yoake",
+   "line": "A pagoda at first light, lit again for pink hour, a crescent moon, a full moon and an eclipse.",
+   "year": 2025,
+   "role": "Environment design",
+   "tools": [
+    "Unreal Engine",
+    "Maya",
+    "Premiere Pro"
+   ],
+   "voyage": true,
+   "brief": "The hour before anything is awake. I wanted the fog to do the modelling: the pagoda barely earns its silhouette and the only hard edge in the frame is the sun clearing the ridge. Roughly four hundred rejected sun angles.",
+   "facts": [
+    [
+     "Times of day",
+     "5"
+    ],
+    [
+     "Rejected sun angles",
+     "~400"
+    ]
+   ]
+  },
+  {
+   "slug": "caves",
+   "island": "worlds",
+   "title": "Caves",
+   "line": "One walk from daylight to a red chamber where flowers grow under a crack of sky.",
+   "role": "Environment design",
+   "tools": [
+    "Unreal Engine"
+   ]
+  },
+  {
+   "slug": "gcburger",
+   "island": "brands",
+   "title": "GC Burger",
+   "line": "One campaign system, five locations, all in one bold red layout.",
+   "year": 2025,
+   "role": "Campaign design",
+   "tools": [
+    "Photoshop",
+    "Illustrator"
+   ],
+   "client": "The Classic Partnership, Toronto",
+   "voyage": true,
+   "floor": "L0 · Street",
+   "alt": 0,
+   "brief": "A Canadian halal burger chain: grand openings, happy hours, Ramadan, student deals and buy-one-get-one offers across five stores. One layout that every store could run without me.",
+   "facts": [
+    [
+     "Locations",
+     "5"
+    ],
+    [
+     "Layouts",
+     "1"
+    ]
+   ]
+  },
+  {
+   "slug": "kerb",
+   "island": "brands",
+   "title": "KERB",
+   "line": "A motorsport coffee roaster: every cup is a lap, every blend a corner.",
+   "year": 2026,
+   "role": "Identity, packaging",
+   "tools": [
+    "Illustrator",
+    "Barlow Condensed",
+    "JetBrains Mono"
+   ],
+   "voyage": true,
+   "floor": "L2 · Pit terrace",
+   "alt": 28,
+   "concept": true,
+   "brief": "Blends are named after the corners of a fictional circuit: Hairpin espresso 01, Apex house blend 07, Chicane decaf 12, Slipstream cold brew. The wordmark is sheared to 12° over a ten-block kerb strip, and that angle drives the badge, the livery and every graphic. Every bag carries a lap sheet with lot, drop temperature and a roast trace coloured by sector.",
+   "facts": [
+    [
+     "Shear",
+     "12°"
+    ],
+    [
+     "Kerb blocks",
+     "10"
+    ]
+   ]
+  },
+  {
+   "slug": "deccan",
+   "island": "brands",
+   "title": "Deccan Night Run",
+   "line": "A city night run where the arches keep time: arch, minaret, lamp.",
+   "year": 2026,
+   "role": "Identity, wayfinding, app",
+   "tools": [
+    "Illustrator",
+    "Figma"
+   ],
+   "voyage": true,
+   "floor": "L4 · Arcade bridge",
+   "alt": 52,
+   "isNew": true,
+   "concept": true,
+   "brief": "At midnight the old city slows down to a sequence of arches. Deccan Night Run turns that rhythm into an event with no podium and no rush: a logo built from arch, minaret and lamp, a sodium-on-midnight palette, race kits, route wayfinding and a pocket app.",
+   "facts": [
+    [
+     "Palette",
+     "Sodium on midnight"
+    ],
+    [
+     "Script",
+     "Latin · Telugu"
+    ]
+   ]
+  },
+  {
+   "slug": "lotus",
+   "island": "brands",
+   "title": "Lotus Constructions",
+   "line": "A Hyderabad builder's brand and site: a house rises from bare ground as you scroll.",
+   "year": 2026,
+   "role": "Brand, design, 3D, code",
+   "tools": [
+    "Illustrator",
+    "Three.js",
+    "Blender"
+   ],
+   "live": "https://lotusconstructions.in",
+   "voyage": true,
+   "floor": "L7 · Cantilever",
+   "alt": 86,
+   "brief": "Footing, frame, walls, glass. At the end the camera pulls back over a street of eleven real Lotus projects I modelled in 3D, each with a name tag. No client names, plots or working drawings go on the page.",
+   "facts": [
+    [
+     "Years of work",
+     "25+"
+    ],
+    [
+     "Projects modelled",
+     "11"
+    ]
+   ]
+  },
+  {
+   "slug": "rem",
+   "island": "brands",
+   "title": "REM",
+   "line": "After-hours food and dreamwear, drawn from one hypnogram. Open 19:00 to 04:00.",
+   "year": 2026,
+   "role": "Identity, packaging, space, app",
+   "tools": [
+    "Syne",
+    "IBM Plex Mono",
+    "Instrument Serif"
+   ],
+   "voyage": true,
+   "floor": "L11 · After hours",
+   "alt": 120,
+   "isNew": true,
+   "concept": true,
+   "brief": "Over a lifetime you spend about six years dreaming and remember almost none of it. REM is where that time goes. The whole system comes from the sleep hypnogram: five stage rows joined only by right-angle steps. Dark until dreaming: four neutrals carry 92% of every surface, and Lucid pink appears only where something is dreaming.",
+   "facts": [
+    [
+     "Hours",
+     "19:00–04:00"
+    ],
+    [
+     "Neutrals",
+     "≥ 92%"
+    ],
+    [
+     "Sheets",
+     "14"
+    ]
+   ]
+  },
+  {
+   "slug": "capq",
+   "island": "brands",
+   "title": "CapQ",
+   "line": "Brand and pre-launch site for a Hyderabad business-finance advisory.",
+   "year": 2026,
+   "role": "Brand, design, code",
+   "tools": [
+    "Astro",
+    "Tailwind CSS",
+    "GSAP"
+   ],
+   "live": "https://su3doesign.github.io/CapQ/",
+   "voyage": true,
+   "floor": "L14 · Atrium",
+   "alt": 150,
+   "brief": "Right Capital. Structured Right. WhatsApp, phone and an enquiry form sit within the first two screens, so the page was taking enquiries before launch. I run the brand end to end: identity, collateral, expos and MSME outreach.",
+   "facts": [
+    [
+     "Lending partners",
+     "117+"
+    ],
+    [
+     "Screens to enquiry",
+     "2"
+    ]
+   ],
+   "note": "Also where I work: Head of Marketing."
+  },
+  {
+   "slug": "mitti",
+   "island": "brands",
+   "title": "Mitti",
+   "line": "Skincare made like pottery: rituals from the earth.",
+   "year": 2026,
+   "role": "Identity, packaging",
+   "tools": [
+    "Illustrator",
+    "Photoshop"
+   ],
+   "voyage": true,
+   "floor": "L17 · Clay floor",
+   "alt": 172,
+   "isNew": true,
+   "concept": true,
+   "brief": "A palette mixed from the ingredients themselves: fired clay, ground sandalwood, fresh haldi. Devanagari and Latin share one quiet voice, jars are thrown like pots, and the shop is a clay niche.",
+   "facts": [
+    [
+     "Scripts",
+     "Latin · Devanagari"
+    ]
+   ]
+  },
+  {
+   "slug": "maruneta",
+   "island": "brands",
+   "title": "Maruneta",
+   "line": "Colour that comes back: recycled yarn, sorted by colour so nobody re-dyes it.",
+   "year": 2026,
+   "role": "Identity, system",
+   "tools": [
+    "Illustrator",
+    "Figma"
+   ],
+   "voyage": true,
+   "floor": "L17 · Loom wall",
+   "alt": 176,
+   "isNew": true,
+   "concept": true,
+   "brief": "Hyderabad's cotton and denim waste, collected, sorted by colour and respun. The mark is built on one radius and drawn with one thread; every lot has a passport.",
+   "facts": [
+    [
+     "Mark",
+     "One radius"
+    ],
+    [
+     "Scripts",
+     "Latin · Telugu"
+    ]
+   ]
+  },
+  {
+   "slug": "bsnl",
+   "island": "brands",
+   "title": "BSNL",
+   "line": "Signal for all of us: a rebrand concept for a network that reaches 1.4 billion.",
+   "year": 2026,
+   "role": "Identity concept",
+   "tools": [
+    "Illustrator",
+    "Figma"
+   ],
+   "voyage": true,
+   "floor": "L20 · Signal floor",
+   "alt": 210,
+   "isNew": true,
+   "concept": true,
+   "brief": "From sarkari connection to a network for 1.4 billion. One dot, one wave. Every script, one voice. Ultramarine, lit up, and lime on every high street.",
+   "facts": [
+    [
+     "People",
+     "1.4 B"
+    ],
+    [
+     "Mark",
+     "One dot, one wave"
+    ]
+   ]
+  },
+  {
+   "slug": "rujuvu",
+   "island": "brands",
+   "title": "Rujuvu",
+   "line": "A cold-chain courier for medicine: delivered, with proof.",
+   "year": 2026,
+   "role": "Identity, product, app",
+   "tools": [
+    "Illustrator",
+    "Figma"
+   ],
+   "voyage": true,
+   "floor": "L20 · Signal floor",
+   "alt": 210,
+   "isNew": true,
+   "concept": true,
+   "brief": "Rujuvu is Telugu for proof. The parcel arrives; the proof usually does not. Every box is a witness: temperature at every handover, a seal with a number, and a storefront that shows its cold room.",
+   "facts": [
+    [
+     "Held at",
+     "4.6 °C"
+    ],
+    [
+     "Scripts",
+     "Latin · Telugu"
+    ]
+   ]
+  },
+  {
+   "slug": "kosh",
+   "island": "brands",
+   "title": "Kosh",
+   "line": "Investing that feels like a game, not a lecture. Meet Gullu.",
+   "year": 2026,
+   "role": "Identity, mascot, app",
+   "tools": [
+    "Illustrator",
+    "Figma",
+    "3D"
+   ],
+   "voyage": true,
+   "floor": "L20 · Signal floor",
+   "alt": 210,
+   "isNew": true,
+   "concept": true,
+   "brief": "Kosh is Sanskrit for treasury. Tiny daily drops, a treasury that grows with you, and Gullu, a clay piggy pot with big feelings. Sunny, saturated, unserious.",
+   "facts": [
+    [
+     "Mascot",
+     "Gullu"
+    ]
+   ]
+  },
+  {
+   "slug": "lagrange",
+   "island": "brands",
+   "title": "LAGRANGE",
+   "line": "Where systems hold still: a night watchman for your apps.",
+   "year": 2026,
+   "role": "Identity, product, space",
+   "tools": [
+    "Illustrator",
+    "Figma"
+   ],
+   "voyage": true,
+   "floor": "L20 · Signal floor",
+   "alt": 210,
+   "isNew": true,
+   "concept": true,
+   "brief": "Software that looks after a company's apps and websites all night and fixes small problems on its own. Named after the five points in space where things stay still: five spots, one balance, drawn on a 60° grid. Spoken at 2 a.m., read without panic.",
+   "facts": [
+    [
+     "Points",
+     "5"
+    ],
+    [
+     "Grid",
+     "60°"
+    ]
+   ]
+  },
+  {
+   "slug": "magma",
+   "island": "brands",
+   "title": "Magma",
+   "line": "A strawberry energy drink: flame logo, can, poster and tee.",
+   "year": 2023,
+   "role": "Branding, product design",
+   "tools": [
+    "Photoshop",
+    "Illustrator",
+    "Maya"
+   ],
+   "voyage": true,
+   "floor": "Core shaft",
+   "alt": 196,
+   "brief": "Ignite your heart's energy. I designed the flame logo, the can label, a 3D can modelled in Maya, the poster and a T-shirt.",
+   "facts": [
+    [
+     "Flavour",
+     "Strawberry"
+    ]
+   ]
+  },
+  {
+   "slug": "photon",
+   "island": "brands",
+   "title": "Photon Yard",
+   "line": "Where light gets computed: a render yard for studios.",
+   "year": 2026,
+   "role": "Identity, product, space",
+   "tools": [
+    "Illustrator",
+    "Figma"
+   ],
+   "voyage": true,
+   "floor": "Crown · Beacon",
+   "alt": 300,
+   "isNew": true,
+   "concept": true,
+   "brief": "A shipping yard for photons. Monochrome until computed: five rows, one photon path, and the spectrum only where light has been rendered. Raw in, light out.",
+   "facts": [
+    [
+     "Rows",
+     "5"
+    ],
+    [
+     "Colour",
+     "Earned"
+    ]
+   ]
+  },
+  {
+   "slug": "three-houses",
+   "island": "brands",
+   "title": "Three Houses",
+   "line": "AEVUM, VOLTA® and VESPERA: three concept brands, three moods, three sites.",
+   "year": 2026,
+   "role": "Concept, art direction, code",
+   "tools": [
+    "GSAP"
+   ],
+   "live": "https://su3doesign.github.io/Aevum/"
+  },
+  {
+   "slug": "midea",
+   "island": "brands",
+   "title": "Midea Canada",
+   "line": "Social, retail and seasonal ads for Midea, Eureka, Comfee and Home Depot.",
+   "year": 2025,
+   "role": "Graphic design",
+   "tools": [
+    "Photoshop",
+    "Illustrator"
+   ],
+   "client": "The Classic Partnership, Toronto"
+  },
+  {
+   "slug": "investohome",
+   "island": "brands",
+   "title": "Investohome",
+   "line": "Luxury real estate ads for Miami and Puerto Rico: one place, one claim, three proofs.",
+   "year": 2025,
+   "role": "Graphic design",
+   "tools": [
+    "Photoshop",
+    "Illustrator"
+   ],
+   "client": "The Classic Partnership, Toronto"
+  },
+  {
+   "slug": "brand-systems",
+   "island": "brands",
+   "title": "Brand Systems",
+   "line": "TCP, VS Design Studio, Lakshmi Bakers and nxtwave.",
+   "year": 2025,
+   "role": "Brand and social design",
+   "tools": [
+    "Illustrator",
+    "Photoshop",
+    "Figma"
+   ]
+  },
+  {
+   "slug": "shelf-table",
+   "island": "brands",
+   "title": "Shelf & Table",
+   "line": "Retail-display stories for KD Displays and an appetite-first calendar for Amaya.",
+   "year": 2025,
+   "role": "Graphic design",
+   "tools": [
+    "Photoshop",
+    "Illustrator"
+   ],
+   "client": "The Classic Partnership, Toronto"
+  },
+  {
+   "slug": "front-doors",
+   "island": "archive",
+   "title": "Front Doors",
+   "line": "My last portfolio: one 3D door that opens onto thirteen websites.",
+   "year": 2026,
+   "role": "Design, 3D, code",
+   "tools": [
+    "React",
+    "Three.js",
+    "Tailwind"
+   ],
+   "repo": "https://github.com/Su3Doesign/PF-2"
+  },
+  {
+   "slug": "photo-manipulation",
+   "island": "archive",
+   "title": "Photo Manipulation",
+   "line": "Photo manipulation and retouching.",
+   "tools": [
+    "Photoshop"
+   ]
+  },
+  {
+   "slug": "digital-art",
+   "island": "archive",
+   "title": "Digital Art",
+   "line": "Digital paintings and illustration.",
+   "tools": [
+    "Illustrator",
+    "Photoshop"
+   ]
+  },
+  {
+   "slug": "illustrations",
+   "island": "archive",
+   "title": "Illustrations",
+   "line": "A collection of illustrations.",
+   "tools": [
+    "Illustrator",
+    "Photoshop"
+   ]
+  },
+  {
+   "slug": "magazine",
+   "island": "archive",
+   "title": "Magazine Cover",
+   "line": "Artificial Relationships: a magazine cover.",
+   "tools": [
+    "Illustrator",
+    "Photoshop"
+   ]
+  },
+  {
+   "slug": "advertisements",
+   "island": "archive",
+   "title": "Advertisements",
+   "line": "Print and digital advertisements.",
+   "tools": [
+    "Photoshop",
+    "Illustrator"
+   ]
+  },
+  {
+   "slug": "graphic-designs",
+   "island": "archive",
+   "title": "Graphic Designs",
+   "line": "Logos, banners and social carousels.",
+   "tools": [
+    "Illustrator",
+    "Photoshop"
+   ]
+  },
+  {
+   "slug": "ebook",
+   "island": "archive",
+   "title": "Ebook",
+   "line": "Cover, layout and illustrated pages.",
+   "tools": [
+    "Illustrator"
+   ]
+  },
+  {
+   "slug": "compositing",
+   "island": "archive",
+   "title": "Compositing & Shadow Matte",
+   "line": "Shadow mattes and 2D/3D compositing in Nuke, tracked in 3DEqualizer.",
+   "tools": [
+    "Nuke",
+    "3DEqualizer"
+   ]
+  }
+ ]
+}

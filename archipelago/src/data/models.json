@@ -1,0 +1,23 @@
+{
+ "hyperion": {
+  "bytes": 6108164
+ },
+ "f1": {
+  "bytes": 4574404
+ },
+ "agera": {
+  "bytes": 1115216
+ },
+ "helmet": {
+  "bytes": 368292
+ },
+ "camera": {
+  "bytes": 466940
+ },
+ "head": {
+  "bytes": 47920
+ },
+ "gate": {
+  "bytes": 1816428
+ }
+}
