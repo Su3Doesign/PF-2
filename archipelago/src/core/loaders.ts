@@ -76,7 +76,7 @@ export function mergeByMaterial(root: THREE.Object3D) {
     if (g.index === null) continue_(g);
     for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'uv', 'color', 'tangent'].includes(k)) g.deleteAttribute(k);
     // de-quantise first: a matrix applied to a normalised integer attribute clamps to [-1, 1]
-    for (const k of Object.keys(g.attributes)) { const a = g.getAttribute(k) as THREE.BufferAttribute; if (a.normalized || !(a.array instanceof Float32Array)) g.setAttribute(k, toFloat(a)); }
+    for (const k of Object.keys(g.attributes)) g.setAttribute(k, toFloat(g.getAttribute(k) as THREE.BufferAttribute)); // fresh float attributes merge cleanly
     g.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld));
     g.morphAttributes = {};
     const sig = (m.material as THREE.Material).uuid + '|' + Object.keys(g.attributes).sort().map((k) => k + g.getAttribute(k).itemSize).join(',');
