@@ -44,7 +44,12 @@
     const setActive = (i) => { if (i === active) return; const prev = active; active = i; rows.forEach((r, k) => r.classList.toggle('is-on', k === i)); num.textContent = pad(i + 1); url.textContent = items[i][1].toLowerCase().replace(/[^a-z0-9]+/g, '-') + '  /  ' + items[i][2];
       imgs.forEach((im, k) => { im.style.zIndex = k === i ? 2 : k === prev ? 1 : 0; });
       if (!G || reduce) { imgs.forEach((im, k) => { im.style.clipPath = k === i ? 'inset(0)' : 'inset(100% 0 0 0)'; }); return; }
-      const up = i > prev; G.fromTo(imgs[i], { clipPath: up ? 'inset(100% 0 0 0)' : 'inset(0 0 100% 0)' }, { clipPath: 'inset(0% 0 0% 0)', duration: 1.0, ease: 'expo.inOut' }); if (prev >= 0) G.to(imgs[prev], { clipPath: up ? 'inset(0 0 30% 0)' : 'inset(30% 0 0 0)', duration: 1.0, ease: 'expo.inOut' }); };
+      // the next site drops in through nine vertical slits, in a shuffled order, like a contact sheet being dealt
+      if (slitTw) slitTw.kill(); const el = imgs[i], pr = { t: 0 };
+      slitTw = G.to(pr, { t: 1, duration: 1.15, ease: 'none', onUpdate: () => slit(el, pr.t, port.clientHeight), onComplete: () => { el.style.clipPath = 'inset(0)'; } }); };
+    let slitTw = null; const BANDS = 9, ORDER = [3, 0, 6, 1, 8, 4, 2, 7, 5];
+    const slit = (el, t, H) => { const pts = []; for (let k = 0; k < BANDS; k++) { const d = ORDER[k] / BANDS * 0.45, q = clamp((t - d) / 0.55), e = 1 - Math.pow(1 - q, 3), h = (e * (H + 2)).toFixed(1), x0 = (k / BANDS * 100).toFixed(3), x1 = ((k + 1) / BANDS * 100).toFixed(3);
+      pts.push(`${x0}% 0px`, `${x0}% ${h}px`, `${x1}% ${h}px`, `${x1}% 0px`); } el.style.clipPath = `polygon(${pts.join(',')})`; };
     imgs.forEach(im => { im.style.clipPath = 'inset(100% 0 0 0)'; });
     (function tick() { const p = progress(wrap), f = Math.min(N - 0.0001, p * N), i = Math.floor(f), t = f - i; setActive(i);
       const im = imgs[i], over = Math.max(0, im.offsetHeight - port.clientHeight); y = reduce ? t : lerp(y, sm(0.12, 0.92, t), 0.12); if (i !== ly) { y = 0; ly = i; } im.style.transform = `translateY(${(-over * y).toFixed(1)}px)`; meter.style.transform = `scaleY(${y.toFixed(3)})`;

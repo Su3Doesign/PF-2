@@ -145,19 +145,35 @@
     a.addEventListener('pointerenter', () => { peekImg.src = COVERS[k]; peek.classList.add('is-on'); $$('.menu__links a').forEach(b => b.classList.toggle('is-dim', b !== a)); });
     a.addEventListener('pointerleave', () => { peek.classList.remove('is-on'); $$('.menu__links a').forEach(b => b.classList.remove('is-dim')); });
     if (a.dataset.face !== undefined) a.addEventListener('click', (e) => { e.preventDefault(); const i = +a.dataset.face; closeMenu(() => enter(i)); }); });
+  // the index: every piece of work as one thin strip of thumbnails, drifting like a contact sheet; each one takes you to it
+  const reel = $('.menu__reel'), track = $('.menu__track'), reelCap = $('.menu__cap b');
+  const INDEX = [...WORK[0].items.map(([src, name]) => ({ src: `img/${src}.jpg`, name, kind: 'World', go: () => enter(0) })), ...WORK[1].items.map(([src, name]) => ({ src: `img/${src}.jpg`, name, kind: 'Web', go: () => enter(1) })),
+    ...(window.BOARDS || []).map(bd => ({ src: `boards/${bd.key}/thumb.jpg`, name: bd.name, kind: 'Brand', go: () => window.Reader.open(bd.key, null) }))];
+  const cell = (it, k) => `<button class="menu__item" type="button" data-k="${k}" aria-label="${it.kind}: ${it.name}"><img data-src="${it.src}" alt=""></button>`;
+  track.innerHTML = INDEX.map(cell).join('') + INDEX.map(cell).join('');
+  let reelLoaded = false; const loadReel = () => { if (reelLoaded) return; reelLoaded = true; $$('img[data-src]', track).forEach(im => { im.src = im.dataset.src; }); };
+  $$('.menu__item', track).forEach(btn => { const it = INDEX[+btn.dataset.k];
+    btn.addEventListener('pointerenter', () => { reelCap.textContent = `${it.kind} · ${it.name}`; reel.classList.add('is-looking'); peekImg.src = it.src; peek.classList.add('is-on'); });
+    btn.addEventListener('pointerleave', () => { reel.classList.remove('is-looking'); peek.classList.remove('is-on'); });
+    btn.addEventListener('click', () => closeMenu(it.go)); });
+  menuBtn.addEventListener('click', loadReel);
   let px = innerWidth / 2, py = innerHeight / 2, pr = 0;
   (function peekLoop() { if (menuOpen) { const tx = (mx + 0.5) * innerWidth, ty = (my + 0.5) * innerHeight, vx = tx - px; px += vx * 0.12; py += (ty - py) * 0.12; pr += (Math.max(-12, Math.min(12, vx * 0.06)) - pr) * 0.1;
     peek.style.transform = `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px) translate(-50%, -50%) rotate(${pr.toFixed(2)}deg)`; } requestAnimationFrame(peekLoop); })();
 
   // ---------- About: off the screen ----------
   const aScroll = $('.about__scroll', about);
-  function openAbout() { if (aboutOpen) return; aboutOpen = true; about.hidden = false; document.body.classList.add('is-about'); aScroll.scrollTop = 0; topo($('.topo', about), [13, 13, 13], 0.07);
+  function openAbout() { if (aboutOpen) return; aboutOpen = true; about.hidden = false; document.body.classList.add('is-about'); aScroll.scrollTop = 0; requestAnimationFrame(() => light()); topo($('.topo', about), [13, 13, 13], 0.07);
     if (!G || reduce) { document.body.classList.add('is-menu-full'); return; } G.fromTo(about, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.1, ease: INOUT, onComplete: () => { if (aboutOpen) document.body.classList.add('is-menu-full'); } });
     G.fromTo('.about__say .rise > *', { yPercent: 110 }, { yPercent: 0, duration: 1.25, ease: OUT, stagger: 0.09, delay: 0.5 }); G.fromTo('.about__who, .about__head .mono, .about__close', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 1, ease: OUT, delay: 0.85, stagger: 0.06 }); }
   function closeAbout() { if (!aboutOpen) return; aboutOpen = false; document.body.classList.remove('is-menu-full'); const done = () => { about.hidden = true; document.body.classList.remove('is-about'); };
     if (!G || reduce) return done(); G.to(about, { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.9, ease: INOUT, onComplete: done }); }
   $$('[data-about]').forEach(a => a.addEventListener('click', (e) => { e.preventDefault(); closeMenu(openAbout); }));
   $('.about__close', about).addEventListener('click', closeAbout);
+  // as you read the About page, its lists light up word by word
+  const words = []; $$('.brands span, .tools, .about__who', about).forEach(el => { if (el.classList.contains('tools') || el.classList.contains('about__who')) { el.innerHTML = el.innerHTML.split(/(\s+)/).map(w => /\S/.test(w) && !/[<>]/.test(w) ? `<span class="lit">${w}</span>` : w).join(''); $$('.lit', el).forEach(w => words.push(w)); } else { el.classList.add('lit'); words.push(el); } });
+  const light = () => { const vh = innerHeight; for (const w of words) { const r = w.getBoundingClientRect(); const k = Math.max(0, Math.min(1, (vh * 0.92 - r.top) / (vh * 0.42))); w.style.opacity = (0.14 + 0.86 * k).toFixed(3); } };
+  aScroll.addEventListener('scroll', light, { passive: true }); addEventListener('resize', light);
   if ('IntersectionObserver' in window) { const aio = new IntersectionObserver((es) => es.forEach(e => { if (e.isIntersecting) e.target.classList.add('is-in'); }), { root: aScroll, rootMargin: '0px 0px -12% 0px' }); $$('.about__row, .about__end', about).forEach(r => aio.observe(r)); }
   else $$('.about__row, .about__end', about).forEach(r => r.classList.add('is-in'));
   if (fine && !reduce) { let at = 0, ap = 0, as = false;
